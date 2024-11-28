@@ -253,6 +253,8 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
+    <None Include="Web.Local.config" />
+    <None Include="Web.Local.example.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
