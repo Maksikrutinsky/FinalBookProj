@@ -43,7 +43,6 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            // שינוי החיפוש לפי שם משתמש במקום אימייל
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == model.Username);
 
