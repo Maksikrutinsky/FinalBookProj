@@ -1,7 +1,7 @@
 @model BookProject.Models.UserProfileViewModel
 
 @{
-    ViewBag.Title = "פרופיל משתמש";
+    ViewBag.Title = "User Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -12,13 +12,19 @@
             @TempData["SuccessMessage"]
         </div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
 
     <div class="row">
-        <!-- פרטי המשתמש -->
+        <!-- User Information -->
         <div class="col-md-6">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h3>User information</h3>
+                    <h3>User Information</h3>
                 </div>
                 <div class="card-body">
                     @using (Html.BeginForm("UpdateProfile", "Profile", FormMethod.Post))
@@ -39,27 +45,60 @@
                             @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
                         </div>
 
-                            <div class="form-group mt-3">
-                                <label>Registration date</label>
-                                <div class="form-control" readonly>
-                                    @Model.CreatedAt
-                                </div>
+                        <div class="form-group mt-3">
+                            <label>Registration Date</label>
+                            <div class="form-control" readonly>
+                                @Model.CreatedAt
                             </div>
+                        </div>
 
-                        <button type="submit" class="btn btn-primary mt-3">Save changes</button>
+                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                    }
+                </div>
+            </div>
+
+            <!-- Password Change Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Change Password</h3>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("ChangePassword", "Profile", FormMethod.Post, new { id = "passwordForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.CurrentPassword)
+                            @Html.PasswordFor(m => m.CurrentPassword, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.CurrentPassword, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mt-3">
+                            @Html.LabelFor(m => m.NewPassword)
+                            @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.NewPassword, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mt-3">
+                            @Html.LabelFor(m => m.ConfirmNewPassword)
+                            @Html.PasswordFor(m => m.ConfirmNewPassword, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.ConfirmNewPassword, "", new { @class = "text-danger" })
+                        </div>
+
+                        <button type="submit" class="btn btn-warning mt-3">Change Password</button>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- רשימת ספרים -->
+        <!-- Books List -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3>My books</h3>
+                    <h3>My Books</h3>
                 </div>
                 <div class="card-body">
-                    <h4>Books purchased</h4>
+                    <h4>Books Purchased</h4>
                     @if (Model.Purchases != null && Model.Purchases.Any())
                     {
                         <ul class="list-group">
@@ -77,7 +116,7 @@
                         <p>No books purchased</p>
                     }
 
-                    <h4 class="mt-4">Borrowed books</h4>
+                    <h4 class="mt-4">Borrowed Books</h4>
                     @if (Model.Borrows != null && Model.Borrows.Any())
                     {
                         <ul class="list-group">
@@ -103,11 +142,46 @@
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
     <script>
-        // הודעת הצלחה נעלמת אחרי 3 שניות
         $(document).ready(function () {
+            // Success/Error message fade out
             setTimeout(function () {
                 $(".alert").fadeOut('slow');
             }, 3000);
+
+            // Handle password form submission
+            $("#passwordForm").submit(function (e) {
+                e.preventDefault();
+                
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            // Clear password fields
+                            $("#CurrentPassword, #NewPassword, #ConfirmNewPassword").val('');
+                            
+                            // Show success message
+                            $("<div class='alert alert-success'>Password changed successfully!</div>")
+                                .insertBefore("#passwordForm")
+                                .fadeOut(3000);
+                        } else {
+                            // Show error message
+                            $("<div class='alert alert-danger'>" + response.message + "</div>")
+                                .insertBefore("#passwordForm")
+                                .fadeOut(3000);
+                        }
+                    },
+                    error: function () {
+                        // Show error message
+                        $("<div class='alert alert-danger'>An error occurred. Please try again.</div>")
+                            .insertBefore("#passwordForm")
+                            .fadeOut(3000);
+                    }
+                });
+            });
         });
     </script>
 }
