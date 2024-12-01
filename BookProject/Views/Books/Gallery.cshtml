@@ -1,0 +1,125 @@
+@model IEnumerable<BookProject.Models.Book>
+
+<style>
+    .original-price {
+        text-decoration: line-through;
+        color: #6c757d;
+        margin-right: 10px;
+    }
+
+    .current-price {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .price-section {
+        margin-top: 10px;
+    }
+    
+    .card-img-top {
+        height: 300px;  /* גובה קבוע */
+        object-fit: contain;  /* שומר על יחס התמונה המקורי */
+        padding: 10px;  /* מרווח מסביב לתמונה */
+    }
+    
+    .card {
+        max-width: 250px;  /* רוחב מקסימלי לכרטיס */
+        margin: auto;  /* מרכוז אוטומטי */
+    }
+
+    .rating {
+        color: darkgoldenrod; /* צבע זהב לכוכבים */
+        font-size: 1.2rem;
+    }
+
+    .star {
+        margin-right: 2px;
+    }
+
+    .empty-star {
+        color: #898a8a;
+    }
+    
+</style>
+
+
+<div class="container">
+    <h2>Our Book Library</h2>
+
+    <!-- Search Box -->
+    <div class="row mb-4">
+        @using (Html.BeginForm("Gallery", "Books", FormMethod.Get))
+        {
+            <!-- Search Box -->
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" name="searchTerm" class="form-control"
+                           placeholder="Search by book title or author..."
+                           value="@ViewBag.CurrentSearch">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end">
+                    <select name="sortOrder" class="form-control w-auto">
+                        <option value="" @(ViewBag.CurrentSort == null ? "selected" : "")>Sort By...</option>
+                        <option value="price_asc" @(ViewBag.CurrentSort == "price_asc" ? "selected" : "")>Price: Low to High</option>
+                        <option value="price_desc" @(ViewBag.CurrentSort == "price_desc" ? "selected" : "")>Price: High to Low</option>
+                        <option value="year_desc" @(ViewBag.CurrentSort == "year_desc" ? "selected" : "")>Year: Newest First</option>
+                        <option value="year_asc" @(ViewBag.CurrentSort == "year_asc" ? "selected" : "")>Year: Oldest First</option>
+                        <option value="rating" @(ViewBag.CurrentSort == "rating" ? "selected" : "")>Popularity (Rating)</option>
+                    </select>
+                </div>
+            </div>
+        }
+    </div>
+    </div>
+
+    <div class="row">
+        @foreach (var book in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <img src="@book.CoverImageUrl" class="card-img-top" alt="@book.Title">
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <p class="card-text">
+                            <strong>Author:</strong> @book.Author<br>
+                            <strong>Publisher:</strong> @book.Publisher<br>
+                            <strong>Year:</strong> @book.PublishYear
+                        </p>
+
+                        <div class="price-section">
+                            @if (book.PreviousPrice.HasValue)
+                            {
+                                <span class="original-price text-muted text-decoration-line-through">$@book.PreviousPrice</span>
+                            }
+                            <span class="current-price">$@book.BuyPrice</span>
+                        </div>
+
+                        <div class="rating">
+                            @{
+                                var rating = ViewBag.BooksRatings[book.BookId];
+                                for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= rating)
+                                    {
+                                        <span class="star">★</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="star empty-star">★</span>
+                                    }
+                                }
+                                <span class="rating-value">(@rating)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
