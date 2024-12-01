@@ -4,12 +4,16 @@ namespace BookProject.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "You have to enter your email")]
-        [EmailAddress(ErrorMessage = "email address is not valid")]
-        public string Email { get; set; }
+        [Required(ErrorMessage = "Username required")]
+        [Display(Name = "User name")]
+        public string Username { get; set; }
     
-        [Required(ErrorMessage = "you have to enter your password")]
+        [Required(ErrorMessage = "Password required")]
         [DataType(DataType.Password)]
+        [Display(Name = "Password")]
         public string Password { get; set; }
+        
+        
+        public string ForgotPasswordUrl { get; set; }
     }
 }

@@ -27,6 +27,7 @@
             <ul class="nav navbar-nav navbar-right">
                 @if (Session["UserId"] != null)
                 {
+                    <li>@Html.ActionLink("Profile", "Profile", "Profile")</li>
                     <li><span class="navbar-text">Hello @Session["UserName"]</span></li>
                     <li>@Html.ActionLink("Logout", "Logout", "Account")</li>
                 }

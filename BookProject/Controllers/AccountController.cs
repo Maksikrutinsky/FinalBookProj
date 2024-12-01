@@ -43,8 +43,9 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
+            // שינוי החיפוש לפי שם משתמש במקום אימייל
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == model.Email);
+                .FirstOrDefaultAsync(u => u.Username == model.Username);
 
             if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
@@ -53,7 +54,7 @@ public class AccountController : Controller
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError("", "Invalid email or password");
+            ModelState.AddModelError("", "Incorrect username or password.");
         }
         return View(model);
     }
@@ -69,14 +70,22 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
+            // בדיקה ששם המשתמש לא קיים
+            if (await _context.Users.AnyAsync(u => u.Username == model.Username))
+            {
+                ModelState.AddModelError("Username", "The username already exists in the system.");
+                return View(model);
+            }
+
+            // בדיקה שהאימייל לא קיים
             if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
-                ModelState.AddModelError("Email", "Email already exists");
+                ModelState.AddModelError("Email", "The email already exists in the system.");
                 return View(model);
             }
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-            
+        
             var user = new User
             {
                 Username = model.Username,
@@ -100,7 +109,7 @@ public class AccountController : Controller
 
             Session["UserId"] = user.UserId;
             Session["UserName"] = user.Username;
-            
+        
             return RedirectToAction("Index", "Home");
         }
         return View(model);
