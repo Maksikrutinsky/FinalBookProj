@@ -1,0 +1,195 @@
+@model BookProject.Models.Book
+
+<style>
+    .img-fluid {
+        height: 400px;  /* גובה קבוע */
+        object-fit: contain;  /* שומר על יחס התמונה המקורי */
+        padding: 10px;  /* מרווח מסביב לתמונה */
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Book Cover - Left Side -->
+        <div class="col-md-4">
+            <img src="@Model.CoverImageUrl" class="img-fluid rounded" alt="@Model.Title">
+        </div>
+
+        <!-- Book Details - Right Side -->
+        <div class="col-md-8">
+            <h1 class="mb-2">@Model.Title</h1>
+            <p class="text-muted">by @Model.Author</p>
+            
+            <!-- Rating Section -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="rating">
+                    @{
+                        var rating = ViewBag.AverageRating;
+                        for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= rating)
+                            {
+                                <span class="star">★</span>
+                            }
+                            else
+                            {
+                                <span class="star empty-star">★</span>
+                            }
+                        }
+                    }
+                </div>
+                <span class="ms-2">@rating</span>
+            </div>
+
+            <!-- Price Section -->
+            <div class="mb-4">
+                <h4>
+                    @if (Model.PreviousPrice.HasValue)
+                    {
+                        <span class="original-price">$@Model.PreviousPrice</span>
+                    }
+                    <span class="current-price">$@Model.BuyPrice</span>
+                </h4>
+            </div>
+
+            <!-- Format Availability -->
+            <div class="mb-4">
+                <h5>Available Formats:</h5>
+                <div class="btn-group">
+                    @if (Model.FormatEpub == true)
+                    {
+                        <button class="btn btn-outline-secondary">EPUB</button>
+                    }
+                    @if (Model.FormatPDF == true)
+                    {
+                        <button class="btn btn-outline-secondary">PDF</button>
+                    }
+                    @if (Model.FormatMobi == true)
+                    {
+                        <button class="btn btn-outline-secondary">MOBI</button>
+                    }
+                    @if (Model.FormatF2b == true)
+                    {
+                        <button class="btn btn-outline-secondary">F2B</button>
+                    }
+                </div>
+            </div>
+
+            <!-- Book Info Table -->
+            <table class="table table-borderless">
+                <tr>
+                    <td>Publisher</td>
+                    <td>@Model.Publisher</td>
+                </tr>
+                <tr>
+                    <td>Publication Year</td>
+                    <td>@Model.PublishYear</td>
+                </tr>
+                <tr>
+                    <td>Genre</td>
+                    <td>@Model.Genre</td>
+                </tr>
+                @if (Model.AgeLimit.HasValue)
+                {
+                    <tr>
+                        <td>Age Limit</td>
+                        <td>@Model.AgeLimit+ years</td>
+                    </tr>
+                }
+            </table>
+
+            <!-- Description -->
+            <div class="mt-4">
+                <h5>Description:</h5>
+                <p>@Model.Description</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Reviews</h3>
+            @if (Model.Ratings != null && Model.Ratings.Any())
+            {
+                foreach (var review in Model.Ratings.OrderByDescending(r => r.CreatedAt))
+                {
+                    <div class="review-card mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between">
+                            <div class="rating">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.RatingValue)
+                                    {
+                                        <span class="star">★</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="star empty-star">★</span>
+                                    }
+                                }
+                            </div>
+                            <small class="text-muted">
+                                @review.CreatedAt.Value.ToString("MMM dd, yyyy")
+                            </small>
+                        </div>
+                        <div class="review-content mt-2">
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p>@review.Comment</p>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No reviews yet.</p>
+            }
+
+            @if (Session["UserId"] != null)
+            {
+                if (ViewBag.HasPurchased)
+                {
+                    <!-- Review Form -->
+                    using (Html.BeginForm("AddReview", "Books", FormMethod.Post))
+                    {
+                        @Html.Hidden("BookId", Model.BookId)
+                        <div class="add-review-form mt-4">
+                            <h4>Add Your Review</h4>
+                            <div class="rating-input mb-3">
+                                <label>Your Rating:</label>
+                                <select name="RatingValue" class="form-control">
+                                    <option value="5">5 stars</option>
+                                    <option value="4">4 stars</option>
+                                    <option value="3">3 stars</option>
+                                    <option value="2">2 stars</option>
+                                    <option value="1">1 star</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Your Review:</label>
+                                <textarea name="Comment" class="form-control" rows="4"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        Only users who have purchased this book can leave a review.
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Please <a href="@Url.Action("Login", "Account")">login</a> to leave a review.
+                </div>
+            }
+        </div>
+    </div>
+    
+</div>
+

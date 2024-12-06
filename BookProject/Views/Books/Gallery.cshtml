@@ -37,7 +37,7 @@
     }
 
     .empty-star {
-        color: #898a8a;
+        color: #e4e5e9;
     }
     
 </style>
@@ -46,80 +46,67 @@
 <div class="container">
     <h2>Our Book Library</h2>
 
-    <!-- Search Box -->
     <div class="row mb-4">
-        @using (Html.BeginForm("Gallery", "Books", FormMethod.Get))
-        {
-            <!-- Search Box -->
-            <div class="col-md-6">
-                <div class="input-group">
-                    <input type="text" name="searchTerm" class="form-control"
-                           placeholder="Search by book title or author..."
-                           value="@ViewBag.CurrentSearch">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit">Search</button>
-                    </div>
-                </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control"
+                       placeholder="Search by book title or author..."
+                       value="@ViewBag.CurrentSearch">
             </div>
+        </div>
 
-            <!-- Sort Options -->
-            <div class="col-md-6">
-                <div class="d-flex justify-content-end">
-                    <select name="sortOrder" class="form-control w-auto">
-                        <option value="" @(ViewBag.CurrentSort == null ? "selected" : "")>Sort By...</option>
-                        <option value="price_asc" @(ViewBag.CurrentSort == "price_asc" ? "selected" : "")>Price: Low to High</option>
-                        <option value="price_desc" @(ViewBag.CurrentSort == "price_desc" ? "selected" : "")>Price: High to Low</option>
-                        <option value="year_desc" @(ViewBag.CurrentSort == "year_desc" ? "selected" : "")>Year: Newest First</option>
-                        <option value="year_asc" @(ViewBag.CurrentSort == "year_asc" ? "selected" : "")>Year: Oldest First</option>
-                        <option value="rating" @(ViewBag.CurrentSort == "rating" ? "selected" : "")>Popularity (Rating)</option>
-                    </select>
-                </div>
-            </div>
-        }
-    </div>
+        <div class="col-md-4">
+            @Html.DropDownList("genre",
+                new SelectList(ViewBag.Genres, "Value", "Text"),
+                "All Genres",
+                new { @class = "form-control", @id = "genreSelect" })
+        </div>
+
+        <div class="col-md-4">
+            <select id="sortOrder" class="form-control">
+                <option value="">Sort By...</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="year_desc">Year: Newest First</option>
+                <option value="year_asc">Year: Oldest First</option>
+                <option value="rating">Popularity (Rating)</option>
+            </select>
+        </div>
     </div>
 
-    <div class="row">
-        @foreach (var book in Model)
-        {
-            <div class="col-md-3 mb-4">
-                <div class="card">
-                    <img src="@book.CoverImageUrl" class="card-img-top" alt="@book.Title">
-                    <div class="card-body">
-                        <h5 class="card-title">@book.Title</h5>
-                        <p class="card-text">
-                            <strong>Author:</strong> @book.Author<br>
-                            <strong>Publisher:</strong> @book.Publisher<br>
-                            <strong>Year:</strong> @book.PublishYear
-                        </p>
-
-                        <div class="price-section">
-                            @if (book.PreviousPrice.HasValue)
-                            {
-                                <span class="original-price text-muted text-decoration-line-through">$@book.PreviousPrice</span>
-                            }
-                            <span class="current-price">$@book.BuyPrice</span>
-                        </div>
-
-                        <div class="rating">
-                            @{
-                                var rating = ViewBag.BooksRatings[book.BookId];
-                                for (int i = 1; i <= 5; i++)
-                                {
-                                    if (i <= rating)
-                                    {
-                                        <span class="star">★</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="star empty-star">★</span>
-                                    }
-                                }
-                                <span class="rating-value">(@rating)</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
+    <div id="booksContainer" class="row">
+        <!-- נעביר את תצוגת הספרים ל-Partial View -->
+        @Html.Partial("_BooksGrid", Model)
     </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var timer;
+
+            function updateResults() {
+                var searchTerm = $('#searchInput').val();
+                var genre = $('#genreSelect').val();
+                var sortOrder = $('#sortOrder').val();
+
+                $.get('@Url.Action("Gallery", "Books")', {
+                    searchTerm: searchTerm,
+                    genre: genre,
+                    sortOrder: sortOrder
+                }, function(data) {
+                    $('#booksContainer').html(data);
+                });
+            }
+
+            $('#searchInput').on('input', function() {
+                clearTimeout(timer);
+                timer = setTimeout(updateResults, 300); // דיליי קטן למניעת עומס
+            });
+
+            $('#genreSelect, #sortOrder').change(function() {
+                updateResults();
+            });
+        });
+    </script>
+}
