@@ -1,0 +1,11 @@
+@if (Session["UserId"] != null)
+{
+    <a href="@Url.Action("Index", "Cart")" class="nav-item nav-link">
+        <i class="fa fa-shopping-cart"></i>
+        העגלה שלי
+        @if (ViewBag.CartItemsCount > 0)
+        {
+            <span class="badge badge-pill badge-primary">@ViewBag.CartItemsCount</span>
+        }
+    </a>
+}

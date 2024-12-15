@@ -1,0 +1,95 @@
+@model BookProject.Models.Book
+
+<div class="container">
+    <h2>Add a new book</h2>
+
+    @using (Html.BeginForm("AddBook", "Books", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        
+        <div class="form-group">
+            <label>Title</label>
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", required = "required" })
+        </div>
+
+        <div class="form-group">
+            <label>Author</label>
+            @Html.TextBoxFor(m => m.Author, new { @class = "form-control", required = "required" })
+        </div>
+
+        <div class="form-group">
+            <label>Publisher</label>
+            @Html.TextBoxFor(m => m.Publisher, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            <label>Publish Year</label>
+            @Html.TextBoxFor(m => m.PublishYear, new { @class = "form-control", type = "number" })
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4" })
+        </div>
+
+            <div class="form-group">
+                <label>Cover Image Url</label>
+                @Html.TextBoxFor(m => m.CoverImageUrl, new { @class = "form-control", type = "url", placeholder = "הכנס כתובת URL של תמונה" })
+            </div>
+
+        <div class="form-group">
+            <label>Age Limit</label>
+            @Html.TextBoxFor(m => m.AgeLimit, new { @class = "form-control", type = "number" })
+        </div>
+
+        <div class="form-group">
+            <label>Genre</label>
+            @Html.DropDownListFor(m => m.Genre, new SelectList(ViewBag.Genres, "Text", "Text"), new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            <label>Borrower price</label>
+            @Html.TextBoxFor(m => m.BorrowPrice, new { @class = "form-control", type = "number", step = "0.01" })
+        </div>
+
+        <div class="form-group">
+            <label>Purchase price</label>
+            @Html.TextBoxFor(m => m.BuyPrice, new { @class = "form-control", type = "number", step = "0.01" })
+        </div>
+
+        <div class="form-group">
+            <label>Number of copies available</label>
+            @Html.TextBoxFor(m => m.AvailableCopies, new { @class = "form-control", type = "number" })
+        </div>
+
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="IsBorrowable" value="true" />
+            <label class="form-check-label">Can be borrowed</label>
+        </div>
+
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="IsBuyable" value="true" />
+            <label class="form-check-label">Can be purchased</label>
+        </div>
+
+        <h5>Available formats</h5>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="FormatEpub" value="true" />
+            <label class="form-check-label">EPUB</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="FormatF2b" value="true" />
+            <label class="form-check-label">F2B</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="FormatMobi" value="true" />
+            <label class="form-check-label">MOBI</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="FormatPDF" value="true" />
+            <label class="form-check-label">PDF</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save a book</button>
+    }
+</div>
