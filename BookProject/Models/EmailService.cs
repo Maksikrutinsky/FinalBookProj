@@ -71,5 +71,32 @@ namespace BookProject.Models
             await client.SendMailAsync(mailMessage);
         }
         
+        
+        public async Task SendPurchaseConfirmationEmailAsync(string toEmail, string orderDetails)
+        {
+            var client = new SmtpClient(_smtpServer)
+            {
+                Port = _smtpPort,
+                Credentials = new NetworkCredential(_fromEmail, _fromPassword),
+                EnableSsl = true,
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_fromEmail),
+                Subject = "אישור הזמנה",
+                Body = $@"
+<h2>אישור הזמנה</h2>
+<p>תודה על הרכישה!</p>
+<h3>פרטי ההזמנה:</h3>
+<p>{orderDetails}</p>
+<p>תודה שקנית מאיתנו!</p>",
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(toEmail);
+            await client.SendMailAsync(mailMessage);
+        }
+        
     }
 }

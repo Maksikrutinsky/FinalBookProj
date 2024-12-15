@@ -4,7 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - My ASP.NET Application</title>
-    @Styles.Render("~/Content/css")
+
+    <!-- סדר נכון של קבצי CSS -->
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
@@ -16,17 +23,32 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            @Html.ActionLink("GOATS", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+             
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li>@Html.ActionLink("Home", "Index", "Home")</li>
                 <li>@Html.ActionLink("Book Gallery", "Gallery", "Books")</li>
                 <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+
+                @if (Session["UserId"] != null)
+                {
+                    <li>@Html.ActionLink("My Library", "Index", "MyLibrary")</li>
+                }
             </ul>
+
             <ul class="nav navbar-nav navbar-right">
                 @if (Session["UserId"] != null)
                 {
+                    <li>
+                        <a href="@Url.Action("Index", "Cart")">
+                            <i class="fas fa-shopping-cart"></i>
+                            @if (ViewBag.CartItemsCount > 0)
+                            {
+                                <span class="badge">@ViewBag.CartItemsCount</span>
+                            }
+                        </a>
+                    </li>
                     <li>@Html.ActionLink("Profile", "Profile", "Profile")</li>
                     <li><span class="navbar-text">Hello @Session["UserName"]</span></li>
                     <li>@Html.ActionLink("Logout", "Logout", "Account")</li>
@@ -39,7 +61,16 @@
             </ul>
         </div>
     </div>
+
+
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search for books...">
+        <div id="searchResults" class="search-results"></div>
+    </div>
+    
+    
 </div>
+
 <div class="container body-content">
     @RenderBody()
     <hr />
@@ -50,6 +81,7 @@
 
 @Scripts.Render("~/bundles/jquery")
 @Scripts.Render("~/bundles/bootstrap")
+<script src="~/Scripts/search.js"></script>
 @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="EBookLibraryModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="EBookLibraryModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Books">
           <Key>
             <PropertyRef Name="BookId" />
@@ -29,6 +29,8 @@
           <Property Name="FormatMobi" Type="bit" />
           <Property Name="FormatPDF" Type="bit" />
           <Property Name="IsActive" Type="bit" />
+          <Property Name="AvailableCopies" Type="int" />
+          <Property Name="Type" Type="nvarchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <EntityType Name="Borrows">
           <Key>
@@ -38,29 +40,28 @@
           <Property Name="UserId" Type="int" Nullable="false" />
           <Property Name="BookId" Type="int" Nullable="false" />
           <Property Name="BorrowStatus" Type="bit" />
-          <Property Name="BorrowDate" Type="datetime" />
+          <Property Name="BorrowDate" Type="datetime" Nullable="false" />
           <Property Name="ReturnDate" Type="datetime" Nullable="false" />
         </EntityType>
-        <EntityType Name="Cart">
+        <EntityType Name="OrderItems">
           <Key>
-            <PropertyRef Name="CartId" />
+            <PropertyRef Name="OrderItemId" />
           </Key>
-          <Property Name="CartId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="OrderItemId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderId" Type="int" Nullable="false" />
           <Property Name="BookId" Type="int" Nullable="false" />
-          <Property Name="TypeBook" Type="bit" />
-          <Property Name="AddedDate" Type="datetime" />
-          <Property Name="IsActive" Type="bit" />
+          <Property Name="TypeBook" Type="bit" Nullable="false" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="2" Nullable="false" />
         </EntityType>
-        <EntityType Name="Purchases">
+        <EntityType Name="Orders">
           <Key>
-            <PropertyRef Name="PurchaseId" />
+            <PropertyRef Name="OrderId" />
           </Key>
-          <Property Name="PurchaseId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="UserId" Type="int" Nullable="false" />
-          <Property Name="BookId" Type="int" Nullable="false" />
-          <Property Name="PurchaseStatus" Type="bit" />
-          <Property Name="PurchaseDate" Type="datetime" />
+          <Property Name="TotalAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="OrderDate" Type="datetime" Nullable="false" />
+          <Property Name="Status" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="PaymentMethod" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="Ratings">
@@ -86,6 +87,10 @@
           <Property Name="CreatedAt" Type="datetime" />
           <Property Name="IsActive" Type="bit" />
           <Property Name="IsAdmin" Type="bit" />
+          <Property Name="Address" Type="nvarchar" MaxLength="255" />
+          <Property Name="ZipCode" Type="nvarchar" MaxLength="10" />
+          <Property Name="City" Type="nvarchar" MaxLength="50" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="20" />
         </EntityType>
         <EntityType Name="WaitingList">
           <Key>
@@ -98,7 +103,7 @@
           <Property Name="RequestDate" Type="datetime" />
           <Property Name="NotificationSent" Type="bit" />
         </EntityType>
-        <Association Name="FK__Borrows__BookId__72C60C4A">
+        <Association Name="FK__Borrows__BookId__7F2BE32F">
           <End Role="Books" Type="Self.Books" Multiplicity="1" />
           <End Role="Borrows" Type="Self.Borrows" Multiplicity="*" />
           <ReferentialConstraint>
@@ -110,7 +115,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Borrows__UserId__71D1E811">
+        <Association Name="FK__Borrows__UserId__7E37BEF6">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Borrows" Type="Self.Borrows" Multiplicity="*" />
           <ReferentialConstraint>
@@ -122,55 +127,43 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Cart__BookId__06CD04F7">
+        <Association Name="FK__OrderItem__BookI__114A936A">
           <End Role="Books" Type="Self.Books" Multiplicity="1" />
-          <End Role="Cart" Type="Self.Cart" Multiplicity="*" />
+          <End Role="OrderItems" Type="Self.OrderItems" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Books">
               <PropertyRef Name="BookId" />
             </Principal>
-            <Dependent Role="Cart">
+            <Dependent Role="OrderItems">
               <PropertyRef Name="BookId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Cart__UserId__05D8E0BE">
+        <Association Name="FK__OrderItem__Order__10566F31">
+          <End Role="Orders" Type="Self.Orders" Multiplicity="1" />
+          <End Role="OrderItems" Type="Self.OrderItems" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Orders">
+              <PropertyRef Name="OrderId" />
+            </Principal>
+            <Dependent Role="OrderItems">
+              <PropertyRef Name="OrderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Orders__UserId__0D7A0286">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
-          <End Role="Cart" Type="Self.Cart" Multiplicity="*" />
+          <End Role="Orders" Type="Self.Orders" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Users">
               <PropertyRef Name="UserId" />
             </Principal>
-            <Dependent Role="Cart">
+            <Dependent Role="Orders">
               <PropertyRef Name="UserId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Purchases__BookI__6D0D32F4">
-          <End Role="Books" Type="Self.Books" Multiplicity="1" />
-          <End Role="Purchases" Type="Self.Purchases" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Books">
-              <PropertyRef Name="BookId" />
-            </Principal>
-            <Dependent Role="Purchases">
-              <PropertyRef Name="BookId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Purchases__UserI__6C190EBB">
-          <End Role="Users" Type="Self.Users" Multiplicity="1" />
-          <End Role="Purchases" Type="Self.Purchases" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Purchases">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Ratings__BookId__787EE5A0">
+        <Association Name="FK__Ratings__BookId__04E4BC85">
           <End Role="Books" Type="Self.Books" Multiplicity="0..1" />
           <End Role="Ratings" Type="Self.Ratings" Multiplicity="*" />
           <ReferentialConstraint>
@@ -182,7 +175,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Ratings__UserId__778AC167">
+        <Association Name="FK__Ratings__UserId__03F0984C">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Ratings" Type="Self.Ratings" Multiplicity="*" />
           <ReferentialConstraint>
@@ -194,7 +187,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__WaitingLi__BookI__7F2BE32F">
+        <Association Name="FK__WaitingLi__BookI__06CD04F7">
           <End Role="Books" Type="Self.Books" Multiplicity="1" />
           <End Role="WaitingList" Type="Self.WaitingList" Multiplicity="*" />
           <ReferentialConstraint>
@@ -206,7 +199,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__WaitingLi__UserI__7E37BEF6">
+        <Association Name="FK__WaitingLi__UserI__05D8E0BE">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="WaitingList" Type="Self.WaitingList" Multiplicity="*" />
           <ReferentialConstraint>
@@ -221,54 +214,49 @@
         <EntityContainer Name="EBookLibraryModelStoreContainer">
           <EntitySet Name="Books" EntityType="Self.Books" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Borrows" EntityType="Self.Borrows" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Cart" EntityType="Self.Cart" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Purchases" EntityType="Self.Purchases" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderItems" EntityType="Self.OrderItems" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Orders" EntityType="Self.Orders" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Ratings" EntityType="Self.Ratings" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="WaitingList" EntityType="Self.WaitingList" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__Borrows__BookId__72C60C4A" Association="Self.FK__Borrows__BookId__72C60C4A">
+          <AssociationSet Name="FK__Borrows__BookId__7F2BE32F" Association="Self.FK__Borrows__BookId__7F2BE32F">
             <End Role="Books" EntitySet="Books" />
             <End Role="Borrows" EntitySet="Borrows" />
           </AssociationSet>
-          <AssociationSet Name="FK__Borrows__UserId__71D1E811" Association="Self.FK__Borrows__UserId__71D1E811">
+          <AssociationSet Name="FK__Borrows__UserId__7E37BEF6" Association="Self.FK__Borrows__UserId__7E37BEF6">
             <End Role="Users" EntitySet="Users" />
             <End Role="Borrows" EntitySet="Borrows" />
           </AssociationSet>
-          <AssociationSet Name="FK__Cart__BookId__06CD04F7" Association="Self.FK__Cart__BookId__06CD04F7">
+          <AssociationSet Name="FK__OrderItem__BookI__114A936A" Association="Self.FK__OrderItem__BookI__114A936A">
             <End Role="Books" EntitySet="Books" />
-            <End Role="Cart" EntitySet="Cart" />
+            <End Role="OrderItems" EntitySet="OrderItems" />
           </AssociationSet>
-          <AssociationSet Name="FK__Cart__UserId__05D8E0BE" Association="Self.FK__Cart__UserId__05D8E0BE">
+          <AssociationSet Name="FK__OrderItem__Order__10566F31" Association="Self.FK__OrderItem__Order__10566F31">
+            <End Role="Orders" EntitySet="Orders" />
+            <End Role="OrderItems" EntitySet="OrderItems" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Orders__UserId__0D7A0286" Association="Self.FK__Orders__UserId__0D7A0286">
             <End Role="Users" EntitySet="Users" />
-            <End Role="Cart" EntitySet="Cart" />
+            <End Role="Orders" EntitySet="Orders" />
           </AssociationSet>
-          <AssociationSet Name="FK__Purchases__BookI__6D0D32F4" Association="Self.FK__Purchases__BookI__6D0D32F4">
-            <End Role="Books" EntitySet="Books" />
-            <End Role="Purchases" EntitySet="Purchases" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Purchases__UserI__6C190EBB" Association="Self.FK__Purchases__UserI__6C190EBB">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Purchases" EntitySet="Purchases" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Ratings__BookId__787EE5A0" Association="Self.FK__Ratings__BookId__787EE5A0">
+          <AssociationSet Name="FK__Ratings__BookId__04E4BC85" Association="Self.FK__Ratings__BookId__04E4BC85">
             <End Role="Books" EntitySet="Books" />
             <End Role="Ratings" EntitySet="Ratings" />
           </AssociationSet>
-          <AssociationSet Name="FK__Ratings__UserId__778AC167" Association="Self.FK__Ratings__UserId__778AC167">
+          <AssociationSet Name="FK__Ratings__UserId__03F0984C" Association="Self.FK__Ratings__UserId__03F0984C">
             <End Role="Users" EntitySet="Users" />
             <End Role="Ratings" EntitySet="Ratings" />
           </AssociationSet>
-          <AssociationSet Name="FK__WaitingLi__BookI__7F2BE32F" Association="Self.FK__WaitingLi__BookI__7F2BE32F">
+          <AssociationSet Name="FK__WaitingLi__BookI__06CD04F7" Association="Self.FK__WaitingLi__BookI__06CD04F7">
             <End Role="Books" EntitySet="Books" />
             <End Role="WaitingList" EntitySet="WaitingList" />
           </AssociationSet>
-          <AssociationSet Name="FK__WaitingLi__UserI__7E37BEF6" Association="Self.FK__WaitingLi__UserI__7E37BEF6">
+          <AssociationSet Name="FK__WaitingLi__UserI__05D8E0BE" Association="Self.FK__WaitingLi__UserI__05D8E0BE">
             <End Role="Users" EntitySet="Users" />
             <End Role="WaitingList" EntitySet="WaitingList" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="EBookLibraryModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -297,10 +285,11 @@
           <Property Name="FormatPDF" Type="Boolean" />
           <Property Name="IsActive" Type="Boolean" />
           <NavigationProperty Name="Borrows" Relationship="Self.FK__Borrows__BookId__72C60C4A" FromRole="Books" ToRole="Borrows" />
-          <NavigationProperty Name="Carts" Relationship="Self.FK__Cart__BookId__06CD04F7" FromRole="Books" ToRole="Cart" />
-          <NavigationProperty Name="Purchases" Relationship="Self.FK__Purchases__BookI__6D0D32F4" FromRole="Books" ToRole="Purchases" />
           <NavigationProperty Name="Ratings" Relationship="Self.FK__Ratings__BookId__787EE5A0" FromRole="Books" ToRole="Ratings" />
           <NavigationProperty Name="WaitingLists" Relationship="Self.FK__WaitingLi__BookI__7F2BE32F" FromRole="Books" ToRole="WaitingList" />
+          <Property Name="AvailableCopies" Type="Int32" />
+          <NavigationProperty Name="OrderItems" Relationship="EBookLibraryModel.FK__OrderItem__BookI__114A936A" FromRole="Book" ToRole="OrderItem" />
+          <Property Name="Type" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Borrow">
           <Key>
@@ -310,36 +299,10 @@
           <Property Name="UserId" Type="Int32" Nullable="false" />
           <Property Name="BookId" Type="Int32" Nullable="false" />
           <Property Name="BorrowStatus" Type="Boolean" />
-          <Property Name="BorrowDate" Type="DateTime" Precision="3" />
+          <Property Name="BorrowDate" Type="DateTime" Precision="3" Nullable="false" />
           <Property Name="ReturnDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="Book" Relationship="Self.FK__Borrows__BookId__72C60C4A" FromRole="Borrows" ToRole="Books" />
           <NavigationProperty Name="User" Relationship="Self.FK__Borrows__UserId__71D1E811" FromRole="Borrows" ToRole="Users" />
-        </EntityType>
-        <EntityType Name="Cart">
-          <Key>
-            <PropertyRef Name="CartId" />
-          </Key>
-          <Property Name="CartId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserId" Type="Int32" Nullable="false" />
-          <Property Name="BookId" Type="Int32" Nullable="false" />
-          <Property Name="TypeBook" Type="Boolean" />
-          <Property Name="AddedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" />
-          <NavigationProperty Name="Book" Relationship="Self.FK__Cart__BookId__06CD04F7" FromRole="Cart" ToRole="Books" />
-          <NavigationProperty Name="User" Relationship="Self.FK__Cart__UserId__05D8E0BE" FromRole="Cart" ToRole="Users" />
-        </EntityType>
-        <EntityType Name="Purchase">
-          <Key>
-            <PropertyRef Name="PurchaseId" />
-          </Key>
-          <Property Name="PurchaseId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserId" Type="Int32" Nullable="false" />
-          <Property Name="BookId" Type="Int32" Nullable="false" />
-          <Property Name="PurchaseStatus" Type="Boolean" />
-          <Property Name="PurchaseDate" Type="DateTime" Precision="3" />
-          <Property Name="PaymentMethod" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Book" Relationship="Self.FK__Purchases__BookI__6D0D32F4" FromRole="Purchases" ToRole="Books" />
-          <NavigationProperty Name="User" Relationship="Self.FK__Purchases__UserI__6C190EBB" FromRole="Purchases" ToRole="Users" />
         </EntityType>
         <EntityType Name="Rating">
           <Key>
@@ -367,10 +330,13 @@
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="IsAdmin" Type="Boolean" />
           <NavigationProperty Name="Borrows" Relationship="Self.FK__Borrows__UserId__71D1E811" FromRole="Users" ToRole="Borrows" />
-          <NavigationProperty Name="Carts" Relationship="Self.FK__Cart__UserId__05D8E0BE" FromRole="Users" ToRole="Cart" />
-          <NavigationProperty Name="Purchases" Relationship="Self.FK__Purchases__UserI__6C190EBB" FromRole="Users" ToRole="Purchases" />
           <NavigationProperty Name="Ratings" Relationship="Self.FK__Ratings__UserId__778AC167" FromRole="Users" ToRole="Ratings" />
           <NavigationProperty Name="WaitingLists" Relationship="Self.FK__WaitingLi__UserI__7E37BEF6" FromRole="Users" ToRole="WaitingList" />
+          <Property Name="Address" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="ZipCode" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="City" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Orders" Relationship="EBookLibraryModel.FK__Orders__UserId__0D7A0286" FromRole="User" ToRole="Order" />
         </EntityType>
         <EntityType Name="WaitingList">
           <Key>
@@ -393,30 +359,6 @@
               <PropertyRef Name="BookId" />
             </Principal>
             <Dependent Role="Borrows">
-              <PropertyRef Name="BookId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Cart__BookId__06CD04F7">
-          <End Role="Books" Type="Self.Book" Multiplicity="1" />
-          <End Role="Cart" Type="Self.Cart" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Books">
-              <PropertyRef Name="BookId" />
-            </Principal>
-            <Dependent Role="Cart">
-              <PropertyRef Name="BookId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Purchases__BookI__6D0D32F4">
-          <End Role="Books" Type="Self.Book" Multiplicity="1" />
-          <End Role="Purchases" Type="Self.Purchase" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Books">
-              <PropertyRef Name="BookId" />
-            </Principal>
-            <Dependent Role="Purchases">
               <PropertyRef Name="BookId" />
             </Dependent>
           </ReferentialConstraint>
@@ -457,30 +399,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Cart__UserId__05D8E0BE">
-          <End Role="Users" Type="Self.User" Multiplicity="1" />
-          <End Role="Cart" Type="Self.Cart" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Cart">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Purchases__UserI__6C190EBB">
-          <End Role="Users" Type="Self.User" Multiplicity="1" />
-          <End Role="Purchases" Type="Self.Purchase" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserId" />
-            </Principal>
-            <Dependent Role="Purchases">
-              <PropertyRef Name="UserId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Ratings__UserId__778AC167">
           <End Role="Users" Type="Self.User" Multiplicity="1" />
           <End Role="Ratings" Type="Self.Rating" Multiplicity="*" />
@@ -508,22 +426,12 @@
         <EntityContainer Name="EBookLibraryEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Books" EntityType="Self.Book" />
           <EntitySet Name="Borrows" EntityType="Self.Borrow" />
-          <EntitySet Name="Carts" EntityType="Self.Cart" />
-          <EntitySet Name="Purchases" EntityType="Self.Purchase" />
           <EntitySet Name="Ratings" EntityType="Self.Rating" />
           <EntitySet Name="Users" EntityType="Self.User" />
           <EntitySet Name="WaitingLists" EntityType="Self.WaitingList" />
           <AssociationSet Name="FK__Borrows__BookId__72C60C4A" Association="Self.FK__Borrows__BookId__72C60C4A">
             <End Role="Books" EntitySet="Books" />
             <End Role="Borrows" EntitySet="Borrows" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Cart__BookId__06CD04F7" Association="Self.FK__Cart__BookId__06CD04F7">
-            <End Role="Books" EntitySet="Books" />
-            <End Role="Cart" EntitySet="Carts" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Purchases__BookI__6D0D32F4" Association="Self.FK__Purchases__BookI__6D0D32F4">
-            <End Role="Books" EntitySet="Books" />
-            <End Role="Purchases" EntitySet="Purchases" />
           </AssociationSet>
           <AssociationSet Name="FK__Ratings__BookId__787EE5A0" Association="Self.FK__Ratings__BookId__787EE5A0">
             <End Role="Books" EntitySet="Books" />
@@ -537,14 +445,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Borrows" EntitySet="Borrows" />
           </AssociationSet>
-          <AssociationSet Name="FK__Cart__UserId__05D8E0BE" Association="Self.FK__Cart__UserId__05D8E0BE">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Cart" EntitySet="Carts" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Purchases__UserI__6C190EBB" Association="Self.FK__Purchases__UserI__6C190EBB">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Purchases" EntitySet="Purchases" />
-          </AssociationSet>
           <AssociationSet Name="FK__Ratings__UserId__778AC167" Association="Self.FK__Ratings__UserId__778AC167">
             <End Role="Users" EntitySet="Users" />
             <End Role="Ratings" EntitySet="Ratings" />
@@ -553,7 +453,82 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="WaitingList" EntitySet="WaitingLists" />
           </AssociationSet>
+          <EntitySet Name="OrderItems" EntityType="EBookLibraryModel.OrderItem" />
+          <EntitySet Name="Orders" EntityType="EBookLibraryModel.Order" />
+          <AssociationSet Name="FK__OrderItem__BookI__114A936A" Association="EBookLibraryModel.FK__OrderItem__BookI__114A936A">
+            <End Role="Book" EntitySet="Books" />
+            <End Role="OrderItem" EntitySet="OrderItems" />
+          </AssociationSet>
+          <AssociationSet Name="FK__OrderItem__Order__10566F31" Association="EBookLibraryModel.FK__OrderItem__Order__10566F31">
+            <End Role="Order" EntitySet="Orders" />
+            <End Role="OrderItem" EntitySet="OrderItems" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Orders__UserId__0D7A0286" Association="EBookLibraryModel.FK__Orders__UserId__0D7A0286">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Order" EntitySet="Orders" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="OrderItem">
+          <Key>
+            <PropertyRef Name="OrderItemId" />
+          </Key>
+          <Property Name="OrderItemId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderId" Type="Int32" Nullable="false" />
+          <Property Name="BookId" Type="Int32" Nullable="false" />
+          <Property Name="TypeBook" Type="Boolean" Nullable="false" />
+          <Property Name="Price" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <NavigationProperty Name="Book" Relationship="EBookLibraryModel.FK__OrderItem__BookI__114A936A" FromRole="OrderItem" ToRole="Book" />
+          <NavigationProperty Name="Order" Relationship="EBookLibraryModel.FK__OrderItem__Order__10566F31" FromRole="OrderItem" ToRole="Order" />
+        </EntityType>
+        <EntityType Name="Order">
+          <Key>
+            <PropertyRef Name="OrderId" />
+          </Key>
+          <Property Name="OrderId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="TotalAmount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="OrderDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="OrderItems" Relationship="EBookLibraryModel.FK__OrderItem__Order__10566F31" FromRole="Order" ToRole="OrderItem" />
+          <NavigationProperty Name="User" Relationship="EBookLibraryModel.FK__Orders__UserId__0D7A0286" FromRole="Order" ToRole="User" />
+          <Property Name="PaymentMethod" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="FK__OrderItem__BookI__114A936A">
+          <End Type="EBookLibraryModel.Book" Role="Book" Multiplicity="1" />
+          <End Type="EBookLibraryModel.OrderItem" Role="OrderItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Book">
+              <PropertyRef Name="BookId" />
+            </Principal>
+            <Dependent Role="OrderItem">
+              <PropertyRef Name="BookId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__OrderItem__Order__10566F31">
+          <End Type="EBookLibraryModel.Order" Role="Order" Multiplicity="1" />
+          <End Type="EBookLibraryModel.OrderItem" Role="OrderItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="OrderId" />
+            </Principal>
+            <Dependent Role="OrderItem">
+              <PropertyRef Name="OrderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Orders__UserId__0D7A0286">
+          <End Type="EBookLibraryModel.User" Role="User" Multiplicity="1" />
+          <End Type="EBookLibraryModel.Order" Role="Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -563,6 +538,8 @@
           <EntitySetMapping Name="Books">
             <EntityTypeMapping TypeName="EBookLibraryModel.Book">
               <MappingFragment StoreEntitySet="Books">
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="AvailableCopies" ColumnName="AvailableCopies" />
                 <ScalarProperty Name="BookId" ColumnName="BookId" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="Author" ColumnName="Author" />
@@ -598,30 +575,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Carts">
-            <EntityTypeMapping TypeName="EBookLibraryModel.Cart">
-              <MappingFragment StoreEntitySet="Cart">
-                <ScalarProperty Name="CartId" ColumnName="CartId" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="BookId" ColumnName="BookId" />
-                <ScalarProperty Name="TypeBook" ColumnName="TypeBook" />
-                <ScalarProperty Name="AddedDate" ColumnName="AddedDate" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Purchases">
-            <EntityTypeMapping TypeName="EBookLibraryModel.Purchase">
-              <MappingFragment StoreEntitySet="Purchases">
-                <ScalarProperty Name="PurchaseId" ColumnName="PurchaseId" />
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="BookId" ColumnName="BookId" />
-                <ScalarProperty Name="PurchaseStatus" ColumnName="PurchaseStatus" />
-                <ScalarProperty Name="PurchaseDate" ColumnName="PurchaseDate" />
-                <ScalarProperty Name="PaymentMethod" ColumnName="PaymentMethod" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Ratings">
             <EntityTypeMapping TypeName="EBookLibraryModel.Rating">
               <MappingFragment StoreEntitySet="Ratings">
@@ -638,6 +591,10 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="EBookLibraryModel.User">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="Username" ColumnName="Username" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
@@ -657,6 +614,29 @@
                 <ScalarProperty Name="Position" ColumnName="Position" />
                 <ScalarProperty Name="RequestDate" ColumnName="RequestDate" />
                 <ScalarProperty Name="NotificationSent" ColumnName="NotificationSent" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrderItems">
+            <EntityTypeMapping TypeName="EBookLibraryModel.OrderItem">
+              <MappingFragment StoreEntitySet="OrderItems">
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="TypeBook" ColumnName="TypeBook" />
+                <ScalarProperty Name="BookId" ColumnName="BookId" />
+                <ScalarProperty Name="OrderId" ColumnName="OrderId" />
+                <ScalarProperty Name="OrderItemId" ColumnName="OrderItemId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Orders">
+            <EntityTypeMapping TypeName="EBookLibraryModel.Order">
+              <MappingFragment StoreEntitySet="Orders">
+                <ScalarProperty Name="PaymentMethod" ColumnName="PaymentMethod" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="OrderDate" ColumnName="OrderDate" />
+                <ScalarProperty Name="TotalAmount" ColumnName="TotalAmount" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="OrderId" ColumnName="OrderId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

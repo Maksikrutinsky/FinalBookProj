@@ -1,13 +1,13 @@
 using System;
 using System.Data.Entity;
-using System.Data.Entity.Core.Common.CommandTrees;
 using System.Linq;
 using System.Web.Mvc;
 using BookProject.Models;
+using System.Collections.Generic;
 
 namespace BookProject.Controllers
 {
-public class BooksController : Controller
+   public class BooksController : Controller
 {
     private readonly EBookLibraryEntities _context;
 
@@ -16,20 +16,34 @@ public class BooksController : Controller
         _context = new EBookLibraryEntities();
     }
 
-    [HttpGet]
-    public ActionResult Gallery(string searchTerm, string genre, string sortOrder)
+    private List<SelectListItem> GetGenresFromDb()
     {
-        var books = _context.Books.Where(b => b.IsActive == true);
-
-        // Get genres for dropdown
-        ViewBag.Genres = _context.Books
+        return _context.Books
             .Where(b => b.IsActive == true)
             .Select(b => b.Genre)
             .Distinct()
             .Select(g => new SelectListItem { Text = g, Value = g })
             .ToList();
+    }
 
-        // Search filter
+    [HttpGet]
+    public ActionResult Gallery(string searchTerm, string genre, string sortOrder)
+    {
+        var userId = Session["UserId"];
+        if (userId != null)
+        {
+            int id = Convert.ToInt32(userId);
+            ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == id)?.IsAdmin ?? false;
+        }
+        else
+        {
+            ViewBag.IsAdmin = false;
+        }
+
+        var books = _context.Books.Where(b => b.IsActive == true);
+
+        ViewBag.Genres = GetGenresFromDb();
+
         if (!string.IsNullOrEmpty(searchTerm))
         {
             searchTerm = searchTerm.ToLower();
@@ -38,13 +52,11 @@ public class BooksController : Controller
             ViewBag.CurrentSearch = searchTerm;
         }
 
-        // Genre filter
         if (!string.IsNullOrEmpty(genre))
         {
             books = books.Where(b => b.Genre == genre);
         }
 
-        // Sort
         switch (sortOrder)
         {
             case "price_asc":
@@ -103,21 +115,189 @@ public class BooksController : Controller
             return HttpNotFound();
         }
 
-        ViewBag.AverageRating = GetAverageRating(id);
-
-        if (Session["UserId"] != null)
+        var userId = Session["UserId"];
+        if (userId != null)
         {
-            var userId = Convert.ToInt32(Session["UserId"]);
-            ViewBag.HasPurchased = _context.Purchases
-                .Any(p => p.BookId == id && p.UserId == userId && p.PurchaseStatus == true);
+            int currentUserId = Convert.ToInt32(userId);
+            ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+        
+            // בדיקה האם הספר נרכש באמצעות Orders
+            ViewBag.HasPurchased = _context.Orders
+                .Any(o => o.OrderItems.Any(oi => 
+                    oi.BookId == id && 
+                    o.UserId == currentUserId && 
+                    o.Status == "Completed"));
         }
+        else
+        {
+            ViewBag.IsAdmin = false;
+            ViewBag.HasPurchased = false;
+        }
+
+        ViewBag.AverageRating = GetAverageRating(id);
         return View(book);
     }
-    private int GetCurrentUserId()
+
+    [HttpGet]
+    public ActionResult AddBook()
     {
-        // יש להתאים את זה לפי המימוש שלך של זיהוי משתמשים
-        return Convert.ToInt32(User.Identity.Name);
+        var userId = Session["UserId"];
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        int currentUserId = Convert.ToInt32(userId);
+        var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+        if (!isAdmin)
+        {
+            return RedirectToAction("Gallery");
+        }
+
+        ViewBag.Genres = GetGenresFromDb();
+        return View();
     }
+
+    [HttpPost]
+    public ActionResult AddBook(Book book)
+    {
+        var userId = Session["UserId"];
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        int currentUserId = Convert.ToInt32(userId);
+        var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+        if (!isAdmin)
+        {
+            return RedirectToAction("Gallery");
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                book.IsActive = true;
+                _context.Books.Add(book);
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = "הספר נוסף בהצלחה!";
+                return RedirectToAction("Gallery");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "אירעה שגיאה בהוספת הספר: " + ex.Message;
+            }
+        }
+
+        ViewBag.Genres = GetGenresFromDb();
+        return View(book);
+    }
+
+    [HttpGet]
+    public ActionResult Edit(int id)
+    {
+        var userId = Session["UserId"];
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        int currentUserId = Convert.ToInt32(userId);
+        var user = _context.Users.FirstOrDefault(u => u.UserId == currentUserId);
+        var isAdmin = user?.IsAdmin == true;
+        if (!isAdmin)
+        {
+            return RedirectToAction("Gallery");
+        }
+
+        var book = _context.Books.Find(id);
+        if (book == null)
+        {
+            return HttpNotFound();
+        }
+
+        ViewBag.Genres = GetGenresFromDb();
+        return View("EditBook", book);
+    }
+
+    [HttpPost]
+    public ActionResult Edit(Book book)
+    {
+        var userId = Session["UserId"];
+        if (userId == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        int currentUserId = Convert.ToInt32(userId);
+        var user = _context.Users.FirstOrDefault(u => u.UserId == currentUserId);
+        var isAdmin = user?.IsAdmin == true;
+        if (!isAdmin)
+        {
+            return RedirectToAction("Gallery");
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var existingBook = _context.Books.Find(book.BookId);
+                if (existingBook == null)
+                {
+                    return HttpNotFound();
+                }
+
+                // עדכון שאר הערכים
+                _context.Entry(existingBook).CurrentValues.SetValues(book);
+            
+                // וידוא שהספר נשאר אקטיבי
+                existingBook.IsActive = true;  // במסד נתונים זה יהיה 1
+
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = "הספר עודכן בהצלחה!";
+                return RedirectToAction("Details", new { id = book.BookId });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "אירעה שגיאה בעדכון הספר: " + ex.Message;
+            }
+        }
+
+        ViewBag.Genres = GetGenresFromDb();
+        return View("EditBook", book);
+    }
+    
+    
+    [HttpGet]
+    public JsonResult Search(string query)
+    {
+        if (string.IsNullOrEmpty(query))
+        {
+            return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+        }
+
+        var results = _context.Books
+            .Where(b => b.IsActive == true &&
+                        (b.Title.Contains(query) || 
+                         b.Author.Contains(query)))
+            .Select(b => new
+            {
+                b.BookId,
+                b.Title,
+                b.Author,
+                b.CoverImageUrl,
+                b.BuyPrice
+            })
+            .Take(5)
+            .ToList();
+
+        return Json(results, JsonRequestBehavior.AllowGet);
+    }
+    
+    
     
 }
 }

@@ -1,24 +1,333 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+﻿/* Basic Settings */
+html {
+    height: 100%;
 }
 
-/* Set padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+body {
+    margin: 0;
+    padding-top: 70px;
+    min-height: 100vh;
+    width: 100%;
+    background-image: url('../Content/images/HEADER.png');
+    background-size: 2100px 983px;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
+/* Container Settings */
+.container {
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
+.container.body-content {
+    background-color: rgba(228, 244, 242, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+/* Navbar Settings */
+.navbar {
+    min-height: 60px;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 1200px;
+    z-index: 1000;
+    margin: 20px auto;
+    border-radius: 8px !important;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+.navbar-inverse {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+/* Navigation Menu */
+.navbar-collapse {
+    background: transparent !important;
+    border-color: transparent !important;
+    text-align: center;
+}
+
+.navbar-nav {
+    display: inline-block;
+    float: none !important;
+    vertical-align: top;
+}
+
+/* Links Styling */
+.navbar-inverse .navbar-nav > li > a,
+.navbar-inverse .navbar-brand {
+    color: #000 !important;
+}
+
+/* Active Page Highlighting */
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    border-radius: 4px;
+}
+
+/* Hover Animation */
+.navbar-inverse .navbar-nav > li > a {
+    position: relative;
+}
+
+.navbar-inverse .navbar-nav > li > a:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: #000;
+    transition: all 0.3s ease;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover:after,
+.navbar-inverse .navbar-nav > .active > a:after {
+    width: 100%;
+    left: 0;
+}
+
+/* Mobile Toggle Button */
+.navbar-inverse .navbar-toggle {
+    background-color: transparent !important;
+    border-color: #000 !important;
+}
+
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .navbar {
+        width: 95%;
+    }
+
+    .navbar-collapse {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+}
+
+
+
+
+
+
+/* Book Gallery */
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* בדיוק 3 ספרים בשורה */
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.book-card {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Cart Badge */
+.badge {
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 6px;
+    font-size: 12px;
+    position: relative;
+    top: -10px;
+    left: -5px;
+}
+
+/* Form Elements */
 input,
 select,
 textarea {
     max-width: 280px;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .books-grid {
+        grid-template-columns: repeat(1, 1fr); /* במובייל - ספר אחד בשורה */
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .navbar-toggle {
+        display: block;
+        margin-right: 0;
+    }
+
+    .navbar-collapse {
+        border: none;
+        box-shadow: none;
+    }
+
+    .navbar-nav {
+        margin: 0;
+        flex-direction: column;
+    }
+
+    .navbar-nav > li {
+        margin: 5px 0;
+    }
+}
+
+
+/* Search Box Styling */
+.search-box {
+    position: fixed;
+    right: -365px;
+    top: 265px;
+    transform: translateY(-50%);
+    width: 250px;
+    z-index: 1000;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: none;
+    margin-top: 10px;
+}
+
+.search-result-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+
+
+.welcome-section {
+    text-align: center;
+    padding: 50px 0;
+    border-radius: 15px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.welcome-content {
+    padding: 0 20px;
+}
+
+.welcome-section h1 {
+    font-size: 3em;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.lead {
+    font-size: 1.5em;
+    color: #666;
+    margin-bottom: 50px;
+}
+
+.features {
+    margin: 50px 0;
+}
+
+.feature-box {
+    padding: 20px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+}
+
+.feature-box i {
+    color: #337ab7;
+    margin-bottom: 20px;
+}
+
+.feature-box h3 {
+    font-size: 1.5em;
+    margin: 20px 0;
+    color: #444;
+}
+
+.feature-box p {
+    color: #666;
+    line-height: 1.6;
+}
+
+.cta-section {
+    margin-top: 50px;
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #337ab7;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #286090;
+    transform: scale(1.05);
 }

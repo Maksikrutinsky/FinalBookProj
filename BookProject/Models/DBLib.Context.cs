@@ -27,10 +27,10 @@ namespace BookProject.Models
     
         public virtual DbSet<Book> Books { get; set; }
         public virtual DbSet<Borrow> Borrows { get; set; }
-        public virtual DbSet<Cart> Carts { get; set; }
-        public virtual DbSet<Purchase> Purchases { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<WaitingList> WaitingLists { get; set; }
+        public virtual DbSet<OrderItem> OrderItems { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
     }
 }

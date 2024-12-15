@@ -4,6 +4,8 @@
     <EntitySetMapping Name="Books">
       <EntityTypeMapping TypeName="EBookLibraryModel.Book">
         <MappingFragment StoreEntitySet="Books">
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="AvailableCopies" ColumnName="AvailableCopies" />
           <ScalarProperty Name="BookId" ColumnName="BookId" />
           <ScalarProperty Name="Title" ColumnName="Title" />
           <ScalarProperty Name="Author" ColumnName="Author" />
@@ -39,30 +41,6 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <EntitySetMapping Name="Carts">
-      <EntityTypeMapping TypeName="EBookLibraryModel.Cart">
-        <MappingFragment StoreEntitySet="Cart">
-          <ScalarProperty Name="CartId" ColumnName="CartId" />
-          <ScalarProperty Name="UserId" ColumnName="UserId" />
-          <ScalarProperty Name="BookId" ColumnName="BookId" />
-          <ScalarProperty Name="TypeBook" ColumnName="TypeBook" />
-          <ScalarProperty Name="AddedDate" ColumnName="AddedDate" />
-          <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
-    <EntitySetMapping Name="Purchases">
-      <EntityTypeMapping TypeName="EBookLibraryModel.Purchase">
-        <MappingFragment StoreEntitySet="Purchases">
-          <ScalarProperty Name="PurchaseId" ColumnName="PurchaseId" />
-          <ScalarProperty Name="UserId" ColumnName="UserId" />
-          <ScalarProperty Name="BookId" ColumnName="BookId" />
-          <ScalarProperty Name="PurchaseStatus" ColumnName="PurchaseStatus" />
-          <ScalarProperty Name="PurchaseDate" ColumnName="PurchaseDate" />
-          <ScalarProperty Name="PaymentMethod" ColumnName="PaymentMethod" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
     <EntitySetMapping Name="Ratings">
       <EntityTypeMapping TypeName="EBookLibraryModel.Rating">
         <MappingFragment StoreEntitySet="Ratings">
@@ -79,6 +57,10 @@
     <EntitySetMapping Name="Users">
       <EntityTypeMapping TypeName="EBookLibraryModel.User">
         <MappingFragment StoreEntitySet="Users">
+          <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+          <ScalarProperty Name="City" ColumnName="City" />
+          <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
+          <ScalarProperty Name="Address" ColumnName="Address" />
           <ScalarProperty Name="UserId" ColumnName="UserId" />
           <ScalarProperty Name="Username" ColumnName="Username" />
           <ScalarProperty Name="Email" ColumnName="Email" />
@@ -98,6 +80,29 @@
           <ScalarProperty Name="Position" ColumnName="Position" />
           <ScalarProperty Name="RequestDate" ColumnName="RequestDate" />
           <ScalarProperty Name="NotificationSent" ColumnName="NotificationSent" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="OrderItems">
+      <EntityTypeMapping TypeName="EBookLibraryModel.OrderItem">
+        <MappingFragment StoreEntitySet="OrderItems">
+          <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="TypeBook" ColumnName="TypeBook" />
+          <ScalarProperty Name="BookId" ColumnName="BookId" />
+          <ScalarProperty Name="OrderId" ColumnName="OrderId" />
+          <ScalarProperty Name="OrderItemId" ColumnName="OrderItemId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Orders">
+      <EntityTypeMapping TypeName="EBookLibraryModel.Order">
+        <MappingFragment StoreEntitySet="Orders">
+          <ScalarProperty Name="PaymentMethod" ColumnName="PaymentMethod" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="OrderDate" ColumnName="OrderDate" />
+          <ScalarProperty Name="TotalAmount" ColumnName="TotalAmount" />
+          <ScalarProperty Name="UserId" ColumnName="UserId" />
+          <ScalarProperty Name="OrderId" ColumnName="OrderId" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

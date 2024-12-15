@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using BookProject.Models;
+using BookProject.Filters;
 
 namespace BookProject.Controllers
 {
+    [CartCount]
     public class HomeController : Controller
     {
-        EBookLibraryEntities db = new EBookLibraryEntities();
+        private readonly EBookLibraryEntities db = new EBookLibraryEntities();
     
         public ActionResult Index()
         {
@@ -25,6 +23,14 @@ namespace BookProject.Controllers
         {
             return View();
         }
-        
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }
