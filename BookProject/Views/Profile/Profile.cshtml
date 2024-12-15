@@ -18,6 +18,7 @@
             @TempData["ErrorMessage"]
         </div>
     }
+    
 
     <div class="row">
         <!-- User Information -->
@@ -44,6 +45,30 @@
                             @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
                             @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
                         </div>
+
+                            <div class="form-group mt-3">
+                                @Html.LabelFor(m => m.Address)
+                                @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group mt-3">
+                                @Html.LabelFor(m => m.ZipCode)
+                                @Html.TextBoxFor(m => m.ZipCode, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.ZipCode, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group mt-3">
+                                @Html.LabelFor(m => m.City)
+                                @Html.TextBoxFor(m => m.City, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group mt-3">
+                                @Html.LabelFor(m => m.PhoneNumber)
+                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                            </div>
 
                         <div class="form-group mt-3">
                             <label>Registration Date</label>
@@ -86,52 +111,6 @@
                         </div>
 
                         <button type="submit" class="btn btn-warning mt-3">Change Password</button>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Books List -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>My Books</h3>
-                </div>
-                <div class="card-body">
-                    <h4>Books Purchased</h4>
-                    @if (Model.Purchases != null && Model.Purchases.Any())
-                    {
-                        <ul class="list-group">
-                            @foreach (var purchase in Model.Purchases)
-                            {
-                                <li class="list-group-item">
-                                    <h5>@purchase.Book.Title</h5>
-                                    <p class="mb-0">Purchase date: @purchase.PurchaseDate?.ToShortDateString()</p>
-                                </li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <p>No books purchased</p>
-                    }
-
-                    <h4 class="mt-4">Borrowed Books</h4>
-                    @if (Model.Borrows != null && Model.Borrows.Any())
-                    {
-                        <ul class="list-group">
-                            @foreach (var borrow in Model.Borrows)
-                            {
-                                <li class="list-group-item">
-                                    <h5>@borrow.Book.Title</h5>
-                                    <p>Return date: @borrow.ReturnDate.ToShortDateString()</p>
-                                </li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <p>No books borrowed</p>
                     }
                 </div>
             </div>

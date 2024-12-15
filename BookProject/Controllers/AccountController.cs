@@ -91,7 +91,8 @@ public class AccountController : Controller
                 Email = model.Email,
                 Password = hashedPassword,
                 CreatedAt = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                IsAdmin = false
             };
 
             _context.Users.Add(user);

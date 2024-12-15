@@ -4,24 +4,23 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="78a41a30061344cc815714fa558d4f01" Name="Diagram1">
+      <Diagram DiagramId="78a41a30061344cc815714fa558d4f01" Name="Diagram1" ZoomLevel="73">
         <EntityTypeShape EntityType="EBookLibraryModel.Book" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="EBookLibraryModel.Borrow" Width="1.5" PointX="3" PointY="8.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="EBookLibraryModel.Cart" Width="1.5" PointX="6" PointY="8.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="EBookLibraryModel.Purchase" Width="1.5" PointX="3" PointY="4.375" IsExpanded="true" />
         <EntityTypeShape EntityType="EBookLibraryModel.Rating" Width="1.5" PointX="3" PointY="12.25" IsExpanded="true" />
         <EntityTypeShape EntityType="EBookLibraryModel.User" Width="1.5" PointX="0.75" PointY="8" IsExpanded="true" />
         <EntityTypeShape EntityType="EBookLibraryModel.WaitingList" Width="1.5" PointX="6" PointY="4.375" IsExpanded="true" />
         <AssociationConnector Association="EBookLibraryModel.FK__Borrows__BookId__72C60C4A" ManuallyRouted="false" />
-        <AssociationConnector Association="EBookLibraryModel.FK__Cart__BookId__06CD04F7" ManuallyRouted="false" />
-        <AssociationConnector Association="EBookLibraryModel.FK__Purchases__BookI__6D0D32F4" ManuallyRouted="false" />
         <AssociationConnector Association="EBookLibraryModel.FK__Ratings__BookId__787EE5A0" ManuallyRouted="false" />
         <AssociationConnector Association="EBookLibraryModel.FK__WaitingLi__BookI__7F2BE32F" ManuallyRouted="false" />
         <AssociationConnector Association="EBookLibraryModel.FK__Borrows__UserId__71D1E811" ManuallyRouted="false" />
-        <AssociationConnector Association="EBookLibraryModel.FK__Cart__UserId__05D8E0BE" ManuallyRouted="false" />
-        <AssociationConnector Association="EBookLibraryModel.FK__Purchases__UserI__6C190EBB" ManuallyRouted="false" />
         <AssociationConnector Association="EBookLibraryModel.FK__Ratings__UserId__778AC167" ManuallyRouted="false" />
         <AssociationConnector Association="EBookLibraryModel.FK__WaitingLi__UserI__7E37BEF6" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="EBookLibraryModel.OrderItem" Width="1.5" PointX="8.25" PointY="8.375" />
+        <EntityTypeShape EntityType="EBookLibraryModel.Order" Width="1.5" PointX="3" PointY="16" />
+        <AssociationConnector Association="EBookLibraryModel.FK__OrderItem__BookI__114A936A" />
+        <AssociationConnector Association="EBookLibraryModel.FK__OrderItem__Order__10566F31" />
+        <AssociationConnector Association="EBookLibraryModel.FK__Orders__UserId__0D7A0286" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

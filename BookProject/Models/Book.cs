@@ -18,10 +18,9 @@ namespace BookProject.Models
         public Book()
         {
             this.Borrows = new HashSet<Borrow>();
-            this.Carts = new HashSet<Cart>();
-            this.Purchases = new HashSet<Purchase>();
             this.Ratings = new HashSet<Rating>();
             this.WaitingLists = new HashSet<WaitingList>();
+            this.OrderItems = new HashSet<OrderItem>();
         }
     
         public int BookId { get; set; }
@@ -44,16 +43,16 @@ namespace BookProject.Models
         public Nullable<bool> FormatMobi { get; set; }
         public Nullable<bool> FormatPDF { get; set; }
         public Nullable<bool> IsActive { get; set; }
+        public Nullable<int> AvailableCopies { get; set; }
+        public string Type { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Borrow> Borrows { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cart> Carts { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Purchase> Purchases { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Rating> Ratings { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<WaitingList> WaitingLists { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<OrderItem> OrderItems { get; set; }
     }
 }

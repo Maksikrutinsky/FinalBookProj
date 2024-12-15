@@ -18,7 +18,7 @@ namespace BookProject.Models
         public int UserId { get; set; }
         public int BookId { get; set; }
         public Nullable<bool> BorrowStatus { get; set; }
-        public Nullable<System.DateTime> BorrowDate { get; set; }
+        public System.DateTime BorrowDate { get; set; }
         public System.DateTime ReturnDate { get; set; }
     
         public virtual Book Book { get; set; }
