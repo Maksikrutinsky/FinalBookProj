@@ -1,0 +1,182 @@
+@model IEnumerable<BookProject.Models.OrderItem>
+
+<style>
+    .cart-item {
+        border: 1px solid #ddd;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .book-cover {
+        width: 80px;
+        height: 120px;
+        object-fit: cover;
+        margin-right: 1rem;
+        border-radius: 4px;
+    }
+
+    .book-info {
+        flex-grow: 1;
+    }
+
+    .book-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .book-price {
+        font-size: 1.1rem;
+        color: #2c5282;
+    }
+
+    .book-type {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .type-purchase {
+        background-color: #c6f6d5;
+        color: #276749;
+    }
+
+    .type-rental {
+        background-color: #bee3f8;
+        color: #2c5282;
+    }
+
+    .remove-btn {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .remove-btn:hover {
+        background-color: #cc0000;
+    }
+
+    .buy-now-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .buy-now-btn:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<script>
+    function updateTotalPrice() {
+        var total = 0;
+        $('.cart-item').each(function() {
+            var priceText = $(this).find('.book-price').text();
+            var price = parseFloat(priceText.replace('price: ₪', ''));
+            if (!isNaN(price)) {
+                total += price;
+            }
+        });
+        $('.total-price').text('Total to be paid: ₪' + total.toFixed(2));
+    }
+
+    function removeFromCart(orderItemId) {
+        if (confirm('Are you sure you want to remove this item?')) {
+            $.ajax({
+                url: '@Url.Action("RemoveFromCart", "Cart")',
+                type: 'POST',
+                data: { orderItemId: orderItemId },
+                success: function (result) {
+                    if (result.success) {
+                        $('#cart-item-' + orderItemId).fadeOut(function() {
+                            $(this).remove();
+                            if ($('.cart-item').length === 0) {
+                                location.reload();
+                            } else {
+                                updateTotalPrice();
+                            }
+                        });
+                    } else {
+                        alert(result.message || 'Error removing item');
+                    }
+                },
+                error: function () {
+                    alert('Error removing item');
+                }
+            });
+        }
+    }
+
+    $(document).ready(function() {
+        updateTotalPrice();
+    });
+</script>
+
+<div class="container mt-4">
+    <h2>Shopping cart</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Your cart is empty. <a href="@Url.Action("Gallery", "Books")">Continue shopping</a>
+        </div>
+    }
+    else
+    {
+        foreach (var item in Model)
+        {
+            <div class="cart-item" id="cart-item-@item.OrderItemId">
+                <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+
+                <div class="book-info">
+                    <div class="book-title">@item.Book.Title</div>
+                    <div>from: @item.Book.Author</div>
+
+                    <div class="book-price">
+                        price: ₪@item.Price
+                    </div>
+
+                    <div class="book-type @(item.Book.Type == "Physical" ? "type-rental" : "type-purchase")">
+                        @item.Book.Type
+                    </div>
+
+                    <div>
+                        format:
+                        @if (item.Book.FormatPDF == true) { <span>PDF</span> }
+                        @if (item.Book.FormatEpub == true) { <span>EPUB</span> }
+                        @if (item.Book.FormatMobi == true) { <span>MOBI</span> }
+                        @if (item.Book.FormatF2b == true) { <span>F2B</span> }
+                    </div>
+
+                    <button class="remove-btn" onclick="removeFromCart(@item.OrderItemId)">
+                        Remove from cart
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="cart-summary mt-4">
+            <div class="total-price">
+                Total to be paid: ₪@Model.Sum(item => item.Price)
+            </div>
+            <a href="@Url.Action("Checkout", "Cart")" class="buy-now-btn">
+                Buy Now!
+            </a>
+        </div>
+    }
+</div>

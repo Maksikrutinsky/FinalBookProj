@@ -1,0 +1,113 @@
+@model BookProject.Models.MyLibraryViewModel
+
+<div class="container">
+    <h2 class="text-center mb-4">הספרייה שלי</h2>
+
+    <!-- ספרים מושאלים -->
+    <div class="mb-5">
+        <h3 class="mb-3">ספרים מושאלים</h3>
+        @if (!Model.BorrowedBooks.Any())
+        {
+            <div class="alert alert-info">אין ספרים מושאלים.</div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var item in Model.BorrowedBooks)
+                {
+                    var daysLeft = (item.Order.OrderDate.AddDays(30) - DateTime.Now).Days;
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            @if (!string.IsNullOrEmpty(item.Book.CoverImageUrl))
+                            {
+                                <img src="@item.Book.CoverImageUrl" class="card-img-top" alt="@item.Book.Title">
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Book.Title</h5>
+                                <p class="card-text">
+                                    מאת: @item.Book.Author <br />
+                                    הוצאה: @item.Book.Publisher <br />
+                                    שנת הוצאה: @item.Book.PublishYear <br />
+                                    ז'אנר: @item.Book.Genre <br />
+                                    נותרו: @daysLeft ימים
+                                </p>
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        הורד ספר
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @if (item.Book.FormatPDF.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "PDF" })">PDF</a></li>
+                                        }
+                                        @if (item.Book.FormatEpub.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "EPUB" })">EPUB</a></li>
+                                        }
+                                        @if (item.Book.FormatMobi.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "MOBI" })">MOBI</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- ספרים שנקנו -->
+    <div>
+        <h3 class="mb-3">ספרים שנרכשו</h3>
+        @if (!Model.PurchasedBooks.Any())
+        {
+            <div class="alert alert-info">אין ספרים שנרכשו.</div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var item in Model.PurchasedBooks)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            @if (!string.IsNullOrEmpty(item.Book.CoverImageUrl))
+                            {
+                                <img src="@item.Book.CoverImageUrl" class="card-img-top" alt="@item.Book.Title">
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Book.Title</h5>
+                                <p class="card-text">
+                                    מאת: @item.Book.Author <br />
+                                    הוצאה: @item.Book.Publisher <br />
+                                    שנת הוצאה: @item.Book.PublishYear <br />
+                                    ז'אנר: @item.Book.Genre
+                                </p>
+                                <div class="dropdown">
+                                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        הורד ספר
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @if (item.Book.FormatPDF.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "PDF" })">PDF</a></li>
+                                        }
+                                        @if (item.Book.FormatEpub.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "EPUB" })">EPUB</a></li>
+                                        }
+                                        @if (item.Book.FormatMobi.GetValueOrDefault())
+                                        {
+                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "MOBI" })">MOBI</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
