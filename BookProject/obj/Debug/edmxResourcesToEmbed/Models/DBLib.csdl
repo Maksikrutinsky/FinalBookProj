@@ -30,6 +30,10 @@
     <Property Name="AvailableCopies" Type="Int32" />
     <NavigationProperty Name="OrderItems" Relationship="EBookLibraryModel.FK__OrderItem__BookI__114A936A" FromRole="Book" ToRole="OrderItem" />
     <Property Name="Type" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="PDFUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="EPUBUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="MOBIUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="F2BUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
   </EntityType>
   <EntityType Name="Borrow">
     <Key>

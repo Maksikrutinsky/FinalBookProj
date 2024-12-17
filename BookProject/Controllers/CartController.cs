@@ -50,107 +50,111 @@ namespace BookProject.Controllers
             return View(currentCart.OrderItems.Where(oi => oi.Book.IsActive.GetValueOrDefault()));
         }
 
-    // הוספת פריט לעגלה
-    [HttpPost]
-    public JsonResult AddToCart(int bookId, bool isBorrow)
+[HttpPost]
+public JsonResult AddToCart(int bookId, bool isBorrow)
+{
+    if (Session["UserId"] == null)
     {
-        if (Session["UserId"] == null)
-        {
-            return Json(new { success = false, message = "Please login to add items to cart" });
-        }
-
-        try
-        {
-            int userId = Convert.ToInt32(Session["UserId"]);
-
-            // בדיקת הספר לפני בדיקות נוספות
-            var bookToAdd = _context.Books.Find(bookId);
-            if (bookToAdd == null)
-            {
-                return Json(new { success = false, message = "Book not found" });
-            }
-
-            // בדיקת מגבלת השאלות
-            if (isBorrow)
-            {
-                var activeCartBorrows = _context.Orders
-                    .Where(o => o.UserId == userId && o.Status == "InCart")
-                    .SelectMany(o => o.OrderItems)
-                    .Count(oi => oi.TypeBook);
-
-                if (activeCartBorrows >= 3)
-                {
-                    return Json(new { 
-                        success = false, 
-                        message = "You can't borrow more than 3 books at a time" 
-                    });
-                }
-
-                if (bookToAdd.AvailableCopies <= 0)
-                {
-                    var waitingList = new WaitingList
-                    {
-                        BookId = bookId,
-                        UserId = userId,
-                        RequestDate = DateTime.Now
-                    };
-                    _context.WaitingLists.Add(waitingList);
-                    _context.SaveChanges();
-
-                    return Json(new { 
-                        success = false, 
-                        message = "Book is currently unavailable. You've been added to the waiting list." 
-                    });
-                }
-
-                bookToAdd.AvailableCopies--;
-                _context.SaveChanges();
-            }
-
-            // מציאת או יצירת עגלה נוכחית
-            var currentCart = _context.Orders
-                .FirstOrDefault(o => o.UserId == userId && o.Status == "InCart");
-
-            if (currentCart == null)
-            {
-                currentCart = new Order
-                {
-                    UserId = userId,
-                    OrderDate = DateTime.Now,
-                    Status = "InCart",
-                    TotalAmount = 0
-                };
-                _context.Orders.Add(currentCart);
-                _context.SaveChanges();
-            }
-
-            // חישוב מחיר
-            decimal price = isBorrow ? bookToAdd.BorrowPrice : bookToAdd.BuyPrice;
-
-            var orderItem = new OrderItem
-            {
-                OrderId = currentCart.OrderId,
-                BookId = bookId,
-                Price = price,
-                TypeBook = isBorrow
-            };
-
-            _context.OrderItems.Add(orderItem);
-            currentCart.TotalAmount += price;
-            _context.SaveChanges();
-
-            var message = isBorrow ? 
-                "Book has been added to cart for borrowing" : 
-                "Book has been added to cart for purchase";
-
-            return Json(new { success = true, message = message });
-        }
-        catch (Exception)
-        {
-            return Json(new { success = false, message = "An error occurred" });
-        }
+        return Json(new { success = false, message = "אנא התחבר כדי להוסיף פריטים לעגלה" });
     }
 
+    try
+    {
+        int userId = Convert.ToInt32(Session["UserId"]);
+
+        // בדיקת הספר לפני בדיקות נוספות
+        var bookToAdd = _context.Books.Find(bookId);
+        if (bookToAdd == null)
+        {
+            return Json(new { success = false, message = "הספר לא נמצא" });
+        }
+
+        // בדיקת מגבלת השאלות
+        if (isBorrow)
+        {
+            // בדיקת מספר ספרים מושאלים כרגע (כולל אלו בעגלה וגם אלו שכבר הושאלו)
+            var currentBorrowedBooksCount = _context.Orders
+                .Where(order => order.UserId == userId && 
+                            (order.Status == "InCart" || order.Status == "Completed"))
+                .SelectMany(order => order.OrderItems)
+                .Count(orderItem => orderItem.TypeBook);
+
+            // אם כבר יש 3 ספרים מושאלים
+            if (currentBorrowedBooksCount >= 3)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "לא ניתן להשאיל יותר משלושה ספרים בו-זמנית" 
+                });
+            }
+
+            // בדיקת זמינות עותקים
+            if (bookToAdd.AvailableCopies <= 0)
+            {
+                var waitingList = new WaitingList
+                {
+                    BookId = bookId,
+                    UserId = userId,
+                    RequestDate = DateTime.Now
+                };
+                _context.WaitingLists.Add(waitingList);
+                _context.SaveChanges();
+
+                return Json(new { 
+                    success = false, 
+                    message = "הספר אינו זמין כעת. הוספת לרשימת המתנה." 
+                });
+            }
+
+            // הפחתת מספר עותקים זמינים
+            bookToAdd.AvailableCopies--;
+            _context.SaveChanges();
+        }
+
+        // מציאת או יצירת עגלה נוכחית
+        var currentCart = _context.Orders
+            .FirstOrDefault(o => o.UserId == userId && o.Status == "InCart");
+
+        if (currentCart == null)
+        {
+            currentCart = new Order
+            {
+                UserId = userId,
+                OrderDate = DateTime.Now,
+                Status = "InCart",
+                TotalAmount = 0
+            };
+            _context.Orders.Add(currentCart);
+            _context.SaveChanges();
+        }
+
+        // חישוב מחיר
+        decimal price = isBorrow ? bookToAdd.BorrowPrice : bookToAdd.BuyPrice;
+
+        var orderItem1 = new OrderItem
+        {
+            OrderId = currentCart.OrderId,
+            BookId = bookId,
+            Price = price,
+            TypeBook = isBorrow
+        };
+
+        _context.OrderItems.Add(orderItem1);
+        currentCart.TotalAmount += price;
+        _context.SaveChanges();
+
+        var message = isBorrow ? 
+            "הספר נוסף לעגלה להשאלה" : 
+            "הספר נוסף לעגלה לרכישה";
+
+        return Json(new { success = true, message = message });
+    }
+    catch (Exception ex)
+    {
+        // לוג השגיאה (מומלץ להוסיף)
+        return Json(new { success = false, message = "אירעה שגיאה: " + ex.Message });
+    }
+}
         // הסרת פריט מהעגלה
         [HttpPost]
         public JsonResult RemoveFromCart(int orderItemId)

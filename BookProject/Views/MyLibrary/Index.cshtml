@@ -31,25 +31,9 @@
                                     ז'אנר: @item.Book.Genre <br />
                                     נותרו: @daysLeft ימים
                                 </p>
-                                <div class="dropdown">
-                                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        הורד ספר
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        @if (item.Book.FormatPDF.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "PDF" })">PDF</a></li>
-                                        }
-                                        @if (item.Book.FormatEpub.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "EPUB" })">EPUB</a></li>
-                                        }
-                                        @if (item.Book.FormatMobi.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "MOBI" })">MOBI</a></li>
-                                        }
-                                    </ul>
-                                </div>
+                                <button class="btn btn-primary" onclick="showBookFormats(@item.BookId)">
+                                    הורד ספר
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -84,25 +68,9 @@
                                     שנת הוצאה: @item.Book.PublishYear <br />
                                     ז'אנר: @item.Book.Genre
                                 </p>
-                                <div class="dropdown">
-                                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        הורד ספר
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        @if (item.Book.FormatPDF.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "PDF" })">PDF</a></li>
-                                        }
-                                        @if (item.Book.FormatEpub.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "EPUB" })">EPUB</a></li>
-                                        }
-                                        @if (item.Book.FormatMobi.GetValueOrDefault())
-                                        {
-                                            <li><a class="dropdown-item" href="@Url.Action("DownloadBook", new { bookId = item.BookId, format = "MOBI" })">MOBI</a></li>
-                                        }
-                                    </ul>
-                                </div>
+                                <button class="btn btn-success" onclick="showBookFormats(@item.BookId)">
+                                    הורד ספר
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -110,4 +78,74 @@
             </div>
         }
     </div>
+
+    <!-- מודאל בחירת פורמט -->
+    <div class="modal fade" id="bookDownloadModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">בחר פורמט הורדה</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select id="formatSelect" class="form-select mb-3">
+                        <!-- פורמטים יתווספו דינמית -->
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadBook()">הורד</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        function showBookFormats(bookId) {
+            $.ajax({
+                url: '@Url.Action("GetBookFormats", "MyLibrary")',
+                type: 'GET',
+                data: { bookId: bookId },
+                success: function(response) {
+                    if (response.success) {
+                        var formatSelect = $('#formatSelect');
+                        formatSelect.empty();
+                        
+                        response.formats.forEach(function(formatInfo) {
+                            formatSelect.append(
+                                $('<option>', {
+                                    value: formatInfo.url,
+                                    text: formatInfo.format
+                                })
+                            );
+                        });
+
+                        $('#bookDownloadModal').attr('data-book-id', bookId);
+                        $('#bookDownloadModal').modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('אירעה שגיאה בטעינת הפורמטים');
+                }
+            });
+        }
+
+        function downloadBook() {
+            var downloadUrl = $('#formatSelect').val();
+            
+            if (!downloadUrl) {
+                alert('אנא בחר פורמט');
+                return;
+            }
+
+            // הפניה ישירה לקישור ההורדה
+            window.open(downloadUrl, '_blank');
+            
+            $('#bookDownloadModal').modal('hide');
+        }
+    </script>
+}

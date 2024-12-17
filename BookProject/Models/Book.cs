@@ -45,6 +45,10 @@ namespace BookProject.Models
         public Nullable<bool> IsActive { get; set; }
         public Nullable<int> AvailableCopies { get; set; }
         public string Type { get; set; }
+        public string PDFUrl { get; set; }
+        public string EPUBUrl { get; set; }
+        public string MOBIUrl { get; set; }
+        public string F2BUrl { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Borrow> Borrows { get; set; }

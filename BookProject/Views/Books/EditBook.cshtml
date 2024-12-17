@@ -92,6 +92,26 @@
             <input type="checkbox" class="form-check-input" name="FormatPDF" value="true" />
             <label class="form-check-label">PDF</label>
         </div>
+        
+        <div class="form-group">
+            <label>PDF Download URL</label>
+            @Html.TextBoxFor(m => m.PDFUrl, new { @class = "form-control", type = "url" })
+        </div>
+
+        <div class="form-group">
+            <label>EPUB Download URL</label>
+            @Html.TextBoxFor(m => m.EPUBUrl, new { @class = "form-control", type = "url" })
+        </div>
+
+        <div class="form-group">
+            <label>MOBI Download URL</label>
+            @Html.TextBoxFor(m => m.MOBIUrl, new { @class = "form-control", type = "url" })
+        </div>
+
+        <div class="form-group">
+            <label>F2B Download URL</label>
+            @Html.TextBoxFor(m => m.F2BUrl, new { @class = "form-control", type = "url" })
+        </div>
 
         <button type="submit" class="btn btn-primary">Save changes</button>
     }
