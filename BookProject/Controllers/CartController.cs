@@ -205,19 +205,31 @@ namespace BookProject.Controllers
                 return RedirectToAction("Index");
             }
 
-            var model = new PaymentViewModel 
-            { 
-                TotalAmount = currentCart.TotalAmount
+            var viewModel = new CheckoutViewModel
+            {
+                Items = currentCart.OrderItems,
+                Order = currentCart,
+                TotalAmount = currentCart.TotalAmount,
+                Payment = new PaymentViewModel
+                { 
+                    TotalAmount = currentCart.TotalAmount 
+                }
             };
-            return View(model);
+
+            return View(viewModel);
         }
 
 // עיבוד תשלום
         [HttpPost]
-        public async Task<ActionResult> ProcessPayment(PaymentViewModel model)
+        public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View("Checkout", model);
+                }
+
                 int userId = Convert.ToInt32(Session["UserId"]);
                 var currentCart = _context.Orders
                     .Include(o => o.OrderItems)

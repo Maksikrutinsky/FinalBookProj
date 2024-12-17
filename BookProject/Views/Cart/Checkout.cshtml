@@ -1,4 +1,4 @@
-@model BookProject.Models.PaymentViewModel
+@model BookProject.Models.CheckoutViewModel
 
 <div class="container mt-4">
     <h2>תשלום</h2>
@@ -9,23 +9,23 @@
 
         <div class="form-group">
             <label>מספר כרטיס</label>
-            @Html.TextBoxFor(m => m.CardNumber, new { @class = "form-control", placeholder = "1234 5678 9012 3456" })
-            @Html.ValidationMessageFor(m => m.CardNumber, "", new { @class = "text-danger" })
+            @Html.TextBoxFor(m => m.Payment.CardNumber, new { @class = "form-control", placeholder = "1234 5678 9012 3456" })
+            @Html.ValidationMessageFor(m => m.Payment.CardNumber, "", new { @class = "text-danger" })
         </div>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
                     <label>תאריך תפוגה</label>
-                    @Html.TextBoxFor(m => m.ExpiryDate, new { @class = "form-control", placeholder = "MM/YY" })
-                    @Html.ValidationMessageFor(m => m.ExpiryDate, "", new { @class = "text-danger" })
+                    @Html.TextBoxFor(m => m.Payment.ExpiryDate, new { @class = "form-control", placeholder = "MM/YY" })
+                    @Html.ValidationMessageFor(m => m.Payment.ExpiryDate, "", new { @class = "text-danger" })
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label>CVV</label>
-                    @Html.TextBoxFor(m => m.CVV, new { @class = "form-control", placeholder = "123" })
-                    @Html.ValidationMessageFor(m => m.CVV, "", new { @class = "text-danger" })
+                    @Html.TextBoxFor(m => m.Payment.CVV, new { @class = "form-control", placeholder = "123" })
+                    @Html.ValidationMessageFor(m => m.Payment.CVV, "", new { @class = "text-danger" })
                 </div>
             </div>
         </div>
@@ -35,7 +35,20 @@
             @Html.HiddenFor(m => m.TotalAmount)
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">בצע תשלום</button>
+        <h3 class="mt-4">פרטי ההזמנה:</h3>
+        <div class="order-items">
+            @foreach (var item in Model.Items)
+            {
+                <div class="order-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>@item.Book.Title</span>
+                        <span>₪@item.Price</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-4">בצע תשלום</button>
     }
 </div>
 
@@ -44,12 +57,12 @@
     <script>
         $(document).ready(function() {
             // פורמט מספר כרטיס
-            $('#CardNumber').on('input', function() {
+            $('#Payment_CardNumber').on('input', function() {
                 $(this).val($(this).val().replace(/\D/g, ''));
             });
 
             // פורמט תאריך תפוגה
-            $('#ExpiryDate').on('input', function() {
+            $('#Payment_ExpiryDate').on('input', function() {
                 var v = $(this).val();
                 v = v.replace(/\D/g, '');
                 if (v.length >= 2) {
@@ -59,7 +72,7 @@
             });
 
             // פורמט CVV
-            $('#CVV').on('input', function() {
+            $('#Payment_CVV').on('input', function() {
                 $(this).val($(this).val().replace(/\D/g, ''));
             });
         });
