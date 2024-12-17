@@ -237,9 +237,12 @@ namespace BookProject.Controllers
                         return HttpNotFound();
                     }
 
-                    _context.Entry(existingBook).CurrentValues.SetValues(book);
+                    existingBook.PDFUrl = book.PDFUrl;
+                    existingBook.EPUBUrl = book.EPUBUrl;
+                    existingBook.MOBIUrl = book.MOBIUrl;
+                    existingBook.F2BUrl = book.F2BUrl;
                     existingBook.IsActive = true;
-                    
+
                     _context.SaveChanges();
 
                     TempData["SuccessMessage"] = "הספר עודכן בהצלחה!";

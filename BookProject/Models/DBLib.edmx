@@ -31,6 +31,10 @@
           <Property Name="IsActive" Type="bit" />
           <Property Name="AvailableCopies" Type="int" />
           <Property Name="Type" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="PDFUrl" Type="nvarchar(max)" />
+          <Property Name="EPUBUrl" Type="nvarchar(max)" />
+          <Property Name="MOBIUrl" Type="nvarchar(max)" />
+          <Property Name="F2BUrl" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="Borrows">
           <Key>
@@ -290,6 +294,10 @@
           <Property Name="AvailableCopies" Type="Int32" />
           <NavigationProperty Name="OrderItems" Relationship="EBookLibraryModel.FK__OrderItem__BookI__114A936A" FromRole="Book" ToRole="OrderItem" />
           <Property Name="Type" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="PDFUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="EPUBUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="MOBIUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="F2BUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Borrow">
           <Key>
@@ -538,6 +546,10 @@
           <EntitySetMapping Name="Books">
             <EntityTypeMapping TypeName="EBookLibraryModel.Book">
               <MappingFragment StoreEntitySet="Books">
+                <ScalarProperty Name="F2BUrl" ColumnName="F2BUrl" />
+                <ScalarProperty Name="MOBIUrl" ColumnName="MOBIUrl" />
+                <ScalarProperty Name="EPUBUrl" ColumnName="EPUBUrl" />
+                <ScalarProperty Name="PDFUrl" ColumnName="PDFUrl" />
                 <ScalarProperty Name="Type" ColumnName="Type" />
                 <ScalarProperty Name="AvailableCopies" ColumnName="AvailableCopies" />
                 <ScalarProperty Name="BookId" ColumnName="BookId" />

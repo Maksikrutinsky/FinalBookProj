@@ -4,6 +4,10 @@
     <EntitySetMapping Name="Books">
       <EntityTypeMapping TypeName="EBookLibraryModel.Book">
         <MappingFragment StoreEntitySet="Books">
+          <ScalarProperty Name="F2BUrl" ColumnName="F2BUrl" />
+          <ScalarProperty Name="MOBIUrl" ColumnName="MOBIUrl" />
+          <ScalarProperty Name="EPUBUrl" ColumnName="EPUBUrl" />
+          <ScalarProperty Name="PDFUrl" ColumnName="PDFUrl" />
           <ScalarProperty Name="Type" ColumnName="Type" />
           <ScalarProperty Name="AvailableCopies" ColumnName="AvailableCopies" />
           <ScalarProperty Name="BookId" ColumnName="BookId" />

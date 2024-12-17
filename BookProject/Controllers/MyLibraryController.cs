@@ -40,7 +40,7 @@ public class MyLibraryController : Controller
             .Where(oi => oi.Order.UserId == userId && 
                          oi.Order.Status == "Completed" && 
                          oi.TypeBook &&
-                         oi.Order.OrderDate > expiryDate)  // השינוי כאן
+                         oi.Order.OrderDate > expiryDate)
             .Include(oi => oi.Book)
             .Include(oi => oi.Order)
             .ToList();
@@ -63,29 +63,93 @@ public class MyLibraryController : Controller
         return View(viewModel);
     }
 
-    // פעולה להורדת ספר בפורמט ספציפי
-    public FileResult DownloadBook(int bookId, string format)
+    public ActionResult GetBookFormats(int bookId)
     {
         var book = _context.Books.Find(bookId);
-        string fileName = $"{book.Title}.{format.ToLower()}";
-        string filePath = Server.MapPath($"~/Content/Books/Sample.{format.ToLower()}");
+        if (book == null)
+        {
+            return Json(new { success = false, message = "הספר לא נמצא" }, JsonRequestBehavior.AllowGet);
+        }
+
+        var availableFormats = new List<object>();
+    
+        // בדיקה וסינון פורמטים
+        if (book.FormatPDF == true && !string.IsNullOrEmpty(book.PDFUrl)) 
+            availableFormats.Add(new { format = "PDF", url = book.PDFUrl });
+    
+        if (book.FormatEpub == true && !string.IsNullOrEmpty(book.EPUBUrl)) 
+            availableFormats.Add(new { format = "EPUB", url = book.EPUBUrl });
+    
+        if (book.FormatMobi == true && !string.IsNullOrEmpty(book.MOBIUrl)) 
+            availableFormats.Add(new { format = "MOBI", url = book.MOBIUrl });
         
-        return File(filePath, GetMimeType(format), fileName);
+        if (book.FormatF2b == true && !string.IsNullOrEmpty(book.F2BUrl))
+            availableFormats.Add(new { format = "F2B", url = book.F2BUrl });
+
+        if (availableFormats.Count == 0)
+        {
+            return Json(new
+            {
+                success = false,
+                message = "אין פורמטים זמינים להורדה עבור ספר זה"
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        return Json(new
+        {
+            success = true,
+            formats = availableFormats
+        }, JsonRequestBehavior.AllowGet);
     }
 
-    private string GetMimeType(string format)
+    public ActionResult DownloadBook(int bookId, string format)
     {
-        switch (format.ToLower())
+        // בדיקת גישה - האם המשתמש קנה/השאיל את הספר
+        int userId = Convert.ToInt32(Session["UserId"]);
+        bool hasAccess = _context.OrderItems
+            .Any(oi => oi.BookId == bookId && 
+                       oi.Order.UserId == userId && 
+                       oi.Order.Status == "Completed");
+
+        if (!hasAccess)
         {
-            case "pdf":
-                return "application/pdf";
-            case "epub":
-                return "application/epub+zip";
-            case "mobi":
-                return "application/x-mobipocket-ebook";
-            default:
-                return "application/octet-stream";
+            return Json(new { 
+                success = false, 
+                message = "אין גישה להורדת ספר זה" 
+            }, JsonRequestBehavior.AllowGet);
         }
+
+        var book = _context.Books.Find(bookId);
+    
+        string downloadUrl;
+        switch (format.ToUpper())
+        {
+            case "PDF":
+                downloadUrl = book.PDFUrl;
+                break;
+            case "EPUB":
+                downloadUrl = book.EPUBUrl;
+                break;
+            case "MOBI":
+                downloadUrl = book.MOBIUrl;
+                break;
+            case "F2B":
+                downloadUrl = book.F2BUrl;
+                break;
+            default:
+                downloadUrl = null;
+                break;
+        }
+
+        if (string.IsNullOrEmpty(downloadUrl))
+        {
+            return Json(new { 
+                success = false, 
+                message = "פורמט לא זמין" 
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        return Redirect(downloadUrl);
     }
 }
 }
