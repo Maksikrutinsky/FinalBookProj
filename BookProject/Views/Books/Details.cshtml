@@ -1,317 +1,397 @@
 @model BookProject.Models.Book
 
 <style>
-   .img-fluid {
-       height: 400px;
-       object-fit: contain;
-       padding: 10px;
-   }
+    .img-fluid {
+        height: 400px;
+        object-fit: contain;
+        padding: 10px;
+    }
 
-   .original-price {
-       text-decoration: line-through;
-       color: #6c757d;
-       margin-right: 10px;
-   }
+    .original-price {
+        text-decoration: line-through;
+        color: #6c757d;
+        margin-right: 10px;
+    }
 
-   .current-price {
-       font-size: 1.5rem;
-       font-weight: bold;
-       color: #007bff;
-   }
+    .current-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+    }
 
-   .rating {
-       color: darkgoldenrod;
-       font-size: 1.2rem;
-   }
+    .borrow-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
 
-   .star {
-       margin-right: 2px;
-   }
+    .format-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
 
-   .empty-star {
-       color: #e4e5e9;
-   }
+    .format-buttons .btn {
+        min-width: 80px;
+    }
 
-   .borrow-price {
-       font-size: 1.5rem;
-       font-weight: bold;
-       color: #28a745;
-   }
+    .purchase-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 20px 0;
+    }
 
-   .format-buttons {
-       display: flex;
-       gap: 10px;
-       flex-wrap: wrap;
-   }
+    .purchase-btn {
+        padding: 12px;
+        font-size: 1.1rem;
+        width: 100%;
+    }
 
-   .format-buttons .btn {
-       min-width: 80px;
-   }
+    .review-card {
+        background-color: #f8f9fa;
+    }
 
-   .purchase-buttons {
-       display: grid;
-       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-       gap: 1rem;
-       margin: 20px 0;
-   }
+    .available-copies {
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
 
-   .purchase-btn {
-       padding: 12px;
-       font-size: 1.1rem;
-       width: 100%;
-   }
+    .line-through {
+        text-decoration: line-through;
+        color: #6c757d;
+    }
 
-   .review-card {
-       background-color: #f8f9fa;
-   }
+    .rating-stars {
+        color: #ffd700;
+        font-size: 1.5rem;
+    }
 
-   .available-copies {
-       font-size: 0.9rem;
-       font-weight: bold;
-   }
-
-   .borrow-price {
-       font-size: 1.5rem;
-       font-weight: bold;
-       color: #28a745;
-   }
-
-   .line-through {
-       text-decoration: line-through;
-       color: #6c757d;
-   }
+    .empty-star {
+        color: #e4e5e9;
+    }
 </style>
 
 <div class="container mt-4">
-   <div class="row">
-       <!-- Cover -->
-       <div class="col-md-4">
-           <img src="@Model.CoverImageUrl" class="img-fluid rounded" alt="@Model.Title">
-       </div>
+    <div class="row">
+        <!-- Cover -->
+        <div class="col-md-4">
+            <img src="@Model.CoverImageUrl" class="img-fluid rounded" alt="@Model.Title">
+        </div>
 
-       <!-- Details -->
-       <div class="col-md-8">
-           <h1 class="mb-2">@Model.Title</h1>
-           @if (ViewBag.IsAdmin)
-           {
-               <a href="@Url.Action("Edit", "Books", new { id = Model.BookId })" class="btn btn-warning mb-3">
-                   Edit a book
-               </a>
-           }
-           <p class="text-muted">by @Model.Author</p>
+        <!-- Details -->
+        <div class="col-md-8">
+            <h1 class="mb-2">@Model.Title</h1>
+            @if (ViewBag.IsAdmin)
+            {
+                <a href="@Url.Action("Edit", "Books", new { id = Model.BookId })" class="btn btn-warning mb-3">
+                    Edit book
+                </a>
+            }
+            <p class="text-muted">by @Model.Author</p>
 
-           <!-- Rating -->
-           <div class="d-flex align-items-center mb-3">
-               <div class="rating">
-                   @{
-                       var rating = ViewBag.AverageRating;
-                       for (int i = 1; i <= 5; i++)
-                       {
-                           if (i <= rating)
-                           {
-                               <span class="star">★</span>
-                           }
-                           else
-                           {
-                               <span class="star empty-star">★</span>
-                           }
-                       }
-                   }
-               </div>
-               <span class="ms-2">@rating</span>
-           </div>
+            <!-- Rating -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="rating-stars me-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= ViewBag.AverageRating)
+                        {
+                            <span>★</span>
+                        }
+                        else
+                        {
+                            <span class="empty-star">★</span>
+                        }
+                    }
+                </div>
+                <span class="text-muted">(@ViewBag.AverageRating/5)</span>
+            </div>
 
-           <!-- Price -->
-           <div class="mb-4">
-               <h4>Purchase Price:</h4>
-               @if (Model.PreviousPrice.HasValue)
-               {
-                   <span class="original-price">₪@Model.PreviousPrice</span>
-               }
-               <span class="current-price">₪@Model.BuyPrice</span>
+            <!-- Price -->
+            <div class="mb-4">
+                <h4>Purchase Price:</h4>
+                @if (Model.PreviousPrice.HasValue)
+                {
+                    <span class="original-price">₪@Model.PreviousPrice</span>
+                }
+                <span class="current-price">₪@Model.BuyPrice</span>
 
-               @if (Model.IsBorrowable == true)
-               {
-                   <div class="mt-3">
-                       <h4>Borrow Price:</h4>
-                       @if (Model.AvailableCopies > 0)
-                       {
-                           <span class="borrow-price">₪@Model.BorrowPrice</span>
-                           <div class="mt-2">
-                    <span class="available-copies text-success">
-                        Available copies: @Model.AvailableCopies
-                    </span>
-                           </div>
-                       }
-                       else
-                       {
-                           <span class="borrow-price line-through">₪@Model.BorrowPrice</span>
-                           <div class="mt-2">
-                    <span class="available-copies text-danger">
-                        Out of stock for borrowing
-                    </span>
-                           </div>
-                       }
-                   </div>
-               }
-           </div>
+                @if (Model.IsBorrowable == true)
+                {
+                    <div class="mt-3">
+                        <h4>Borrow Price:</h4>
+                        @if (Model.AvailableCopies > 0)
+                        {
+                            <span class="borrow-price">₪@Model.BorrowPrice</span>
+                            <div class="mt-2">
+                                <span class="available-copies text-success">
+                                    Available copies: @Model.AvailableCopies
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="borrow-price line-through">₪@Model.BorrowPrice</span>
+                            <div class="mt-2">
+                                <span class="available-copies text-danger">
+                                    Out of stock for borrowing
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
 
-           <!-- Buttons -->
-           <div class="purchase-buttons">
-               <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
-                   Add to cart
-               </button>
-               <a href="@Url.Action("Checkout", "Order", new { bookId = Model.BookId })" 
-                  class="btn btn-primary purchase-btn">
-                   Buy now!
-               </a>
-           </div>
-           
+            <!-- Buttons -->
+            <div class="purchase-buttons">
+                <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
+                    Add to cart
+                </button>
+                <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
+                    Buy now!
+                </button>
+            </div>
 
-           <!-- Modal -->
-           <div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
-               <div class="modal-dialog">
-                   <div class="modal-content">
-                       <div class="modal-header">
-                           <h5 class="modal-title">Add to Cart</h5>
-                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                       </div>
-                       <div class="modal-body">
-                           <p>Would you like to buy or borrow this book?</p>
-                           <div class="d-grid gap-2">
-                               <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">Buy</button>
-                               @if (Model.IsBorrowable == true && Model.AvailableCopies > 0)
-                               {
-                                   <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
-                               }
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
-           
+            <!-- Modal -->
+            <div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add to Cart</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Would you like to buy or borrow this book?</p>
+                            <div class="d-grid gap-2">
+                                <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">Buy</button>
+                                @if (Model.IsBorrowable == true && Model.AvailableCopies > 0)
+                                {
+                                    <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-           <!-- Formats -->
-           <div class="mb-4 mt-4">
-               <h5>Available Formats:</h5>
-               <div class="format-buttons">
-                   @if (Model.FormatEpub == true)
-                   {
-                       <button class="btn btn-outline-secondary me-2">EPUB</button>
-                   }
-                   @if (Model.FormatPDF == true)
-                   {
-                       <button class="btn btn-outline-secondary me-2">PDF</button>
-                   }
-                   @if (Model.FormatMobi == true)
-                   {
-                       <button class="btn btn-outline-secondary me-2">MOBI</button>
-                   }
-                   @if (Model.FormatF2b == true)
-                   {
-                       <button class="btn btn-outline-secondary me-2">F2B</button>
-                   }
-               </div>
-           </div>
+            <!-- Formats -->
+            <div class="mb-4 mt-4">
+                <h5>Available Formats:</h5>
+                <div class="format-buttons">
+                    @if (Model.FormatEpub == true)
+                    {
+                        <button class="btn btn-outline-secondary me-2">EPUB</button>
+                    }
+                    @if (Model.FormatPDF == true)
+                    {
+                        <button class="btn btn-outline-secondary me-2">PDF</button>
+                    }
+                    @if (Model.FormatMobi == true)
+                    {
+                        <button class="btn btn-outline-secondary me-2">MOBI</button>
+                    }
+                    @if (Model.FormatF2b == true)
+                    {
+                        <button class="btn btn-outline-secondary me-2">F2B</button>
+                    }
+                </div>
+            </div>
 
-           <!-- Info Table -->
-           <table class="table table-borderless mt-4">
-               <tr>
-                   <td><strong>publishing:</strong></td>
-                   <td>@Model.Publisher</td>
-               </tr>
-               <tr>
-                   <td><strong>Year of publication:</strong></td>
-                   <td>@Model.PublishYear</td>
-               </tr>
-               <tr>
-                   <td><strong>genre:</strong></td>
-                   <td>@Model.Genre</td>
-               </tr>
-               @if (Model.AgeLimit.HasValue)
-               {
-                   <tr>
-                       <td><strong>Age limit:</strong></td>
-                       <td>@Model.AgeLimit+ years</td>
-                   </tr>
-               }
-           </table>
+            <!-- Info Table -->
+            <table class="table table-borderless mt-4">
+                <tr>
+                    <td><strong>Publisher:</strong></td>
+                    <td>@Model.Publisher</td>
+                </tr>
+                <tr>
+                    <td><strong>Year of publication:</strong></td>
+                    <td>@Model.PublishYear</td>
+                </tr>
+                <tr>
+                    <td><strong>Genre:</strong></td>
+                    <td>@Model.Genre</td>
+                </tr>
+                @if (Model.AgeLimit.HasValue)
+                {
+                    <tr>
+                        <td><strong>Age limit:</strong></td>
+                        <td>@Model.AgeLimit+ years</td>
+                    </tr>
+                }
+            </table>
 
-           <!-- Description -->
-           <div class="mt-4">
-               <h5>Description:</h5>
-               <p>@Model.Description</p>
-           </div>
-       </div>
-   </div>
+            <!-- Description -->
+            <div class="mt-4">
+                <h5>Description:</h5>
+                <p>@Model.Description</p>
+            </div>
+        </div>
+    </div>
 
-   <!-- Reviews -->
-   <div class="row mt-5">
-       <div class="col-12">
-           <h3>Reviews</h3>
-           @if (Model.Ratings != null && Model.Ratings.Any())
-           {
-               foreach (var review in Model.Ratings.OrderByDescending(r => r.CreatedAt))
-               {
-                   <div class="review-card mb-3 p-3 border rounded">
-                       <div class="d-flex justify-content-between">
-                           <div class="rating">
-                               @for (int i = 1; i <= 5; i++)
-                               {
-                                   if (i <= review.RatingValue)
-                                   {
-                                       <span class="star">★</span>
-                                   }
-                                   else
-                                   {
-                                       <span class="star empty-star">★</span>
-                                   }
-                               }
-                           </div>
-                           <small class="text-muted">
-                               @review.CreatedAt.Value.ToString("dd/MM/yyyy")
-                           </small>
-                       </div>
-                       @if (!string.IsNullOrEmpty(review.Comment))
-                       {
-                           <div class="review-content mt-2">
-                               <p>@review.Comment</p>
-                           </div>
-                       }
-                   </div>
-               }
-           }
-           else
-           {
-               <p>No reviews yet</p>
-           }
-       </div>
-   </div>
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Reviews</h3>
+
+            @if (Session["UserId"] != null)
+            {
+                if (ViewBag.HasPurchased)
+                {
+                    <div class="add-review-section mb-4">
+                        <form id="ratingForm" class="p-3 bg-light rounded mb-4">
+                            <div class="mb-3">
+                                <label class="form-label">Your Rating:</label>
+                                <select class="form-select" name="rating" id="rating" required>
+                                    <option value="">Select Rating</option>
+                                    <option value="1">1 - Poor</option>
+                                    <option value="2">2 - Fair</option>
+                                    <option value="3">3 - Good</option>
+                                    <option value="4">4 - Very Good</option>
+                                    <option value="5">5 - Excellent</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comment" class="form-label">Your Review (Optional):</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-4" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        To rate and review this book, you need to purchase it first.
+                        <div class="mt-2">
+                            <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-sm btn-primary">
+                                Add to Cart
+                            </button>
+                            <button onclick="directBuy(@Model.BookId)" class="btn btn-sm btn-success ms-2">
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            <!-- Existing Reviews -->
+            @if (Model.Ratings != null && Model.Ratings.Any())
+            {
+                foreach (var review in Model.Ratings.OrderByDescending(r => r.CreatedAt))
+                {
+                    <div class="review-card mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="rating-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.RatingValue)
+                                        {
+                                            <span>★</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="empty-star">★</span>
+                                        }
+                                    }
+                                </div>
+                                <div class="mt-1">
+                                    <strong class="text-primary">@review.User.Username</strong>
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                @String.Format("{0:dd/MM/yyyy}", review.CreatedAt)
+                            </small>
+                        </div>
+                        @if (!string.IsNullOrEmpty(review.Comment))
+                        {
+                            <div class="review-content mt-2">
+                                <p>@review.Comment</p>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No reviews yet</p>
+            }
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-   <script>
-       function showAddToCartOptions(bookId) {
-           $('#addToCartModal').modal('show');
-       }
+    <script>
+        function showAddToCartOptions(bookId) {
+            $('#addToCartModal').modal('show');
+        }
 
-       function addToCart(bookId, isBorrow) {
-           $.post('@Url.Action("AddToCart", "Cart")', {
-               bookId: bookId,
-               isBorrow: isBorrow
-           })
-               .done(function(response) {
-                   $('#addToCartModal').modal('hide');
-                   if (response.success) {
-                       alert(response.message);
-                   } else {
-                       alert(response.message);
-                   }
-               })
-               .fail(function() {
-                   $('#addToCartModal').modal('hide');
-                   alert("An error occurred while adding the book to cart");
-               });
-       }
-   </script>
+        function directBuy(bookId) {
+            $.post('@Url.Action("AddToCart", "Cart")', {
+                bookId: bookId,
+                isBorrow: false
+            })
+            .done(function(response) {
+                if (response.success) {
+                    window.location.href = '@Url.Action("Checkout", "Cart")';
+                } else {
+                    alert(response.message);
+                }
+            })
+            .fail(function() {
+                alert("An error occurred while processing your request");
+            });
+        }
+
+        function addToCart(bookId, isBorrow) {
+            $.post('@Url.Action("AddToCart", "Cart")', {
+                bookId: bookId,
+                isBorrow: isBorrow
+            })
+            .done(function(response) {
+                $('#addToCartModal').modal('hide');
+                if (response.success) {
+                    alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            })
+            .fail(function() {
+                $('#addToCartModal').modal('hide');
+                alert("An error occurred while adding the book to cart");
+            });
+        }
+
+        // Rating Form Handling
+        $(document).ready(function() {
+            $('#ratingForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var rating = $('#rating').val();
+                if (!rating) {
+                    alert('Please select a rating');
+                    return;
+                }
+
+                $.post('@Url.Action("AddRating", "Books")', {
+                    bookId: @Model.BookId,
+                    rating: parseInt(rating),
+                    comment: $('#comment').val()
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                })
+                .fail(function(xhr) {
+                    alert('Error submitting rating: ' + (xhr.responseText || 'Unknown error'));
+                });
+            });
+        });
+    </script>
 }
