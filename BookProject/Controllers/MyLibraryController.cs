@@ -1,67 +1,103 @@
 using System;
-using System.Web.Mvc;
-using System.Data.Entity;
-using BookProject.Models;
-using System.Linq;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.Entity;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web.Mvc;
+using BookProject.Controllers;
+using BookProject.Models;
 
-
-namespace BookProject.Controllers
-{
 public class MyLibraryController : Controller
 {
     private readonly EBookLibraryEntities _context;
+    private readonly EmailService _emailService;
     
     public MyLibraryController()
     {
         _context = new EBookLibraryEntities();
+        _emailService = new EmailService(
+            ConfigurationManager.AppSettings["SmtpServer"],
+            int.Parse(ConfigurationManager.AppSettings["SmtpPort"]),
+            ConfigurationManager.AppSettings["SmtpEmail"],
+            ConfigurationManager.AppSettings["SmtpPassword"]
+        );
     }
 
-    public ActionResult Index()
+public async Task<ActionResult> Index()
+{
+    if (Session["UserId"] == null)
     {
-        if (Session["UserId"] == null)
-        {
-            return RedirectToAction("Login", "Account");
-        }
-
-        int userId = Convert.ToInt32(Session["UserId"]);
-        DateTime currentDate = DateTime.Now;
-
-        // מחיקת השאלות שפג תוקפן
-        var expiredBorrows = _context.Borrows
-            .Where(b => b.UserId == userId && b.ReturnDate < currentDate);
-        _context.Borrows.RemoveRange(expiredBorrows);
-        _context.SaveChanges();
-
-        // קבלת הספרים המושאלים הפעילים
-        DateTime expiryDate = currentDate.AddDays(-30);
-
-        var borrowedBooks = _context.OrderItems
-            .Where(oi => oi.Order.UserId == userId && 
-                         oi.Order.Status == "Completed" && 
-                         oi.TypeBook &&
-                         oi.Order.OrderDate > expiryDate)
-            .Include(oi => oi.Book)
-            .Include(oi => oi.Order)
-            .ToList();
-
-        // קבלת הספרים שנקנו
-        var purchasedBooks = _context.OrderItems
-            .Where(oi => oi.Order.UserId == userId && 
-                        oi.Order.Status == "Completed" && 
-                        !oi.TypeBook)
-            .Include(oi => oi.Book)
-            .Include(oi => oi.Order)
-            .ToList();
-
-        var viewModel = new MyLibraryViewModel
-        {
-            BorrowedBooks = borrowedBooks,
-            PurchasedBooks = purchasedBooks
-        };
-
-        return View(viewModel);
+        return RedirectToAction("Login", "Account");
     }
+
+    int userId = Convert.ToInt32(Session["UserId"]);
+    DateTime currentDate = DateTime.Now;
+    DateTime expiryDate = currentDate.AddDays(-30);
+
+    // בדיקת ספרים שזמן ההשאלה שלהם פג והחזרת העותקים למלאי
+    var expiredBorrows = _context.OrderItems
+        .Include(oi => oi.Book)
+        .Include(oi => oi.Order)
+        .Where(oi => oi.Order.UserId == userId && 
+                    oi.TypeBook && 
+                    oi.Order.Status == "Completed" &&
+                    oi.Order.OrderDate < expiryDate)
+        .ToList();
+
+    foreach (var expiredBorrow in expiredBorrows)
+    {
+        // החזרת העותק למלאי
+        expiredBorrow.Book.AvailableCopies++;
+        
+        // שינוי הסטטוס ל-Cancelled במקום Returned
+        expiredBorrow.Order.Status = "Cancelled";
+
+        try 
+        {
+            // שליחת התראות לרשימת המתנה
+            var booksController = new BooksController();
+            await booksController.NotifyWaitingUsers(expiredBorrow.BookId);
+        }
+        catch (Exception ex)
+        {
+            // לוג את השגיאה אבל להמשיך בתהליך
+            System.Diagnostics.Debug.WriteLine($"Failed to notify waiting users: {ex.Message}");
+        }
+    }
+
+    if (expiredBorrows.Any())
+    {
+        _context.SaveChanges();
+    }
+
+    // קבלת הספרים המושאלים הפעילים (רק אלו שלא פג תוקפם)
+    var borrowedBooks = _context.OrderItems
+        .Where(oi => oi.Order.UserId == userId && 
+                    oi.Order.Status == "Completed" && 
+                    oi.TypeBook &&
+                    oi.Order.OrderDate >= expiryDate)
+        .Include(oi => oi.Book)
+        .Include(oi => oi.Order)
+        .ToList();
+
+    // קבלת הספרים שנקנו
+    var purchasedBooks = _context.OrderItems
+        .Where(oi => oi.Order.UserId == userId && 
+                    oi.Order.Status == "Completed" && 
+                    !oi.TypeBook)
+        .Include(oi => oi.Book)
+        .Include(oi => oi.Order)
+        .ToList();
+
+    var viewModel = new MyLibraryViewModel
+    {
+        BorrowedBooks = borrowedBooks,
+        PurchasedBooks = purchasedBooks
+    };
+
+    return View(viewModel);
+}
 
     public ActionResult GetBookFormats(int bookId)
     {
@@ -73,7 +109,6 @@ public class MyLibraryController : Controller
 
         var availableFormats = new List<object>();
     
-        // בדיקה וסינון פורמטים
         if (book.FormatPDF == true && !string.IsNullOrEmpty(book.PDFUrl)) 
             availableFormats.Add(new { format = "PDF", url = book.PDFUrl });
     
@@ -104,12 +139,11 @@ public class MyLibraryController : Controller
 
     public ActionResult DownloadBook(int bookId, string format)
     {
-        // בדיקת גישה - האם המשתמש קנה/השאיל את הספר
         int userId = Convert.ToInt32(Session["UserId"]);
         bool hasAccess = _context.OrderItems
             .Any(oi => oi.BookId == bookId && 
-                       oi.Order.UserId == userId && 
-                       oi.Order.Status == "Completed");
+                      oi.Order.UserId == userId && 
+                      oi.Order.Status == "Completed");
 
         if (!hasAccess)
         {
@@ -151,5 +185,4 @@ public class MyLibraryController : Controller
 
         return Redirect(downloadUrl);
     }
-}
 }
