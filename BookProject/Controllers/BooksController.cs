@@ -4,16 +4,25 @@ using System.Linq;
 using System.Web.Mvc;
 using BookProject.Models;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Threading.Tasks;
 
 namespace BookProject.Controllers
 {
     public class BooksController : Controller
     {
         private readonly EBookLibraryEntities _context;
-
+        private readonly EmailService _emailService;
+        
         public BooksController()
         {
             _context = new EBookLibraryEntities();
+            _emailService = new EmailService(
+                ConfigurationManager.AppSettings["SmtpServer"],
+                int.Parse(ConfigurationManager.AppSettings["SmtpPort"]),
+                ConfigurationManager.AppSettings["SmtpEmail"],
+                ConfigurationManager.AppSettings["SmtpPassword"]
+            );
         }
 
         private List<SelectListItem> GetGenresFromDb()
@@ -126,6 +135,40 @@ namespace BookProject.Controllers
 
             ViewBag.AverageRating = GetAverageRating(id);
             return View(book);
+        }
+        public async Task NotifyWaitingUsers(int bookId)
+        {
+            var book = _context.Books.Find(bookId);
+            if (book == null) return;  // רק בדיקת null
+
+            var waitingUsers = _context.WaitingLists  // שים לב: WaitingList ולא WaitingLists
+                .Where(w => w.BookId == bookId && w.NotificationSent == false)
+                .OrderBy(w => w.Position)
+                .Take(3)
+                .Include(w => w.User)
+                .ToList();
+
+            System.Diagnostics.Debug.WriteLine($"Found {waitingUsers.Count} waiting users for book {bookId}");
+
+            foreach (var waitEntry in waitingUsers)
+            {
+                if (waitEntry.User?.Email != null)
+                {
+                    try
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Trying to send email to {waitEntry.User.Email}");
+                        await _emailService.SendBookAvailableEmailAsync(waitEntry.User.Email, book.Title);
+                        waitEntry.NotificationSent = true;
+                        System.Diagnostics.Debug.WriteLine($"Successfully sent email to {waitEntry.User.Email}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to send email: {ex.Message}");
+                    }
+                }
+            }
+    
+            _context.SaveChanges();
         }
 
         [HttpGet]
@@ -353,6 +396,61 @@ namespace BookProject.Controllers
                 return 0;
 
             return Math.Round(ratings.Average(r => r.RatingValue), 1);
+        }
+        
+        [HttpPost]
+        public ActionResult JoinWaitingList(int bookId)
+        {
+            try
+            {
+                var userId = Session["UserId"];
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "יש להתחבר כדי להצטרף לרשימת המתנה" });
+                }
+
+                int currentUserId = Convert.ToInt32(userId);
+                var book = _context.Books.Find(bookId);
+        
+                if (book == null || book.IsBorrowable != true)
+                {
+                    return Json(new { success = false, message = "הספר אינו זמין להשאלה" });
+                }
+
+                // בדיקה אם המשתמש כבר ברשימת ההמתנה
+                var existingWait = _context.WaitingLists
+                    .FirstOrDefault(w => w.BookId == bookId && w.UserId == currentUserId);
+            
+                if (existingWait != null)
+                {
+                    return Json(new { success = false, message = "הנך כבר ברשימת ההמתנה לספר זה" });
+                }
+
+                // מציאת המיקום האחרון ברשימה
+                var lastPosition = _context.WaitingLists
+                    .Where(w => w.BookId == bookId)
+                    .Select(w => w.Position)
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                var waitingEntry = new WaitingList
+                {
+                    BookId = bookId,
+                    UserId = currentUserId,
+                    Position = lastPosition + 1,
+                    RequestDate = DateTime.Now,
+                    NotificationSent = false
+                };
+
+                _context.WaitingLists.Add(waitingEntry);
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "נוספת בהצלחה לרשימת ההמתנה" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "אירעה שגיאה: " + ex.Message });
+            }
         }
 
         protected override void Dispose(bool disposing)

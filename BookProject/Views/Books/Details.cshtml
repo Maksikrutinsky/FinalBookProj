@@ -137,6 +137,18 @@
                                 <span class="available-copies text-danger">
                                     Out of stock for borrowing
                                 </span>
+                                @if (Session["UserId"] != null)
+                                {
+                                    <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-warning mt-2">
+                                        הצטרף לרשימת המתנה
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mt-2">
+                                        הנך כבר ברשימת ההמתנה לספר זה
+                                    </div>
+                                }
                             </div>
                         }
                     </div>
@@ -170,6 +182,28 @@
                                     <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
                                 }
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="waitingListModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">הצטרפות לרשימת המתנה</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>האם ברצונך להצטרף לרשימת ההמתנה לספר זה?</p>
+                            <p class="text-muted small">
+                                תקבל התראה במייל כאשר הספר יהיה זמין להשאלה.
+                                תהיה לך עדיפות להשאלה במשך 24 שעות מרגע קבלת ההתראה.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                            <button onclick="joinWaitingList(@Model.BookId)" class="btn btn-primary">הצטרף לרשימת המתנה</button>
                         </div>
                     </div>
                 </div>
@@ -326,6 +360,29 @@
     <script>
         function showAddToCartOptions(bookId) {
             $('#addToCartModal').modal('show');
+        }
+
+        function showJoinWaitingList(bookId) {
+            $('#waitingListModal').modal('show');
+        }
+
+        function joinWaitingList(bookId) {
+            $.post('@Url.Action("JoinWaitingList", "Books")', {
+                bookId: bookId
+            })
+                .done(function(response) {
+                    $('#waitingListModal').modal('hide');
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                })
+                .fail(function() {
+                    $('#waitingListModal').modal('hide');
+                    alert("אירעה שגיאה בהצטרפות לרשימת ההמתנה");
+                });
         }
 
         function directBuy(bookId) {

@@ -71,6 +71,32 @@ namespace BookProject.Models
             await client.SendMailAsync(mailMessage);
         }
         
+        public async Task SendBookAvailableEmailAsync(string toEmail, string bookTitle)
+        {
+            var client = new SmtpClient(_smtpServer)
+            {
+                Port = _smtpPort,
+                Credentials = new NetworkCredential(_fromEmail, _fromPassword),
+                EnableSsl = true,
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_fromEmail),
+                Subject = "ספר זמין להשאלה!",
+                Body = $@"
+            <h2>הספר זמין להשאלה!</h2>
+            <p>שלום,</p>
+            <p>הספר {bookTitle} שביקשת להשאיל זמין כעת!</p>
+            <p>יש לך 24 שעות להיכנס לאתר ולהשאיל את הספר.</p>
+            <p>אחרי 24 שעות, האפשרות תעבור למשתמש הבא ברשימת ההמתנה.</p>",
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(toEmail);
+            await client.SendMailAsync(mailMessage);
+        }
+        
         
         public async Task SendPurchaseConfirmationEmailAsync(string toEmail, string orderDetails)
         {

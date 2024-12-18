@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 using BookProject.Models;
 using BookProject.Filters;
 
@@ -9,8 +10,10 @@ namespace BookProject.Controllers
     {
         private readonly EBookLibraryEntities db = new EBookLibraryEntities();
     
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
+            var bookReturn = new BookReturnJob();
+            await bookReturn.CheckExpiredBooks();
             return View();
         }
 
