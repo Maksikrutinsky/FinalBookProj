@@ -8,13 +8,12 @@ body {
     padding-top: 70px;
     min-height: 100vh;
     width: 100%;
-    background-image: url('../Content/images/HEADER.png');
+    background-color: rgba(228, 244, 242, 0.85); /* Slightly more opaque */
     background-size: 2100px 983px;
     background-position: center top;
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
-
 /* Container Settings */
 .container {
     width: 100% !important;
@@ -24,13 +23,13 @@ body {
 }
 
 .container.body-content {
-    background-color: rgba(228, 244, 242, 0.7);
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: rgba(228, 244, 242, 0.9); /* More transparent */
+    border-radius: 12px; /* Slightly larger radius for softer edges */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
     padding: 20px;
     text-align: center;
+    border: none; /* Remove any potential border */
 }
-
 /* Navbar Settings */
 .navbar {
     min-height: 60px;
@@ -43,8 +42,10 @@ body {
     z-index: 1000;
     margin: 20px auto;
     border-radius: 8px !important;
-    background: transparent !important;
-    border-color: transparent !important;
+    background: rgba(255, 255, 255, 0.6) !important; /* Semi-transparent white */
+    border: none !important;
+    backdrop-filter: blur(10px); /* Add a blur effect for more modern look */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
 }
 
 .navbar-inverse {

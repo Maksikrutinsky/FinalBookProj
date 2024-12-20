@@ -1,46 +1,137 @@
 @model BookProject.Models.RegisterViewModel
 
-@{
-    ViewBag.Title = "Register";
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register to System</title>
+    <style>
+        /* General form styling */
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center">Register</h2>
-            @using (Html.BeginForm())
-            {
-                @Html.ValidationSummary(true)
+        .form-container {
+            width: 350px;
+            background-color: rgba(228, 244, 242, 0.7);
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            border-radius: 10px;
+            box-sizing: border-box;
+            padding: 20px 30px;
+            margin: 50px auto;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Username)
-                    @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Username)
-                </div>
+        .title {
+            text-align: center;
+            margin: 10px 0 30px 0;
+            font-size: 28px;
+            font-weight: 800;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Email)
-                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Email)
-                </div>
+        .form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 15px;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password)
-                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Password)
-                </div>
+        .input {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #c0c0c0;
+            outline: 0 !important;
+            box-sizing: border-box;
+            padding: 12px 15px;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.ConfirmPassword)
-                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.ConfirmPassword)
-                </div>
+        .form-btn {
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 0 !important;
+            outline: 0 !important;
+            background: teal;
+            color: white;
+            cursor: pointer;
+            box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+            width: 100%;
+            font-weight: 600;
+        }
 
-                <button type="submit" class="btn btn-primary">Register</button>
-            }
+        .form-btn:active {
+            box-shadow: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 11px;
+            color: #747474;
+        }
+
+        .login-link a {
+            color: teal;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        /* Validation message styling */
+        .text-danger {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2 class="title">Create Account</h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form">
             <div>
-                @Html.ActionLink("Already have an account? Login here", "Login")
+                @Html.LabelFor(m => m.Username, new { @class = "sr-only" })
+                @Html.TextBoxFor(m => m.Username, new { @class = "input", placeholder = "Username" })
+                @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
             </div>
+
+            <div>
+                @Html.LabelFor(m => m.Email, new { @class = "sr-only" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "input", placeholder = "Email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                @Html.LabelFor(m => m.Password, new { @class = "sr-only" })
+                @Html.PasswordFor(m => m.Password, new { @class = "input", placeholder = "Password" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "sr-only" })
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "input", placeholder = "Confirm Password" })
+                @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+            </div>
+
+            <button type="submit" class="form-btn">Register</button>
         </div>
+    }
+
+    <div class="login-link">
+        Already have an account? @Html.ActionLink("Login", "Login", "Account")
     </div>
 </div>
+</body>
+</html>
