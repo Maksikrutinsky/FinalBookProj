@@ -206,6 +206,7 @@
     <Compile Include="Models\WaitingList.cs">
       <DependentUpon>DBLib.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\WaitingListViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

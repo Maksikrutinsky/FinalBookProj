@@ -1,4 +1,5 @@
 @model BookProject.Models.Book
+@using BookProject.Models
 
 <style>
     .img-fluid {
@@ -125,29 +126,29 @@
                         {
                             <span class="borrow-price">₪@Model.BorrowPrice</span>
                             <div class="mt-2">
-                                <span class="available-copies text-success">
-                                    Available copies: @Model.AvailableCopies
-                                </span>
+                <span class="available-copies text-success">
+                    Available copies: @Model.AvailableCopies
+                </span>
                             </div>
                         }
                         else
                         {
                             <span class="borrow-price line-through">₪@Model.BorrowPrice</span>
                             <div class="mt-2">
-                                <span class="available-copies text-danger">
-                                    Out of stock for borrowing
-                                </span>
-                                @if (Session["UserId"] != null)
+                <span class="available-copies text-danger">
+                    Out of stock for borrowing
+                </span>
+                                @if (Session["UserId"] != null && !ViewBag.HasPurchased)
                                 {
                                     <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-warning mt-2">
                                         הצטרף לרשימת המתנה
                                     </button>
                                 }
-                                else
+                                else if (Session["UserId"] == null)
                                 {
-                                    <div class="alert alert-info mt-2">
-                                        הנך כבר ברשימת ההמתנה לספר זה
-                                    </div>
+                                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary mt-2">
+                                        התחבר כדי להצטרף לרשימת המתנה
+                                    </a>
                                 }
                             </div>
                         }
@@ -156,13 +157,39 @@
             </div>
 
             <!-- Buttons -->
+            <!-- Buttons -->
             <div class="purchase-buttons">
-                <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
-                    Add to cart
-                </button>
-                <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
-                    Buy now!
-                </button>
+                @if (Session["UserId"] != null)
+                {
+                    if (ViewBag.HasPurchased)
+                    {
+                        <div class="alert alert-info">
+                            @if (ViewBag.IsBorrowed)
+                            {
+                                <p><i class="fas fa-info-circle"></i> You are currently borrowing this book (since @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
+                            }
+                            else
+                            {
+                                <p><i class="fas fa-info-circle"></i> You already own this book (purchased on @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
+                            Add to cart
+                        </button>
+                        <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
+                            Buy now!
+                        </button>
+                    }
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary purchase-btn">
+                        Login to purchase or borrow
+                    </a>
+                }
             </div>
 
             <!-- Modal -->
@@ -261,6 +288,62 @@
                 <p>@Model.Description</p>
             </div>
         </div>
+    </div>
+
+    <!-- Waiting List Section -->
+    <div class="mt-4">
+        <h5>רשימת המתנה</h5>
+        @{
+            var waitingList = ViewBag.WaitingList as List<WaitingListViewModel>;
+        }
+
+        @if (waitingList != null && waitingList.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>מיקום בתור</th>
+                        <th>שם משתמש</th>
+                        <th>תאריך הצטרפות</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var waiting in waitingList)
+                    {
+                        <tr class="@(waiting.IsCurrentUser ? "table-primary" : "")">
+                            <td>@waiting.Position</td>
+                            <td>
+                                @waiting.Username
+                                @if (waiting.IsCurrentUser)
+                                {
+                                    <span class="badge bg-primary ms-2">את/ה</span>
+                                }
+                            </td>
+                            <td>@(waiting.RequestDate.HasValue ? waiting.RequestDate.Value.ToString("dd/MM/yyyy") : "-")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            if (ViewBag.IsInWaitingList)
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    המיקום שלך בתור: @ViewBag.UserWaitingPosition
+                    @if (ViewBag.UserWaitingPosition == 1)
+                    {
+                        <br/>
+                        <small>כשהספר יהיה זמין, תקבל/י התראה במייל ותהיה לך עדיפות להשאלה במשך 24 שעות.</small>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p>אין כרגע אנשים ברשימת ההמתנה</p>
+        }
     </div>
 
     <!-- Reviews Section -->
@@ -373,8 +456,8 @@
                 .done(function(response) {
                     $('#waitingListModal').modal('hide');
                     if (response.success) {
-                        alert(response.message);
-                        location.reload();
+                        // נרענן את העמוד כדי להציג את המידע המעודכן
+                        window.location.reload();
                     } else {
                         alert(response.message);
                     }
