@@ -104,38 +104,75 @@ namespace BookProject.Controllers
             return View(books.ToList());
         }
 
-        public ActionResult Details(int id)
+    public ActionResult Details(int id)
+    {
+        var book = _context.Books
+            .Include(b => b.Ratings.Select(r => r.User))
+            .Include(b => b.WaitingLists.Select(w => w.User))
+            .FirstOrDefault(b => b.BookId == id && b.IsActive == true);
+
+        if (book == null)
         {
-            var book = _context.Books
-                .Include(b => b.Ratings.Select(r => r.User))  // Include User data with each Rating
-                .FirstOrDefault(b => b.BookId == id && b.IsActive == true);
-
-            if (book == null)
-            {
-                return HttpNotFound();
-            }
-
-            var userId = Session["UserId"];
-            if (userId != null)
-            {
-                int currentUserId = Convert.ToInt32(userId);
-                ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
-        
-                ViewBag.HasPurchased = _context.Orders
-                    .Any(o => o.OrderItems.Any(oi => 
-                        oi.BookId == id && 
-                        o.UserId == currentUserId && 
-                        o.Status == "Completed"));
-            }
-            else
-            {
-                ViewBag.IsAdmin = false;
-                ViewBag.HasPurchased = false;
-            }
-
-            ViewBag.AverageRating = GetAverageRating(id);
-            return View(book);
+            return HttpNotFound();
         }
+
+        var userId = Session["UserId"];
+        if (userId != null)
+        {
+            int currentUserId = Convert.ToInt32(userId);
+            ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+            ViewBag.CurrentUserId = currentUserId;
+
+            // מצא את הפריט האחרון שנרכש/הושאל (אם קיים)
+            var lastOrderItem = _context.Orders
+                .Where(o => o.OrderItems.Any(oi => 
+                    oi.BookId == id && 
+                    o.UserId == currentUserId && 
+                    o.Status == "Completed"))
+                .SelectMany(o => o.OrderItems)
+                .Where(oi => oi.BookId == id)
+                .OrderByDescending(oi => oi.Order.OrderDate)
+                .FirstOrDefault();
+
+            ViewBag.HasPurchased = lastOrderItem != null;
+            ViewBag.IsBorrowed = lastOrderItem?.TypeBook ?? false;
+            ViewBag.PurchaseDate = lastOrderItem?.Order.OrderDate;
+            
+            ViewBag.IsInWaitingList = book.WaitingLists
+                .Any(w => w.UserId == currentUserId);
+        
+            if (ViewBag.IsInWaitingList)
+            {
+                ViewBag.UserWaitingPosition = book.WaitingLists
+                    .OrderBy(w => w.Position)
+                    .ToList()
+                    .FindIndex(w => w.UserId == currentUserId) + 1;
+            }
+        }
+        else
+        {
+            ViewBag.IsAdmin = false;
+            ViewBag.HasPurchased = false;
+            ViewBag.IsBorrowed = false;
+            ViewBag.IsInWaitingList = false;
+        }
+
+        ViewBag.AverageRating = GetAverageRating(id);
+
+        ViewBag.WaitingList = book.WaitingLists
+            .OrderBy(w => w.Position)
+            .Select(w => new WaitingListViewModel
+            {
+                Username = w.User.Username,
+                Position = w.Position,
+                RequestDate = w.RequestDate,
+                IsCurrentUser = w.UserId == (userId != null ? Convert.ToInt32(userId) : 0)
+            })
+            .ToList();
+
+        return View(book);
+    }
+
         public async Task NotifyWaitingUsers(int bookId)
         {
             var book = _context.Books.Find(bookId);
@@ -254,52 +291,70 @@ namespace BookProject.Controllers
             return View("EditBook", book);
         }
 
-        [HttpPost]
-        public ActionResult Edit(Book book)
+[HttpPost]
+public async Task<ActionResult> Edit(Book book)
+{
+    var userId = Session["UserId"];
+    if (userId == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+
+    int currentUserId = Convert.ToInt32(userId);
+    var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+    if (!isAdmin)
+    {
+        return RedirectToAction("Gallery");
+    }
+
+    if (ModelState.IsValid)
+    {
+        try
         {
-            var userId = Session["UserId"];
-            if (userId == null)
+            var existingBook = _context.Books.Find(book.BookId);
+            if (existingBook == null)
             {
-                return RedirectToAction("Login", "Account");
+                return HttpNotFound();
             }
 
-            int currentUserId = Convert.ToInt32(userId);
-            var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
-            if (!isAdmin)
+            // עדכון כל שדות הספר
+            existingBook.Title = book.Title;
+            existingBook.Author = book.Author;
+            existingBook.Description = book.Description;
+            existingBook.Genre = book.Genre;
+            existingBook.PublishYear = book.PublishYear;
+            existingBook.Publisher = book.Publisher;
+            existingBook.CoverImageUrl = book.CoverImageUrl;
+            existingBook.BuyPrice = book.BuyPrice;
+            existingBook.BorrowPrice = book.BorrowPrice;
+            existingBook.IsBorrowable = book.IsBorrowable;
+            existingBook.AvailableCopies = book.AvailableCopies;
+            existingBook.PDFUrl = book.PDFUrl;
+            existingBook.EPUBUrl = book.EPUBUrl;
+            existingBook.MOBIUrl = book.MOBIUrl;
+            existingBook.F2BUrl = book.F2BUrl;
+            existingBook.IsActive = true;
+
+            _context.SaveChanges();
+
+            // אם יש עותקים זמינים, נודיע למשתמשים בהמתנה
+            if (book.AvailableCopies > 0)
             {
-                return RedirectToAction("Gallery");
+                await NotifyWaitingUsers(book.BookId);
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var existingBook = _context.Books.Find(book.BookId);
-                    if (existingBook == null)
-                    {
-                        return HttpNotFound();
-                    }
-
-                    existingBook.PDFUrl = book.PDFUrl;
-                    existingBook.EPUBUrl = book.EPUBUrl;
-                    existingBook.MOBIUrl = book.MOBIUrl;
-                    existingBook.F2BUrl = book.F2BUrl;
-                    existingBook.IsActive = true;
-
-                    _context.SaveChanges();
-
-                    TempData["SuccessMessage"] = "הספר עודכן בהצלחה!";
-                    return RedirectToAction("Details", new { id = book.BookId });
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "אירעה שגיאה בעדכון הספר: " + ex.Message);
-                }
-            }
-
-            ViewBag.Genres = GetGenresFromDb();
-            return View("EditBook", book);
+            TempData["SuccessMessage"] = "הספר עודכן בהצלחה!";
+            return RedirectToAction("Details", new { id = book.BookId });
         }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", "אירעה שגיאה בעדכון הספר: " + ex.Message);
+        }
+    }
+
+    ViewBag.Genres = GetGenresFromDb();
+    return View("EditBook", book);
+}
 
         [HttpGet]
         public JsonResult Search(string query)
