@@ -174,9 +174,10 @@
             <div class="total-price">
                 Total to be paid: ₪@Model.Sum(item => item.Price)
             </div>
-            <a href="@Url.Action("Checkout", "Cart")" class="buy-now-btn">
-                Buy Now!
-            </a>
+            <br/>
+            <button class="gradient-button">
+                <a href="@Url.Action("Checkout", "Cart")" class="gradient-button-text">Buy now!</a>
+            </button>
         </div>
     }
 </div>

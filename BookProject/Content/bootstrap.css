@@ -2015,7 +2015,7 @@ pre code {
   .col-md-3,
   .col-md-4,
   .col-md-5,
-  .col-md-6,
+/*  .col-md-6, */
   .col-md-7,
   .col-md-8,
   .col-md-9,
@@ -2042,9 +2042,9 @@ pre code {
   .col-md-7 {
     width: 58.33333333%;
   }
-  .col-md-6 {
+  /*.col-md-6 {
     width: 50%;
-  }
+  }*/
   .col-md-5 {
     width: 41.66666667%;
   }
@@ -2656,9 +2656,21 @@ output {
   line-height: 1.42857143;
   color: #555555;
 }
+
+
+/* סגנון הקונטיינר */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* סגנון הריבוע */
 .form-control {
   display: block;
-  width: 100%;
+  width: 400px; /* הגדלתי רק את הרוחב מ-200px ל-400px */
   height: 34px;
   padding: 6px 12px;
   font-size: 14px;
@@ -2668,15 +2680,16 @@ output {
   background-image: none;
   border: 1px solid #ccc;
   border-radius: 4px;
+  text-align: center;
+  margin: 0 auto;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
   -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
-  transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
 }
+
+
 .form-control:focus {
   border-color: #66afe9;
   outline: 0;
@@ -4240,6 +4253,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+. /*
 .navbar {
   position: relative;
   min-height: 50px;
@@ -4766,7 +4781,7 @@ fieldset[disabled] .navbar-inverse .btn-link:hover,
 .navbar-inverse .btn-link[disabled]:focus,
 fieldset[disabled] .navbar-inverse .btn-link:focus {
   color: #444;
-}
+} */
 .breadcrumb {
   padding: 8px 15px;
   margin-bottom: 20px;
@@ -6554,12 +6569,12 @@ button.close {
 .btn-group-vertical > .btn-group:after,
 .nav:before,
 .nav:after,
-.navbar:before,
+/*.navbar:before,
 .navbar:after,
 .navbar-header:before,
 .navbar-header:after,
 .navbar-collapse:before,
-.navbar-collapse:after,
+.navbar-collapse:after,*/
 .pager:before,
 .pager:after,
 .panel-body:before,
@@ -6579,10 +6594,6 @@ button.close {
 .form-horizontal .form-group:after,
 .btn-toolbar:after,
 .btn-group-vertical > .btn-group:after,
-.nav:after,
-.navbar:after,
-.navbar-header:after,
-.navbar-collapse:after,
 .pager:after,
 .panel-body:after,
 .modal-header:after,

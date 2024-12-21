@@ -167,11 +167,11 @@
                 {
                     <div class="order-item">
                         <span>@item.Book.Title</span>
-                        <span>$@item.Price</span>
+                        <span>₪@item.Price</span>
                     </div>
                 }
                 <div class="total-amount">
-                    Total: $@Model.TotalAmount
+                    Total: ₪@Model.TotalAmount
                 </div>
             </div>
         </div>
@@ -217,8 +217,10 @@
         $(document).ready(function() {
             // Card number formatting
             $('#Payment_CardNumber').on('input', function() {
-                $(this).val($(this).val().replace(/\D/g, ''));
-                let value = $(this).val();
+                let value = $(this).val().replace(/\D/g, ''); // מסיר תווים שאינם ספרות
+                if (value.length > 16) {
+                    value = value.substr(0, 16);
+                }
                 if (value.length > 0) {
                     value = value.match(/.{1,4}/g).join(' ');
                 }
@@ -232,6 +234,14 @@
                     value = value.substring(0,2) + '/' + value.substring(2);
                 }
                 $(this).val(value);
+            });
+
+            // כשהטופס נשלח
+            $('form').on('submit', function() {
+                // מסיר את הרווחים ממספר הכרטיס לפני השליחה
+                let cardNumber = $('#Payment_CardNumber').val();
+                $('#Payment_CardNumber').val(cardNumber.replace(/\s/g, ''));
+                return true;
             });
 
             // CVV formatting

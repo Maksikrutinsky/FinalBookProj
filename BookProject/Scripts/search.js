@@ -30,7 +30,7 @@ $(document).ready(function() {
                             var resultItem = $('<div class="search-result-item">')
                                 .html(`
                                     <div class="d-flex align-items-center">
-                                        <img src="${book.ImageUrl}" alt="${book.Title}" style="width: 50px; height: 70px; object-fit: cover; margin-right: 10px;">
+                                        <img src="${book.CoverImageUrl}" alt="${book.Title}" style="width: 50px; height: 70px; object-fit: cover; margin-right: 10px;">
                                         <div>
                                             <div class="font-weight-bold">${book.Title}</div>
                                             <div class="text-muted">${book.Author}</div>

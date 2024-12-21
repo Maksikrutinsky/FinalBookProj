@@ -1,4 +1,7 @@
-﻿@{
+﻿@model IEnumerable<BookProject.Models.Book>
+@using BookProject.Models
+
+@{
     ViewBag.Title = "Home Page";
 }
 
@@ -15,12 +18,74 @@
         @TempData["ErrorMessage"]
     </div>
 }
+
+<div class="container d-flex justify-content-center mt-100">
+    <h1>Welcome to Reader</h1>
+    <p class="lead">
+        Discover a whole world of digital books in one place.
+    </p>
+    
+    <br /> <br />
+
+    <div class="row">
+        <h2>TOP 4</h2>
+        <br /> <br />
+        @foreach (var book in Model)
+        {
+            var averageRating = book.Ratings.Any() ? book.Ratings.Average(r => r.RatingValue) : 0;
+            var ratingsCount = book.Ratings.Count;
+
+            <div class="col-md-3">
+                <div class="product-wrapper mb-45 text-center">
+                    <div class="product-img">
+                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })" data-abc="true">
+                            <img src="@book.CoverImageUrl" alt="@book.Title">
+                        </a>
+                        <span>
+                            <div class="book-title">@book.Title</div>
+                            <div class="book-rating">
+                                <i class="fa fa-star"></i> @averageRating.ToString("F1") (@ratingsCount)
+                            </div>
+                        </span>
+                    </div>
+                    <div class="product-action">
+                        <div class="product-action-style">
+                            <a class="action-plus" title="Quick View"
+                               href="@Url.Action("Details", "Books", new { id = book.BookId })"
+                               data-abc="true">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a class="action-heart" title="Add to Wishlist"
+                                   href="@Url.Action("AddToWishList", "Books", new { id = book.BookId })"
+                                   data-abc="true">
+                                    <i class="fa fa-heart"></i>
+                                </a>
+                                if (book.IsBuyable == true)
+                                {
+                                    <a class="action-cart" title="Add To Cart"
+                                       href="@Url.Action("AddToCart", "Books", new { id = book.BookId })"
+                                       data-abc="true">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<br /> <br />
+<br /> <br />
+
+
 <div class="welcome-section">
     <div class="welcome-content">
-        <h1>Welcome to Reader</h1>
-        <p class="lead">
-            Discover a whole world of digital books in one place
-        </p>
         <div class="features">
             <div class="row">
                 <div class="col-md-4">
@@ -46,8 +111,15 @@
                 </div>
             </div>
         </div>
-        <div class="cta-section">
-            <a href="@Url.Action("Gallery", "Books")" class="btn btn-primary btn-lg">התחילו לקרוא עכשיו</a>
-        </div>
     </div>
 </div>
+
+
+
+<br /> <br />
+<br /> <br />
+
+
+<button class="gradient-button">
+    <a href="@Url.Action("Gallery", "Books")" class="gradient-button-text">Start Read Right now!</a>
+</button>
