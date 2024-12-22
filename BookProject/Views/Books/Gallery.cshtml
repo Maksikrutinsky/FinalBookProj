@@ -1,14 +1,7 @@
 @model IEnumerable<BookProject.Models.Book>
 
 <style>
-    .books-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr); /* בדיוק 3 עמודות */
-        gap: 20px;
-        padding: 20px 0;
-        max-width: 100%; /* מוודא שלא חורג מהקונטיינר */
-        margin: 0 auto; /* ממרכז את הגריד */
-    }
+
 
     .card-img-top {
         height: 300px;
@@ -79,13 +72,15 @@
             </button>
         </div>
     }
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Our Book Library</h2>
+    <div class="row align-items-center mb-4">
+        <div class="col-6">
+            <h2>Our Book Library</h2>
+        </div>
         @if (ViewBag.IsAdmin)
         {
-            <div class="text-right mb-3">
-                <a href="@Url.Action("AddBook", "Books")" class="btn btn-primary">Add a new book</a>
-            </div>
+            <button class="gradient-button">
+                <a href="@Url.Action("AddBook", "Books")" class="gradient-button-text">Add a new book</a>
+            </button>
         }
     </div>
 

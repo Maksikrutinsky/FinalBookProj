@@ -276,8 +276,27 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 {
     try
     {
+        // מנקה רווחים ממספר הכרטיס
+        if (model.Payment != null && model.Payment.CardNumber != null)
+        {
+            model.Payment.CardNumber = model.Payment.CardNumber.Replace(" ", "");
+        }
+
         if (!ModelState.IsValid)
         {
+            var userid = Convert.ToInt32(Session["UserId"]);
+            var currentcart = _context.Orders
+                .Include(o => o.OrderItems)
+                .Include(o => o.OrderItems.Select(oi => oi.Book))
+                .FirstOrDefault(o => o.UserId == userid && o.Status == "InCart");
+
+            if (currentcart != null)
+            {
+                model.Items = currentcart.OrderItems;
+                model.Order = currentcart;
+                model.TotalAmount = currentcart.TotalAmount;
+            }
+            
             return View("Checkout", model);
         }
 
@@ -350,10 +369,10 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 
         return RedirectToAction("Index", "Home");
     }
-    catch (Exception)
+    catch (Exception ex)
     {
-        TempData["ErrorMessage"] = "אירעה שגיאה. אנא נסה שנית מאוחר יותר.";
-        return RedirectToAction("Index", "Home");
+        TempData["ErrorMessage"] = "אירעה שגיאה בעיבוד התשלום: " + ex.Message;
+        return RedirectToAction("Checkout");
     }
 }
 

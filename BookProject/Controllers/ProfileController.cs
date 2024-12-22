@@ -18,6 +18,41 @@ namespace BookProject.Controllers
             _context = new EBookLibraryEntities();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ChangePassword(string CurrentPassword, string NewPassword)
+        {
+            try
+            {
+                if (Session["UserId"] == null)
+                {
+                    return Json(new { success = false, message = "Session expired. Please login again." });
+                }
+
+                int userId = (int)Session["UserId"];
+                var user = _context.Users.Find(userId);
+
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found." });
+                }
+
+                if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, user.Password))
+                {
+                    return Json(new { success = false, message = "Current password is incorrect." });
+                }
+
+                user.Password = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Password changed successfully!" });  
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "An error occurred while changing password." });
+            }
+        }
+        
         public ActionResult Profile()
         {
             if (Session["UserId"] == null)

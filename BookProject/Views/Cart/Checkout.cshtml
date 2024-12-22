@@ -1,188 +1,262 @@
 @model BookProject.Models.CheckoutViewModel
 
 <style>
-    .mainscreen {
-        padding-top: 120px;
-        min-height: calc(100vh - 140px);
-    }
-
-    .card {
-        width: 75rem;
-        margin: 2rem auto;
-        background: rgba(228, 244, 242, 0.7);
-        position: relative;
-        border-radius: 1.5rem;
-        box-shadow: 4px 3px 20px rgba(53, 53, 53, 0.55);
+    .checkout-header {
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
         display: flex;
-        flex-direction: row;
-        min-height: 600px;
-    }
-
-    .leftside {
-        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)),
-        url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=228&q=80');
-        background-size: cover;
-        background-position: center;
-        width: 35rem;
-        display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        border-top-left-radius: 1.5rem;
-        border-bottom-left-radius: 1.5rem;
-        flex-direction: column;
-        padding: 3rem;
+    }
+
+    .checkout-header h2 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .back-to-cart {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.8rem 1.5rem;
+        background: white;
+        color: #008080;
+        border: 2px solid #008080;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        gap: 0.5rem;
+    }
+
+    .back-to-cart:hover {
+        background: #008080;
         color: white;
-        position: relative;
+        transform: translateY(-2px);
     }
 
-    .leftside::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(117, 51, 112, 0.2), rgba(41, 128, 150, 0.2));
-        border-top-left-radius: 1.5rem;
-        border-bottom-left-radius: 1.5rem;
+    .back-to-cart svg {
+        width: 20px;
+        height: 20px;
     }
 
-    /* עדכון שאר הסגנונות לשיפור הקריאות עם הרקע השקוף יותר */
-    .order-summary {
-        position: relative;
-        z-index: 1;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 2rem;
-        border-radius: 1rem;
-        backdrop-filter: blur(5px);
+    .checkout-container {
+        max-width: 1400px;
+        margin: 3rem auto;
+        padding: 0 2rem;
+    }
+
+    .checkout-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 3rem;
+        overflow: hidden;
+        min-height: 700px;
+    }
+
+    .order-summary-section {
+        background: #f7fafc;
+        padding: 3rem;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .summary-header {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e2e8f0;
     }
 
     .order-item {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        border: none;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .book-cover {
+        width: 80px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-info {
+        flex-grow: 1;
+    }
+
+    .book-price {
+        font-weight: 600;
+        color: #008080;
+        font-size: 1.4rem;
+    }
+
+    .order-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .total-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e2e8f0;
     }
 
     .total-amount {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        font-size: 1.8rem;
-        color: #ffffff;
-        font-weight: bold;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #008080;
+        text-align: right;
     }
 
-    .rightside {
-        background-color: rgba(228, 244, 242, 0.7);
-        width: 40rem;
-        border-bottom-right-radius: 1.5rem;
-        border-top-right-radius: 1.5rem;
+    .payment-section {
         padding: 3rem;
     }
 
-    .rightside h1 {
-        color: #963E7B;
-        margin-bottom: 2rem;
+    .payment-header {
         font-size: 2.8rem;
-    }
-
-    .rightside h2 {
-        color: #615a5a;
-        font-size: 2rem;
-        margin-bottom: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 3rem;
     }
 
     .form-group {
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
     }
 
     .form-group label {
         display: block;
         font-size: 1.4rem;
-        color: #615a5a;
-        margin-bottom: 0.8rem;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 1rem;
     }
 
     .inputbox {
         width: 100%;
         padding: 1.2rem;
-        border: none;
-        border-bottom: 2px solid #ccc;
-        border-radius: 0.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
         font-size: 1.3rem;
-        color: #615a5a;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
 
     .inputbox:focus {
         outline: none;
-        border-bottom: 3px solid #963E7B;
+        border-color: #008080;
+        box-shadow: 0 0 0 4px rgba(0, 128, 128, 0.1);
     }
 
-    .expcvv {
-        display: flex;
-        gap: 3rem;
-        margin-top: 1.5rem;
-    }
-
-    .expcvv > div {
-        flex: 1;
+    .card-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
     }
 
     .button {
-        background: linear-gradient(135deg, #753370 0%, #298096 100%);
         width: 100%;
         padding: 1.5rem;
-        border: none;
-        border-radius: 50px;
+        background: #008080;
         color: white;
-        font-size: 1.5rem;
-        font-weight: 500;
-        letter-spacing: 0.11rem;
+        border: none;
+        border-radius: 40px;
+        font-size: 1.6rem;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         margin-top: 3rem;
+        letter-spacing: 0.5px;
     }
 
     .button:hover {
+        background: #006666;
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 12px rgba(0, 128, 128, 0.2);
     }
 
     .text-danger {
-        color: #dc3545;
-        font-size: 1rem;
+        color: #e53e3e;
+        font-size: 1.1rem;
         margin-top: 0.5rem;
+    }
+
+    @@media (max-width: 1200px) {
+    .checkout-card {
+        grid-template-columns: 1fr;
+    }
+
+    .order-summary-section {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    }
+
+    @@media (max-width: 768px) {
+    .card-details {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-container {
+        padding: 0 1rem;
+    }
+
+    .payment-header {
+        font-size: 2.2rem;
+    }
+
+    .summary-header {
+        font-size: 2rem;
+    }
     }
 </style>
 
-<div class="mainscreen">
-    <div class="card">
-        <div class="leftside">
-            <div class="order-summary">
-                <h2>Order Summary</h2>
-                @foreach (var item in Model.Items)
-                {
-                    <div class="order-item">
-                        <span>@item.Book.Title</span>
-                        <span>$@item.Price</span>
-                    </div>
-                }
-                <div class="total-amount">
-                    Total: $@Model.TotalAmount
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h2>Checkout</h2>
+        <a href="@Url.Action("Index", "Cart")" class="back-to-cart">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Cart
+        </a>
+    </div>
+    <div class="checkout-card">
+        <div class="order-summary-section">
+            <h2 class="summary-header">Order Summary</h2>
+            @foreach (var item in Model.Items)
+            {
+                <div class="order-item">
+                    <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+                    <div class="book-info">@item.Book.Title</div>
+                    <div class="book-price">₪@item.Price</div>
                 </div>
+            }
+            <div class="total-section">
+                <div class="total-amount">Total: ₪@Model.TotalAmount</div>
             </div>
         </div>
 
-        <div class="rightside">
+        <div class="payment-section">
             @using (Html.BeginForm("ProcessPayment", "Cart", FormMethod.Post))
             {
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-                <h1>Checkout</h1>
-                <h2>Payment Information</h2>
+                <h2 class="payment-header">Payment Details</h2>
 
                 <div class="form-group">
                     <label>Card Number</label>
@@ -190,7 +264,7 @@
                     @Html.ValidationMessageFor(m => m.Payment.CardNumber, "", new { @class = "text-danger" })
                 </div>
 
-                <div class="expcvv">
+                <div class="card-details">
                     <div class="form-group">
                         <label>Expiry Date</label>
                         @Html.TextBoxFor(m => m.Payment.ExpiryDate, new { @class = "inputbox", placeholder = "MM/YY" })
@@ -217,8 +291,10 @@
         $(document).ready(function() {
             // Card number formatting
             $('#Payment_CardNumber').on('input', function() {
-                $(this).val($(this).val().replace(/\D/g, ''));
-                let value = $(this).val();
+                let value = $(this).val().replace(/\D/g, '');
+                if (value.length > 16) {
+                    value = value.substr(0, 16);
+                }
                 if (value.length > 0) {
                     value = value.match(/.{1,4}/g).join(' ');
                 }
@@ -232,6 +308,13 @@
                     value = value.substring(0,2) + '/' + value.substring(2);
                 }
                 $(this).val(value);
+            });
+
+            // Form submission
+            $('form').on('submit', function() {
+                let cardNumber = $('#Payment_CardNumber').val();
+                $('#Payment_CardNumber').val(cardNumber.replace(/\s/g, ''));
+                return true;
             });
 
             // CVV formatting

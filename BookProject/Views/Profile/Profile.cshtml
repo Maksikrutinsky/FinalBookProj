@@ -5,112 +5,310 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
+<style>
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 5px rgba(0,0,0,.4);
+        transition: all 0.5s ease;
+        margin-bottom: 2em;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,.4);
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
+        border-bottom: 1px solid #ddd;
+        padding: 0.5em 0;
+        outline: none;
+        transition: all 0.3s ease;
+        background: transparent;
+        margin: 0;
+    }
+
+    .form-control:focus {
+        border-bottom: 1px solid #008080;
+    }
+
+    .validation-error .form-control,
+    .form-control.input-validation-error {
+        border-bottom: 2px solid #008080;
+    }
+
+    .validation-error::after,
+    .input-validation-error::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: #008080;
+        transform: scaleX(1);
+        transition: transform 0.3s ease;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 2em;
+        width: 100%;
+    }
+
+    .text-danger {
+        display: none;
+        color: #008080;
+        font-size: 0.85em;
+        margin-top: 5px;
+        animation: slideIn 0.3s ease;
+    }
+
+    .validation-error .text-danger,
+    .input-validation-error + .text-danger {
+        display: block;
+    }
+
+    keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-header {
+        background-color: #181b61;
+        color: white;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        padding: 1.5em;
+    }
+
+    .btn-save {
+        transition: all .5s ease;
+        width: 70%;
+        border-radius: 30px;
+        color: #008080;
+        font-weight: 600;
+        background-color: #fff;
+        border: 1px solid #008080;
+        margin: 1.5em auto;
+        padding: 0.8em;
+        display: block;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background-color: #008080;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .btn-password {
+        transition: all .5s ease;
+        width: 70%;
+        border-radius: 30px;
+        color: #008080;
+        font-weight: 600;
+        background-color: #fff;
+        border: 1px solid #008080;
+        margin: 1.5em auto;
+        padding: 0.8em;
+        display: block;
+        cursor: pointer;
+    }
+
+    .btn-password:hover {
+        background-color: #008080;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .form-label {
+        color: #008080;
+        font-weight: 500;
+    }
+
+    .form-icon {
+        color: #008080;
+        margin-right: 8px;
+    }
+
+    .alert {
+        border-radius: 20px;
+        animation: fadeIn 0.5s ease-in-out;
+        border-left: 4px solid;
+        margin-bottom: 2em;
+    }
+
+    .alert-success {
+        background-color: rgba(0,128,128,0.1);
+        border-color: #008080;
+        color: #008080;
+    }
+
+    .alert-danger {
+        background-color: rgba(220,53,69,0.1);
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2em;
+    }
+
+    .page-title {
+        color: #090909;
+        text-align: center;
+        margin-bottom: 2em;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2em;
+        margin: 0;
+        width: 100%;
+    }
+
+    .col-md-6 {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .card-body {
+        padding: 2em;
+    }
+
+    @@media screen and (max-width: 768px) {
+        .row {
+            flex-direction: column;
+        }
+        .col-md-6 {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container">
+    <h1 class="page-title">My Profile</h1>
+
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
             @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    
 
     <div class="row">
-        <!-- User Information -->
+        <!-- Personal Information Card -->
         <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3>User Information</h3>
+            <div class="profile-card">
+                <div class="custom-header">
+                    <h3><i class="fas fa-user me-2"></i> Personal Information</h3>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("UpdateProfile", "Profile", FormMethod.Post))
+                    @using (Html.BeginForm("UpdateProfile", "Profile", FormMethod.Post, new { @class = "needs-validation" }))
                     {
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                         @Html.HiddenFor(m => m.UserId)
 
                         <div class="form-group">
-                            @Html.LabelFor(m => m.Username)
-                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+                            @Html.LabelFor(m => m.Username, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Enter username" })
                             @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
                         </div>
 
-                        <div class="form-group mt-3">
-                            @Html.LabelFor(m => m.Email)
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter email" })
                             @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
                         </div>
 
-                            <div class="form-group mt-3">
-                                @Html.LabelFor(m => m.Address)
-                                @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group mt-3">
-                                @Html.LabelFor(m => m.ZipCode)
-                                @Html.TextBoxFor(m => m.ZipCode, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.ZipCode, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group mt-3">
-                                @Html.LabelFor(m => m.City)
-                                @Html.TextBoxFor(m => m.City, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group mt-3">
-                                @Html.LabelFor(m => m.PhoneNumber)
-                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
-                            </div>
-
-                        <div class="form-group mt-3">
-                            <label>Registration Date</label>
-                            <div class="form-control" readonly>
-                                @Model.CreatedAt
-                            </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Address, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.Address, new { @class = "form-control", placeholder = "Enter address" })
+                            @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
                         </div>
 
-                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ZipCode, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.ZipCode, new { @class = "form-control", placeholder = "Enter ZIP code" })
+                            @Html.ValidationMessageFor(m => m.ZipCode, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.City, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.City, new { @class = "form-control", placeholder = "Enter city" })
+                            @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.PhoneNumber, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", placeholder = "Enter phone number" })
+                            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                        </div>
+
+                        <button type="submit" class="btn-save">Save Changes</button>
                     }
                 </div>
             </div>
+        </div>
 
-            <!-- Password Change Section -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Change Password</h3>
+        <!-- Password Change Card -->
+        <div class="col-md-6">
+            <div class="profile-card">
+                <div class="custom-header">
+                    <h3><i class="fas fa-lock me-2"></i> Change Password</h3>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("ChangePassword", "Profile", FormMethod.Post, new { id = "passwordForm" }))
+                    @using (Html.BeginForm("ChangePassword", "Profile", FormMethod.Post, new { @id = "passwordForm" }))
                     {
                         @Html.AntiForgeryToken()
-                        
+
                         <div class="form-group">
-                            @Html.LabelFor(m => m.CurrentPassword)
-                            @Html.PasswordFor(m => m.CurrentPassword, new { @class = "form-control" })
+                            @Html.LabelFor(m => m.CurrentPassword, new { @class = "form-label" })
+                            @Html.PasswordFor(m => m.CurrentPassword, new { @class = "form-control", placeholder = "Enter current password" })
                             @Html.ValidationMessageFor(m => m.CurrentPassword, "", new { @class = "text-danger" })
                         </div>
 
-                        <div class="form-group mt-3">
-                            @Html.LabelFor(m => m.NewPassword)
-                            @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.NewPassword, new { @class = "form-label" })
+                            @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control", placeholder = "Enter new password" })
                             @Html.ValidationMessageFor(m => m.NewPassword, "", new { @class = "text-danger" })
                         </div>
 
-                        <div class="form-group mt-3">
-                            @Html.LabelFor(m => m.ConfirmNewPassword)
-                            @Html.PasswordFor(m => m.ConfirmNewPassword, new { @class = "form-control" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ConfirmNewPassword, new { @class = "form-label" })
+                            @Html.PasswordFor(m => m.ConfirmNewPassword, new { @class = "form-control", placeholder = "Confirm new password" })
                             @Html.ValidationMessageFor(m => m.ConfirmNewPassword, "", new { @class = "text-danger" })
                         </div>
 
-                        <button type="submit" class="btn btn-warning mt-3">Change Password</button>
+                        <button type="submit" class="btn-password">Update Password</button>
                     }
                 </div>
             </div>
@@ -120,44 +318,93 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Success/Error message fade out
             setTimeout(function () {
-                $(".alert").fadeOut('slow');
+                $('.alert').fadeOut('slow');
             }, 3000);
 
-            // Handle password form submission
+            $('form input').on('blur', function () {
+                var $input = $(this);
+                var $formGroup = $input.closest('.form-group');
+
+                if (!$input.val()) {
+                    $formGroup.addClass('validation-error');
+                } else {
+                    $formGroup.removeClass('validation-error');
+                }
+            });
+
             $("#passwordForm").submit(function (e) {
                 e.preventDefault();
-                
-                var formData = $(this).serialize();
-                
+
+                var currentPassword = $("#CurrentPassword").val();
+                var newPassword = $("#NewPassword").val();
+                var confirmPassword = $("#ConfirmNewPassword").val();
+
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    $('<div class="alert alert-danger" role="alert">' +
+                        '<i class="fas fa-exclamation-circle me-2"></i>' +
+                        'Please fill in all password fields.' +
+                        '</div>')
+                        .insertBefore("#passwordForm")
+                        .delay(3000)
+                        .fadeOut('slow');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    $('<div class="alert alert-danger" role="alert">' +
+                        '<i class="fas fa-exclamation-circle me-2"></i>' +
+                        'New passwords do not match.' +
+                        '</div>')
+                        .insertBefore("#passwordForm")
+                        .delay(3000)
+                        .fadeOut('slow');
+                    return;
+                }
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
                 $.ajax({
-                    url: $(this).attr('action'),
+                    url: '/Profile/ChangePassword',
                     type: 'POST',
-                    data: formData,
+                    data: {
+                        CurrentPassword: currentPassword,
+                        NewPassword: newPassword,
+                        __RequestVerificationToken: token
+                    },
                     success: function (response) {
                         if (response.success) {
-                            // Clear password fields
                             $("#CurrentPassword, #NewPassword, #ConfirmNewPassword").val('');
-                            
-                            // Show success message
-                            $("<div class='alert alert-success'>Password changed successfully!</div>")
+
+                            $('<div class="alert alert-success" role="alert">' +
+                                '<i class="fas fa-check-circle me-2"></i>' +
+                                response.message +
+                                '</div>')
                                 .insertBefore("#passwordForm")
-                                .fadeOut(3000);
+                                .delay(3000)
+                                .fadeOut('slow');
                         } else {
-                            // Show error message
-                            $("<div class='alert alert-danger'>" + response.message + "</div>")
+                            $('<div class="alert alert-danger" role="alert">' +
+                                '<i class="fas fa-exclamation-circle me-2"></i>' +
+                                (response.message || 'An error occurred. Please try again') +
+                                '</div>')
                                 .insertBefore("#passwordForm")
-                                .fadeOut(3000);
+                                .delay(3000)
+                                .fadeOut('slow');
                         }
                     },
-                    error: function () {
-                        // Show error message
-                        $("<div class='alert alert-danger'>An error occurred. Please try again.</div>")
+                    error: function (xhr) {
+                        var message = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred. Please try again.';
+                        $('<div class="alert alert-danger" role="alert">' +
+                            '<i class="fas fa-exclamation-circle me-2"></i>' +
+                            message +
+                            '</div>')
                             .insertBefore("#passwordForm")
-                            .fadeOut(3000);
+                            .delay(3000)
+                            .fadeOut('slow');
                     }
                 });
             });

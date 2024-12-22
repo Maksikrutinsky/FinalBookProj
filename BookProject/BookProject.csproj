@@ -214,8 +214,12 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\images\.DS_Store" />
-    <Content Include="Content\images_\HEADER.jpg" />
+    <Content Include="Content\images\captureimag.png" />
+    <Content Include="Content\images\Reader.png" />
+    <Content Include="Content\images\readerlogin.png" />
+    <Content Include="Content\images\top rated.png" />
+    <Content Include="Content\images_\logo.png" />
+    <Content Include="Content\images_\header.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -250,6 +254,10 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\navbar-scroll.js" />
+    <Content Include="Scripts\package.json" />
+    <Content Include="Scripts\sandbox.config.json" />
+    <Content Include="Scripts\script.js" />
     <Content Include="Scripts\search.js" />
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\Account\ForgotPasswordConfirmation.cshtml" />
