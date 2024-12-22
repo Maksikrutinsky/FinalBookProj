@@ -15,8 +15,6 @@
     
 }
 
-
-
 /* CSS Variables */
 :root {
     --main-font: 'Outfit', sans-serif;
@@ -37,9 +35,6 @@
         --primary: #337ab7;
         --transition: all 0.3s ease;
     }
-
-
-
 
 /* Basic Settings */
 html, body {

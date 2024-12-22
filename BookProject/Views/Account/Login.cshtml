@@ -3,194 +3,191 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login to System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* General form styling */
-        .form-container {
-            width: 350px;
-            height: 500px;
-            background-color: rgba(228, 244, 242, 0.7);
-            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-            border-radius: 10px;
-            box-sizing: border-box;
-            padding: 20px 30px;
-            margin: 50px auto;
+        .main-content {
+            width: 50%;
+            border-radius: 20px;
+            box-shadow: 0 5px 5px rgba(0,0,0,.4);
+            margin: 5em auto;
+            display: flex;
         }
 
-        .title {
-            text-align: center;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-            margin: 10px 0 30px 0;
-            font-size: 28px;
-            font-weight: 800;
-        }
-
-        .form {
-            width: 100%;
+        .company__info {
+            background-color: #008080;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
-            margin-bottom: 15px;
-        }
-
-        .input {
-            width: 100%;
-            border-radius: 20px;
-            border: 1px solid #c0c0c0;
-            outline: 0 !important;
-            box-sizing: border-box;
-            padding: 12px 15px;
-        }
-
-        .page-link {
-            text-decoration: underline;
-            margin: 0;
-            text-align: end;
-            color: #747474;
-            text-decoration-color: #747474;
-        }
-
-        .page-link-label {
-            cursor: pointer;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-            font-size: 9px;
-            font-weight: 700;
-        }
-
-        .page-link-label:hover {
-            color: #000;
-        }
-
-        .form-btn {
-            padding: 10px 15px;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-            border-radius: 20px;
-            border: 0 !important;
-            outline: 0 !important;
-            background: teal;
-            color: white;
-            cursor: pointer;
-            box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-            width: 100%;
-        }
-
-        .form-btn:active {
-            box-shadow: none;
-        }
-
-        .sign-up-label {
-            margin: 0;
-            font-size: 10px;
-            color: #747474;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-            text-align: center;
-        }
-
-        .sign-up-link {
-            margin-left: 1px;
-            font-size: 11px;
-            text-decoration: underline;
-            text-decoration-color: teal;
-            color: teal;
-            cursor: pointer;
-            font-weight: 800;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-        }
-
-        .buttons-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            margin-top: 20px;
-            gap: 15px;
-        }
-
-        .apple-login-button,
-        .google-login-button {
-            border-radius: 20px;
-            box-sizing: border-box;
-            padding: 10px 15px;
-            box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
-            rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
-            cursor: pointer;
-            display: flex;
             justify-content: center;
             align-items: center;
-            font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-            "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-            font-size: 11px;
-            gap: 5px;
-        }
-
-        .apple-login-button {
-            background-color: #000;
             color: #fff;
-            border: 2px solid #000;
+            padding: 2em;
+            width: 300px;
         }
 
-        .google-login-button {
-            border: 2px solid #747474;
+        .logo-img {
+            object-fit: contain;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
 
-        .apple-icon,
-        .google-icon {
-            font-size: 18px;
-            margin-bottom: 1px;
+        .login_form {
+            background-color: transparent;
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-top: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 2em;
+            flex: 1;
         }
 
-        /* Validation message styling */
+        .form__input {
+            width: 100%;
+            border: 0px solid transparent;
+            border-radius: 0;
+            border-bottom: 1px solid #aaa;
+            padding: 1em .5em .5em;
+            padding-left: 2em;
+            outline: none;
+            margin: 1.5em auto;
+            transition: all .5s ease;
+        }
+
+        .form__input:focus {
+            border-bottom-color: #008080;
+            box-shadow: 0 0 5px rgba(0,80,80,.4);
+            border-radius: 4px;
+        }
+
+        .btn {
+            transition: all .5s ease;
+            width: 70%;
+            border-radius: 30px;
+            color: #008080;
+            font-weight: 600;
+            background-color: #fff;
+            border: 1px solid #008080;
+            margin-top: 1.5em;
+            margin-bottom: 1em;
+            padding: 0.8em;
+            cursor: pointer;
+        }
+
+        .btn:hover, .btn:focus {
+            background-color: #008080;
+            color: #fff;
+        }
+
         .text-danger {
             color: red;
             font-size: 0.8em;
             margin-top: 5px;
         }
+
+        .page-link {
+            text-align: end;
+            margin-bottom: 1em;
+        }
+
+        .page-link-label {
+            color: #008080;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .page-link-label:hover {
+            text-decoration: underline;
+        }
+
+        @@media screen and (max-width: 640px) {
+            .main-content { width: 90%; }
+            .company__info { display: none; }
+            .login_form {
+                border-top-left-radius: 20px;
+                border-bottom-left-radius: 20px;
+            }
+        }
+
+        @@media screen and (min-width: 642px) and (max-width:800px) {
+            .main-content { width: 70%; }
+        }
+
+        .row > h2 {
+            color: #008080;
+            margin-bottom: 1.5em;
+            text-align: center;
+        }
+
+        .remember-me {
+            margin: 1em 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2em;
+            color: #666;
+        }
+
+        .footer a {
+            color: #008080;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
-<div class="form-container">
-    <h2 class="title">Welcome Back</h2>
-
-    @using (Html.BeginForm())
-    {
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-        <div class="form">
-            <div>
-                @Html.LabelFor(m => m.Username, new { @class = "sr-only" })
-                @Html.TextBoxFor(m => m.Username, new { @class = "input", placeholder = "Username" })
-                @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
-            </div>
-
-            <div>
-                @Html.LabelFor(m => m.Password, new { @class = "sr-only" })
-                @Html.PasswordFor(m => m.Password, new { @class = "input", placeholder = "Password" })
-                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="page-link">
-                @Html.ActionLink("Forgot Password?", "ForgotPassword", "Account", null, new { @class = "page-link-label" })
-            </div>
-
-            <button class="gradient-button" type="submit">
-                <span class="gradient-button-text">Log <span class="bold-text">In</span></span>
-            </button>
-            
-        </div>
-    }
-
-    <div class="buttons-container">
-        <p class="sign-up-label">
-            Don't have an account?
-            @Html.ActionLink("Sign Up", "Register", "Account", null, new { @class = "sign-up-link" })
-        </p>
-        
+<div class="main-content">
+    <div class="company__info">
+        <img src="~/content/images/readerlogin.png" alt="Reader Logo" class="logo-img" style="width: 400px; height: auto;" />
+        <h4 class="company_title">Start read today!</h4>
     </div>
+    <div class="login_form">
+        <div class="container-fluid">
+            <div class="row">
+                <h2>Log In</h2>
+            </div>
+            @using (Html.BeginForm())
+            {
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="row">
+                    @Html.TextBoxFor(m => m.Username, new { @class = "form__input", placeholder = "Username" })
+                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row">
+                    @Html.PasswordFor(m => m.Password, new { @class = "form__input", placeholder = "Password" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="page-link">
+                    @Html.ActionLink("Forgot Password?", "ForgotPassword", "Account", null, new { @class = "page-link-label" })
+                </div>
+
+                <div class="remember-me">
+                    <input type="checkbox" name="remember_me" id="remember_me">
+                    <label for="remember_me">Remember Me!</label>
+                </div>
+
+                <div class="row">
+                    <button type="submit" class="btn">Login</button>
+                </div>
+
+                <div class="row">
+                    <p>Don't have an account? @Html.ActionLink("Register Here", "Register", "Account")</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>&copy; @DateTime.Now.Year - Your Application</p>
 </div>
 </body>
 </html>

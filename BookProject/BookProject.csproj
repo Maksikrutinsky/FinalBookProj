@@ -215,6 +215,10 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\images\.DS_Store" />
+    <Content Include="Content\images\captureimag.png" />
+    <Content Include="Content\images\Reader.png" />
+    <Content Include="Content\images\readerlogin.png" />
+    <Content Include="Content\images\top rated.png" />
     <Content Include="Content\images_\logo.png" />
     <Content Include="Content\images_\header.png" />
     <Content Include="favicon.ico" />

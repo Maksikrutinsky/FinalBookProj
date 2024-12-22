@@ -5,6 +5,7 @@
     ViewBag.Title = "Home Page";
 }
 
+<!-- Alert Messages -->
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
@@ -19,25 +20,336 @@
     </div>
 }
 
-<div class="container d-flex justify-content-center mt-100">
-    <h1>Welcome to Reader</h1>
-    <p class="lead">
-        Discover a whole world of digital books in one place.
-    </p>
-    
-    <br /> <br />
+<!-- Logo and Main Title -->
+<div class="container d-flex justify-content-center mt-50">
+    <div class="text-center">
+        <img src="~/content/images/Reader.png" alt="Reader Logo" class="logo-img" style="width: 400px; height: auto;" />
+    </div>
+</div>
 
+<!-- Styles -->
+<style>
+    /* אנימציות בסיסיות */
+    @@keyframes fadeInUp {  
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Categories Section */
+    .categories-section {
+        padding: 15px 0;
+        margin-top: 20px;
+        margin-bottom: 50px;
+    }
+
+    .categories-title {
+        position: relative;
+        text-align: center;
+        font-size: 3rem;
+        padding-bottom: 15px;
+        margin-bottom: 40px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .categories-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(to right, #164e12, #6610f2);
+        border-radius: 2px;
+    }
+
+    .categories-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .category-item {
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        text-align: center;
+        width: 200px;
+    }
+
+    .category-item:hover {
+        transform: translateY(-10px);
+    }
+
+    .category-circle {
+        width: 120px;
+        height: 120px;
+        border: 2px solid rgba(228, 244, 242, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        background-color: transparent;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .category-item:hover .category-circle {
+        background-color: #195732;
+        transform: scale(1.05);
+    }
+
+    .category-item:hover .category-circle i {
+        color: white;
+    }
+
+    .category-circle i {
+        font-size: 40px;
+        color: #090909;
+        transition: color 0.3s ease;
+    }
+
+    .category-name {
+        font-size: 1.3rem;
+        font-weight: 500;
+    }
+
+    /* Products Section */
+    .product-wrapper {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .product-img {
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-img:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .ranking-number {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(220, 20, 20, 0.85);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        z-index: 2;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .product-wrapper:hover .ranking-number {
+        transform: scale(1.1);
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin: 12px 0 8px;
+        line-height: 1.4;
+        height: 2.8em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .book-rating {
+        font-size: 0.95rem;
+        color: #636e72;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .book-rating i.fa-star {
+        color: #f1c40f;
+    }
+
+    /* תיקון זליגת פרטי הספר */
+    .product-img span {
+        display: block;
+        position: relative;
+        z-index: 1;
+        padding: 10px;
+        background: white;
+    }
+
+    /* תיקון כפתורי הפעולה */
+    .product-action-style {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .product-img:hover .product-action-style {
+        opacity: 1;
+        visibility: visible;
+        bottom: 10px;
+    }
+
+    /* עיצוב כפתורי הפעולה */
+    .action-plus, .action-heart, .action-cart {
+        width: 35px;
+        height: 35px;
+        background: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .action-plus:hover { background-color: #74b9ff; color: white; }
+    .action-heart:hover { background-color: #ff7675; color: white; }
+    .action-cart:hover { background-color: #55efc4; color: white; }
+
+    /* Top Rated Title */
+    .top-rated-title {
+        font-size: 3rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: linear-gradient(to right, #249720, #6610f2);
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-bottom: 30px;
+    }
+
+    .highlight {
+        color: #ff6347;
+        font-style: italic;
+    }
+
+    /* Features Section */
+    .feature-box {
+        padding: 25px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .feature-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-box i {
+        color: #144313;
+        margin-bottom: 15px;
+    }
+
+    .feature-box h3 {
+        color: #2d3436;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .feature-box p {
+        color: #636e72;
+        line-height: 1.6;
+    }
+
+    /* Gradient Button */
+    .gradient-button {
+        background: linear-gradient(45deg, #249720, #6610f2);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 1px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gradient-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 16, 242, 0.3);
+    }
+
+    .gradient-button-text {
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<div class="categories-section">
+    <img src="~/content/images/captureimag.png" alt="captureimg" class="logo-img2" style="width: auto; height: auto;" />
+    <div class="categories-container">
+        <a href="@Url.Action("Gallery", "Books", new { genre = "Finance" })" class="category-item">
+            <div class="category-circle">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="category-name">Finance</div>
+        </a>
+
+        <a href="@Url.Action("Gallery", "Books", new { genre = "Mystery" })" class="category-item">
+            <div class="category-circle">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="category-name">Mystery</div>
+        </a>
+
+        <a href="@Url.Action("Gallery", "Books", new { genre = "Romance" })" class="category-item">
+            <div class="category-circle">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="category-name">Romance</div>
+        </a>
+
+        <a href="@Url.Action("Gallery", "Books", new { genre = "Fantasy" })" class="category-item">
+            <div class="category-circle">
+                <i class="fas fa-dragon"></i>
+            </div>
+            <div class="category-name">Fantasy</div>
+        </a>
+    </div>
+</div>
+
+<!-- Top Rated Section -->
+<div class="container mt-50">
     <div class="row">
-        <h2>TOP 4</h2>
-        <br /> <br />
+        <div class="col-12 text-center">
+            <h2 class="top-rated-title">Top-rated picks, <span class="highlight">just for you!</span></h2>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-30">
+    <div class="row">
+        @{ var bookCounter = 1; }
         @foreach (var book in Model)
         {
             var averageRating = book.Ratings.Any() ? book.Ratings.Average(r => r.RatingValue) : 0;
             var ratingsCount = book.Ratings.Count;
 
             <div class="col-md-3">
-                <div class="product-wrapper mb-45 text-center">
+                <div class="product-wrapper mb-30 text-center">
                     <div class="product-img">
+                        <div class="ranking-number">#@(bookCounter)</div>
                         <a href="@Url.Action("Details", "Books", new { id = book.BookId })" data-abc="true">
                             <img src="@book.CoverImageUrl" alt="@book.Title">
                         </a>
@@ -75,16 +387,31 @@
                     </div>
                 </div>
             </div>
+            bookCounter++;
         }
     </div>
 </div>
 
+<style>
+    .top-rated-title {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #333;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: linear-gradient(to right, #249720, #6610f2);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
 
-<br /> <br />
-<br /> <br />
+    .highlight {
+        color: #ff6347;
+        font-style: italic;
+    }
+</style>
 
 
-<div class="welcome-section">
+<div class="welcome-section mt-100">
     <div class="welcome-content">
         <div class="features">
             <div class="row">
@@ -114,12 +441,8 @@
     </div>
 </div>
 
-
-
-<br /> <br />
-<br /> <br />
-
-
-<button class="gradient-button">
-    <a href="@Url.Action("Gallery", "Books")" class="gradient-button-text">Start Read Right now!</a>
-</button>
+<div class="container text-center mt-50">
+    <button class="gradient-button">
+        <a href="@Url.Action("Gallery", "Books")" class="gradient-button-text">Start Read Right now!</a>
+    </button>
+</div>
