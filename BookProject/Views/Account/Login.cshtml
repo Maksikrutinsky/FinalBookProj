@@ -3,191 +3,268 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login to System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .main-content {
-            width: 50%;
-            border-radius: 20px;
-            box-shadow: 0 5px 5px rgba(0,0,0,.4);
-            margin: 5em auto;
-            display: flex;
-        }
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>Login to System</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <style>
+       .main-content {
+           width: 50%;
+           border-radius: 20px;
+           box-shadow: 0 5px 5px rgba(0,0,0,.4);
+           margin: 5em auto;
+           display: flex;
+       }
 
-        .company__info {
-            background-color: #008080;
-            border-top-left-radius: 20px;
-            border-bottom-left-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            padding: 2em;
-            width: 300px;
-        }
+       .company__info {
+           background-color: #008080;
+           border-top-left-radius: 20px;
+           border-bottom-left-radius: 20px;
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           align-items: center;
+           color: #fff;
+           padding: 2em;
+           width: 300px;
+       }
 
-        .logo-img {
-            object-fit: contain;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
+       .logo-img {
+           object-fit: contain;
+           max-width: 100%;
+           height: auto;
+           display: block;
+           margin: 0 auto;
+       }
 
-        .login_form {
-            background-color: transparent;
-            border-top-right-radius: 20px;
-            border-bottom-right-radius: 20px;
-            border-top: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-            padding: 2em;
-            flex: 1;
-        }
+       .login_form {
+           background-color: transparent;
+           border-top-right-radius: 20px;
+           border-bottom-right-radius: 20px;
+           border-top: 1px solid #ccc;
+           border-right: 1px solid #ccc;
+           padding: 2em;
+           flex: 1;
+       }
 
-        .form__input {
-            width: 100%;
-            border: 0px solid transparent;
-            border-radius: 0;
-            border-bottom: 1px solid #aaa;
-            padding: 1em .5em .5em;
-            padding-left: 2em;
-            outline: none;
-            margin: 1.5em auto;
-            transition: all .5s ease;
-        }
+       .form__input {
+           width: 100%;
+           border: 0px solid transparent;
+           border-radius: 0;
+           border-bottom: 1px solid #aaa;
+           padding: 1em .5em .5em;
+           padding-left: 2em;
+           outline: none;
+           margin: 1.5em auto;
+           transition: all .5s ease;
+       }
 
-        .form__input:focus {
-            border-bottom-color: #008080;
-            box-shadow: 0 0 5px rgba(0,80,80,.4);
-            border-radius: 4px;
-        }
+       .form__input:focus {
+           border-bottom-color: #008080;
+           box-shadow: 0 0 5px rgba(0,80,80,.4);
+           border-radius: 4px;
+       }
 
-        .btn {
-            transition: all .5s ease;
-            width: 70%;
-            border-radius: 30px;
-            color: #008080;
-            font-weight: 600;
-            background-color: #fff;
-            border: 1px solid #008080;
-            margin-top: 1.5em;
-            margin-bottom: 1em;
-            padding: 0.8em;
-            cursor: pointer;
-        }
+       .btn {
+           transition: all .5s ease;
+           width: 70%;
+           border-radius: 30px;
+           color: #008080;
+           font-weight: 600;
+           background-color: #fff;
+           border: 1px solid #008080;
+           margin-top: 1.5em;
+           margin-bottom: 1em;
+           padding: 0.8em;
+           cursor: pointer;
+       }
 
-        .btn:hover, .btn:focus {
-            background-color: #008080;
-            color: #fff;
-        }
+       .btn:hover, .btn:focus {
+           background-color: #008080;
+           color: #fff;
+       }
 
-        .text-danger {
-            color: red;
-            font-size: 0.8em;
-            margin-top: 5px;
-        }
+       .text-danger {
+           color: red;
+           font-size: 0.8em;
+           margin-top: 5px;
+       }
 
-        .page-link {
-            text-align: end;
-            margin-bottom: 1em;
-        }
+       .page-link {
+           text-align: end;
+           margin-bottom: 1em;
+       }
 
-        .page-link-label {
-            color: #008080;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
+       .page-link-label {
+           color: #008080;
+           text-decoration: none;
+           font-size: 0.9em;
+       }
 
-        .page-link-label:hover {
-            text-decoration: underline;
-        }
+       .page-link-label:hover {
+           text-decoration: underline;
+       }
 
-        @@media screen and (max-width: 640px) {
-            .main-content { width: 90%; }
-            .company__info { display: none; }
-            .login_form {
-                border-top-left-radius: 20px;
-                border-bottom-left-radius: 20px;
-            }
-        }
+       @@media screen and (max-width: 640px) {
+           .main-content { width: 90%; }
+           .company__info { display: none; }
+           .login_form {
+               border-top-left-radius: 20px;
+               border-bottom-left-radius: 20px;
+           }
+       }
 
-        @@media screen and (min-width: 642px) and (max-width:800px) {
-            .main-content { width: 70%; }
-        }
+       @@media screen and (min-width: 642px) and (max-width:800px) {
+           .main-content { width: 70%; }
+       }
 
-        .row > h2 {
-            color: #008080;
-            margin-bottom: 1.5em;
-            text-align: center;
-        }
+       .row > h2 {
+           color: #008080;
+           margin-bottom: 1.5em;
+           text-align: center;
+       }
 
-        .remember-me {
-            margin: 1em 0;
-        }
+       .remember-me {
+           margin: 1em 0;
+       }
 
-        .footer {
-            text-align: center;
-            margin-top: 2em;
-            color: #666;
-        }
+       .footer {
+           text-align: center;
+           margin-top: 2em;
+           color: #666;
+       }
 
-        .footer a {
-            color: #008080;
-            text-decoration: none;
-        }
-    </style>
+       .footer a {
+           color: #008080;
+           text-decoration: none;
+       }
+       
+       .validation-message, .field-validation-error {
+           color: #008080;
+           font-size: 0.9em;
+           margin-top: -1em;
+           margin-bottom: 1em;
+           padding: 5px 10px;
+           display: none;  
+           font-weight: 600;
+           transition: all 0.3s ease;
+           text-shadow: 0px 0px 1px rgba(0,128,128,0.2);
+           border-left: 3px solid #008080;
+           background-color: rgba(0,128,128,0.05);
+           border-radius: 4px;
+       }
+
+       .validation-message.show {
+           display: block;
+       }
+
+       .validation-summary {
+           background-color: rgba(0,128,128,0.05);
+           border-left: 4px solid #008080;
+           padding: 1em;
+           margin-bottom: 1.5em;
+           border-radius: 4px;
+           font-size: 1.0em;
+           font-weight: 600;
+           color: #008080;
+           text-align: center;
+           box-shadow: 0 2px 4px rgba(0,128,128,0.1);
+           display: none;
+       }
+
+       .validation-summary.show {
+           display: block;
+       }
+   </style>
 </head>
 <body>
 <div class="main-content">
-    <div class="company__info">
-        <img src="~/content/images/readerlogin.png" alt="Reader Logo" class="logo-img" style="width: 400px; height: auto;" />
-        <h4 class="company_title">Start read today!</h4>
-    </div>
-    <div class="login_form">
-        <div class="container-fluid">
-            <div class="row">
-                <h2>Log In</h2>
-            </div>
-            @using (Html.BeginForm())
-            {
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+   <div class="company__info">
+       <img src="~/content/images/readerlogin.png" alt="Reader Logo" class="logo-img" style="width: 400px; height: auto;" />
+       <h4 class="company_title">Start read today!</h4>
+   </div>
+   <div class="login_form">
+       <div class="container-fluid">
+           <div class="row">
+               <h2>Log In</h2>
+           </div>
+           @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "loginForm" }))
+           {
+               @Html.ValidationSummary(true, "", new { @class = "validation-summary" + (ViewData.ModelState.ContainsKey("") ? " show" : "") })
 
-                <div class="row">
-                    @Html.TextBoxFor(m => m.Username, new { @class = "form__input", placeholder = "Username" })
-                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
-                </div>
+               <div class="row">
+                   @Html.TextBoxFor(m => m.Username, new { @class = "form__input", placeholder = "Username" })
+                   @Html.ValidationMessageFor(m => m.Username, "**User name is required!**", new { @class = "validation-message" })
+               </div>
 
-                <div class="row">
-                    @Html.PasswordFor(m => m.Password, new { @class = "form__input", placeholder = "Password" })
-                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                </div>
+               <div class="row">
+                   @Html.PasswordFor(m => m.Password, new { @class = "form__input", placeholder = "Password" })
+                   @Html.ValidationMessageFor(m => m.Password, "**Password is required!**", new { @class = "validation-message" })
+               </div>
 
-                <div class="page-link">
-                    @Html.ActionLink("Forgot Password?", "ForgotPassword", "Account", null, new { @class = "page-link-label" })
-                </div>
+               <div class="page-link">
+                   @Html.ActionLink("Forgot Password?", "ForgotPassword", "Account", null, new { @class = "page-link-label" })
+               </div>
 
-                <div class="remember-me">
-                    <input type="checkbox" name="remember_me" id="remember_me">
-                    <label for="remember_me">Remember Me!</label>
-                </div>
+               <div class="remember-me">
+                   <input type="checkbox" name="remember_me" id="remember_me">
+                   <label for="remember_me">Remember Me!</label>
+               </div>
 
-                <div class="row">
-                    <button type="submit" class="btn">Login</button>
-                </div>
+               <div class="row">
+                   <button type="submit" class="btn">Login</button>
+               </div>
 
-                <div class="row">
-                    <p>Don't have an account? @Html.ActionLink("Register Here", "Register", "Account")</p>
-                </div>
-            }
-        </div>
-    </div>
+               <div class="row">
+                   <p>Don't have an account? @Html.ActionLink("Register Here", "Register", "Account")</p>
+               </div>
+           }
+       </div>
+   </div>
 </div>
 
 <div class="footer">
-    <p>&copy; @DateTime.Now.Year - Your Application</p>
+   <p>&copy; @DateTime.Now.Year - Your Application</p>
 </div>
+
+<script>
+   $(document).ready(function() {
+       // בודקים אם יש הודעת שגיאה כללית בטעינה
+       if ($('.validation-summary').length && $('.validation-summary').text().trim() !== '') {
+           $('.validation-summary').addClass('show');
+       }
+
+       // מאזינים לאירוע שליחת הטופס
+       $('#loginForm').on('submit', function() {
+           var isValid = true;
+
+           // בודקים כל שדה
+           $('.form__input').each(function() {
+               if (!$(this).val()) {
+                   isValid = false;
+                   $(this).siblings('.validation-message')
+                       .slideDown(300)
+                       .css('display', 'block')
+                       .addClass('show');
+               } else {
+                   $(this).siblings('.validation-message')
+                       .slideUp(300)
+                       .removeClass('show');
+               }
+           });
+
+           return isValid;
+       });
+
+       // מסתירים את הודעות השגיאה כשמתחילים להקליד
+       $('.form__input').on('input', function() {
+           $(this).siblings('.validation-message')
+               .slideUp(300)
+               .removeClass('show');
+           $('.validation-summary').removeClass('show');
+       });
+   });
+</script>
 </body>
 </html>

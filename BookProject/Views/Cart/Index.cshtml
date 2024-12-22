@@ -1,44 +1,115 @@
 @model IEnumerable<BookProject.Models.OrderItem>
 
 <style>
-    .cart-item {
-        border: 1px solid #ddd;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        border-radius: 8px;
+    .cart-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        direction: ltr;
+    }
+
+    .cart-header {
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
         display: flex;
+        justify-content: space-between;
         align-items: center;
     }
 
+    .cart-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .cart-items-container {
+        flex: 1;
+    }
+
+    .cart-item {
+        background: white;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cart-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-sidebar {
+        position: sticky;
+        top: 2rem;
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        height: fit-content;
+    }
+
     .book-cover {
-        width: 80px;
-        height: 120px;
+        width: 120px;
+        height: 180px;
         object-fit: cover;
-        margin-right: 1rem;
-        border-radius: 4px;
+        border-radius: 8px;
+        margin-right: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .book-cover:hover {
+        transform: scale(1.05);
     }
 
     .book-info {
         flex-grow: 1;
+        display: grid;
+        gap: 0.75rem;
     }
 
     .book-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0;
+    }
+
+    .book-author {
+        font-size: 1.1rem;
+        color: #4a5568;
     }
 
     .book-price {
-        font-size: 1.1rem;
-        color: #2c5282;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2b6cb0;
     }
 
     .book-type {
         display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.875rem;
+        width: fit-content;
     }
 
     .type-purchase {
@@ -51,48 +122,215 @@
         color: #2c5282;
     }
 
+    .formats-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .format-badge {
+        background-color: #edf2f7;
+        color: #4a5568;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
     .remove-btn {
-        background-color: #ff4444;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
+        background-color: #fff;
+        color: #e53e3e;
+        border: 2px solid #e53e3e;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
-        margin-top: 10px;
+        transition: all 0.2s ease;
+        width: fit-content;
     }
 
     .remove-btn:hover {
-        background-color: #cc0000;
-    }
-
-    .buy-now-btn {
-        background-color: #4CAF50;
+        background-color: #e53e3e;
         color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 20px;
     }
 
-    .buy-now-btn:hover {
-        background-color: #45a049;
+    .cart-summary-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .items-summary {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    .btn-checkout {
+        transition: all .5s ease;
+        width: 70%;
+        border-radius: 30px;
+        color: #008080;
+        font-weight: 600;
+        background-color: #fff;
+        border: 1px solid #008080;
+        margin: 1.5em auto;
+        padding: 0.8em;
+        cursor: pointer;
+        display: block;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-checkout:hover, .btn-checkout:focus {
+        background-color: #008080;
+        color: #fff;
+    }
+
+    .total-price {
+        color: #008080;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-cart a {
+        color: #008080;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .empty-cart a:hover {
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 1024px) {
+    .cart-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-sidebar {
+        position: static;
+        margin-top: 2rem;
+    }
+    }
+
+    @@media (max-width: 768px) {
+    .cart-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .book-cover {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .formats-container {
+        justify-content: center;
+    }
+
+    .remove-btn {
+        margin: 0 auto;
+    }
+
+    .book-type {
+        margin: 0 auto;
+    }
     }
 </style>
+
+<div class="cart-container">
+    <div class="cart-header">
+        <h2>Shopping Cart</h2>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-cart">
+            <h3>Your cart is empty</h3>
+            <p>
+                <a href="@Url.Action("Gallery", "Books")">Continue Shopping</a>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+            <div class="cart-items-container">
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item" id="cart-item-@item.OrderItemId">
+                        <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+
+                        <div class="book-info">
+                            <h3 class="book-title">@item.Book.Title</h3>
+                            <div class="book-author">By: @item.Book.Author</div>
+                            <div class="book-price">₪@item.Price</div>
+
+                            <div class="book-type @(item.Book.Type == "Physical" ? "type-rental" : "type-purchase")">
+                                @item.Book.Type
+                            </div>
+
+                            <div class="formats-container">
+                                <span>Available formats:</span>
+                                @if (item.Book.FormatPDF == true) { <span class="format-badge">PDF</span> }
+                                @if (item.Book.FormatEpub == true) { <span class="format-badge">EPUB</span> }
+                                @if (item.Book.FormatMobi == true) { <span class="format-badge">MOBI</span> }
+                                @if (item.Book.FormatF2b == true) { <span class="format-badge">F2B</span> }
+                            </div>
+
+                            <button class="remove-btn" onclick="removeFromCart(@item.OrderItemId)">
+                                Remove from cart
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="cart-sidebar">
+                <div class="cart-summary-header">Order Summary</div>
+
+                <div class="items-summary">
+                    @Model.Count() items in your cart
+                </div>
+
+                <div class="total-price">
+                    Total to pay: ₪@Model.Sum(item => item.Price)
+                </div>
+
+                <a href="@Url.Action("Checkout", "Cart")" class="btn-checkout">
+                    Proceed to Checkout
+                </a>
+            </div>
+        </div>
+    }
+</div>
 
 <script>
     function updateTotalPrice() {
         var total = 0;
         $('.cart-item').each(function() {
             var priceText = $(this).find('.book-price').text();
-            var price = parseFloat(priceText.replace('price: ₪', ''));
+            var price = parseFloat(priceText.replace('₪', ''));
             if (!isNaN(price)) {
                 total += price;
             }
         });
-        $('.total-price').text('Total to be paid: ₪' + total.toFixed(2));
+        $('.total-price').text('Total to pay: ₪' + total.toFixed(2));
     }
 
     function removeFromCart(orderItemId) {
@@ -109,6 +347,7 @@
                                 location.reload();
                             } else {
                                 updateTotalPrice();
+                                $('.items-summary').text($('.cart-item').length + ' items in your cart');
                             }
                         });
                     } else {
@@ -126,58 +365,3 @@
         updateTotalPrice();
     });
 </script>
-
-<div class="container mt-4">
-    <h2>Shopping cart</h2>
-
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">
-            Your cart is empty. <a href="@Url.Action("Gallery", "Books")">Continue shopping</a>
-        </div>
-    }
-    else
-    {
-        foreach (var item in Model)
-        {
-            <div class="cart-item" id="cart-item-@item.OrderItemId">
-                <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
-
-                <div class="book-info">
-                    <div class="book-title">@item.Book.Title</div>
-                    <div>from: @item.Book.Author</div>
-
-                    <div class="book-price">
-                        price: ₪@item.Price
-                    </div>
-
-                    <div class="book-type @(item.Book.Type == "Physical" ? "type-rental" : "type-purchase")">
-                        @item.Book.Type
-                    </div>
-
-                    <div>
-                        format:
-                        @if (item.Book.FormatPDF == true) { <span>PDF</span> }
-                        @if (item.Book.FormatEpub == true) { <span>EPUB</span> }
-                        @if (item.Book.FormatMobi == true) { <span>MOBI</span> }
-                        @if (item.Book.FormatF2b == true) { <span>F2B</span> }
-                    </div>
-
-                    <button class="remove-btn" onclick="removeFromCart(@item.OrderItemId)">
-                        Remove from cart
-                    </button>
-                </div>
-            </div>
-        }
-
-        <div class="cart-summary mt-4">
-            <div class="total-price">
-                Total to be paid: ₪@Model.Sum(item => item.Price)
-            </div>
-            <br/>
-            <button class="gradient-button">
-                <a href="@Url.Action("Checkout", "Cart")" class="gradient-button-text">Buy now!</a>
-            </button>
-        </div>
-    }
-</div>

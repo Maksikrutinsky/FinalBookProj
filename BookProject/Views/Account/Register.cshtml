@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Register to System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .main-content {
             width: 50%;
@@ -84,12 +85,6 @@
             color: #fff;
         }
 
-        .text-danger {
-            color: red;
-            font-size: 0.8em;
-            margin-top: 5px;
-        }
-
         @@media screen and (max-width: 640px) {
             .main-content { width: 90%; }
             .company__info { display: none; }
@@ -125,6 +120,43 @@
             text-align: center;
             font-size: 1.2em;
         }
+
+        .validation-message, .field-validation-error {
+            color: #008080;
+            font-size: 0.9em;
+            margin-top: -1em;
+            margin-bottom: 1em;
+            padding: 5px 10px;
+            display: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-shadow: 0px 0px 1px rgba(0,128,128,0.2);
+            border-left: 3px solid #008080;
+            background-color: rgba(0,128,128,0.05);
+            border-radius: 4px;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .validation-summary {
+            background-color: rgba(0,128,128,0.05);
+            border-left: 4px solid #008080;
+            padding: 1em;
+            margin-bottom: 1.5em;
+            border-radius: 4px;
+            font-size: 1.0em;
+            font-weight: 600;
+            color: #008080;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,128,128,0.1);
+            display: none;
+        }
+
+        .validation-summary.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -138,28 +170,38 @@
             <div class="row">
                 <h2>Create Account</h2>
             </div>
-            @using (Html.BeginForm())
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "registerForm" }))
             {
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="validation-summary @(ViewData.ModelState.ContainsKey("") ? "show" : "")" style="display: @(ViewData.ModelState.ContainsKey("") ? "block" : "none")">
+                    @Html.ValidationSummary(true)
+                </div>
 
                 <div class="row">
                     @Html.TextBoxFor(m => m.Username, new { @class = "form__input", placeholder = "Username" })
-                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                    <div class="validation-message">
+                        @Html.ValidationMessageFor(m => m.Username)
+                    </div>
                 </div>
 
                 <div class="row">
                     @Html.TextBoxFor(m => m.Email, new { @class = "form__input", placeholder = "Email" })
-                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    <div class="validation-message">
+                        @Html.ValidationMessageFor(m => m.Email)
+                    </div>
                 </div>
 
                 <div class="row">
                     @Html.PasswordFor(m => m.Password, new { @class = "form__input", placeholder = "Password" })
-                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    <div class="validation-message">
+                        @Html.ValidationMessageFor(m => m.Password)
+                    </div>
                 </div>
 
                 <div class="row">
                     @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form__input", placeholder = "Confirm Password" })
-                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                    <div class="validation-message">
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                    </div>
                 </div>
 
                 <div class="row">
@@ -177,5 +219,55 @@
 <div class="footer">
     <p>&copy; @DateTime.Now.Year - Your Application</p>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // בדיקת הודעות שגיאה בטעינה
+        $('.validation-message').each(function() {
+            if ($(this).text().trim() !== '') {
+                $(this).addClass('show');
+            }
+        });
+
+        $('#registerForm').on('submit', function() {
+            var isValid = true;
+            $('.validation-message').removeClass('show');
+
+            $('.form__input').each(function() {
+                var $input = $(this);
+                var value = $input.val();
+                var $error = $input.siblings('.validation-message');
+
+                if (!value) {
+                    isValid = false;
+                    $error.text('**This field is required!**').addClass('show');
+                    return;
+                }
+
+                if ($input.attr('id') === 'Password' && value.length < 6) {
+                    isValid = false;
+                    $error.text('**Password must be at least 6 characters long!**').addClass('show');
+                }
+
+                if ($input.attr('id') === 'Password' && (!/[A-Z]/.test(value) || !/[a-z]/.test(value))) {
+                    isValid = false;
+                    $error.text('**Password must contain uppercase and lowercase letters!**').addClass('show');
+                }
+
+                if ($input.attr('id') === 'ConfirmPassword' && value !== $('#Password').val()) {
+                    isValid = false;
+                    $error.text('**Passwords do not match!**').addClass('show');
+                }
+            });
+
+            return isValid;
+        });
+
+        // הסתרת הודעות שגיאה בעת הקלדה
+        $('.form__input').on('input', function() {
+            $(this).siblings('.validation-message').removeClass('show');
+        });
+    });
+</script>
 </body>
 </html>
