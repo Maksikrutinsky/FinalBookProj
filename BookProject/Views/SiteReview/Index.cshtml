@@ -1,0 +1,164 @@
+@model IEnumerable<BookProject.Models.SiteReviewViewModel>
+
+@{
+    ViewBag.Title = "Site Reviews";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Site Reviews</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Session["UserId"] != null)
+    {
+        if(ViewBag.HasOrderOrBorrow == false)
+        {
+            <div class="alert alert-info mb-4">
+                You need to purchase or borrow a book before you can leave a review.
+            </div>
+        }
+        else if (ViewBag.CanAddReview)
+        {
+            <div class="mb-4">
+                @Html.ActionLink("Add Review", "Create", null, new { @class = "btn btn-primary" })
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-4">
+                You have already submitted a review.
+            </div>
+        }
+    }
+
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var review in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">@review.Username</h5>
+                                <div class="rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= review.RatingValue ? "text-warning" : "text-secondary")"></i>
+                                    }
+                                </div>
+                            </div>
+                            <p class="card-text mb-3">@review.Comment</p>
+                            <small class="text-muted">
+                                @(review.CreatedAt.HasValue ? review.CreatedAt.Value.ToString("dd/MM/yyyy") : "")
+                            </small> </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No reviews yet. Be the first to write one!
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .rating {
+        display: flex;
+        gap: 4px;
+    }
+
+    .rating .fas.fa-star {
+        font-size: 1.1rem;
+    }
+
+    .text-warning {
+        color: #ffd700 !important;
+    }
+
+    .text-secondary {
+        color: #ddd !important;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        padding: 0.5rem 1.5rem;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0b5ed7;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+    }
+
+    .alert a {
+        text-decoration: underline;
+        color: inherit;
+        font-weight: 600;
+    }
+
+    .card-title {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .text-muted {
+        font-size: 0.875rem;
+    }
+
+    @@media (max-width: 768px) {
+    .col-md-6 {
+        padding: 0 10px;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+    }
+</style>

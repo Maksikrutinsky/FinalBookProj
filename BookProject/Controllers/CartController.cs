@@ -376,6 +376,78 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
     }
 }
 
+[HttpPost]
+public async Task<JsonResult> ProcessPayPalPayment(string orderID, dynamic paymentDetails)
+{
+    try
+    {
+        if (Session["UserId"] == null)
+        {
+            return Json(new { success = false, message = "User not logged in" });
+        }
+
+        int userId = Convert.ToInt32(Session["UserId"]);
+        var currentCart = _context.Orders
+            .Include(o => o.OrderItems.Select(oi => oi.Book))
+            .FirstOrDefault(o => o.UserId == userId && o.Status == "InCart");
+        
+
+        if (currentCart == null || !currentCart.OrderItems.Any())
+        {
+            return Json(new { success = false, message = "Cart is empty" });
+        }
+
+        // עדכון ספרים להשאלה
+        foreach (var orderItem in currentCart.OrderItems)
+        {
+            if (orderItem.TypeBook) // אם זו השאלה
+            {
+                var book = orderItem.Book;
+                if (book.AvailableCopies <= 0)
+                {
+                    return Json(new { success = false, message = "One or more books are no longer available" });
+                }
+                book.AvailableCopies--;
+
+                // טיפול ברשימת המתנה
+                var waitingEntry = _context.WaitingLists
+                    .FirstOrDefault(w => w.BookId == book.BookId && w.UserId == userId);
+                if (waitingEntry != null)
+                {
+                    _context.WaitingLists.Remove(waitingEntry);
+                    UpdateWaitingListPositions(book.BookId);
+                }
+            }
+        }
+
+        // עדכון ההזמנה
+        currentCart.Status = "Completed";
+        currentCart.OrderDate = DateTime.Now;
+        currentCart.PaymentMethod = "PayPal";
+
+        await _context.SaveChangesAsync();
+
+        // שליחת אימייל אישור
+        var user = _context.Users.Find(userId);
+        await SendPurchaseConfirmationEmailAsync(user.Email, currentCart);
+
+        return Json(new { success = true });
+    }
+    catch (Exception ex)
+    {
+        return Json(new { success = false, message = ex.Message });
+    }
+}
+
+public ActionResult PaymentSuccess()
+{
+    if (TempData["SuccessMessage"] == null)
+    {
+        TempData["SuccessMessage"] = "Thank you for your purchase!";
+    }
+    return RedirectToAction("Index", "Home");
+}
+
         // שליחת אימייל אישור רכישה
         private async Task SendPurchaseConfirmationEmailAsync(string email, Order order)
         {
