@@ -1,0 +1,138 @@
+@model BookProject.Models.SiteReviewViewModel
+
+@{
+    ViewBag.Title = "Add Site Review";
+}
+
+<!-- הוספת הסטיילים ישירות בדף -->
+<style>
+    .container {
+        max-width: 800px;
+    }
+
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    .rating-input input {
+        display: none;
+    }
+
+    .rating-input label {
+        cursor: pointer;
+        font-size: 2rem;
+        color: #ddd;
+        transition: color 0.2s ease;
+    }
+
+    .rating-input input:checked ~ label,
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
+        color: #ffd700;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .btn {
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Add Site Review</h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group mb-4">
+            <label>Rating</label>
+            <div class="rating-input">
+                @for (int i = 5; i >= 1; i--)
+                {
+                    <input type="radio" id="star@(i)" name="RatingValue" value="@i" required />
+                    <label for="star@(i)" title="@i stars">
+                        <i class="far fa-star"></i>
+                    </label>
+                }
+            </div>
+            @Html.ValidationMessageFor(m => m.RatingValue, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="Comment">Your Review</label>
+            @Html.TextAreaFor(m => m.Comment, new { @class = "form-control", rows = "5", placeholder = "Write your review here..." })
+            @Html.ValidationMessageFor(m => m.Comment, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary ms-2" })
+        </div>
+    }
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Handle hover effects
+        $('.rating-input label').hover(
+            function() {
+                $(this).find('i').removeClass('far').addClass('fas');
+                $(this).prevAll('label').find('i').removeClass('far').addClass('fas');
+            },
+            function() {
+                if (!$(this).prev('input').is(':checked')) {
+                    $(this).find('i').removeClass('fas').addClass('far');
+                    $(this).prevAll('label').find('i').removeClass('fas').addClass('far');
+                }
+            }
+        );
+
+        // Handle click events
+        $('.rating-input input').change(function() {
+            $('.rating-input i').removeClass('fas').addClass('far');
+            let selectedRating = $(this).val();
+            $('.rating-input input').each(function() {
+                if ($(this).val() <= selectedRating) {
+                    $(this).next('label').find('i').removeClass('far').addClass('fas');
+                }
+            });
+        });
+
+        // Form validation
+        $('form').submit(function(e) {
+            if (!$('input[name="RatingValue"]:checked').val()) {
+                e.preventDefault();
+                $('.text-danger').text('Please select a rating');
+            }
+        });
+    });
+</script>

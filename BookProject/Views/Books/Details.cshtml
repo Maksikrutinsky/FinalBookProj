@@ -2,439 +2,622 @@
 @using BookProject.Models
 
 <style>
-    .img-fluid {
-        height: 400px;
+    .book-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .book-cover {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .book-cover:hover {
+        transform: translateY(-5px);
+    }
+
+    .book-cover img {
+        width: 100%;
+        height: 500px;
         object-fit: contain;
-        padding: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .book-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #1a73e8, #0052cc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.8rem;
+        letter-spacing: -0.5px;
+    }
+
+    .book-author {
+        font-size: 1.4rem;
+        color: #5f6368;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .section-card {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        margin-bottom: 1.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+    }
+
+    .rating-stars {
+        color: #ffd700;
+        font-size: 2rem;
+        letter-spacing: 3px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .empty-star {
+        color: #e4e5e9;
+    }
+
+    .price-tag {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #0984e3, #00b894);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+        letter-spacing: -0.5px;
     }
 
     .original-price {
+        font-size: 1.8rem;
+        color: #a4b0be;
         text-decoration: line-through;
-        color: #6c757d;
-        margin-right: 10px;
-    }
-
-    .current-price {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #007bff;
+        margin-right: 1.5rem;
+        opacity: 0.7;
     }
 
     .borrow-price {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #28a745;
-    }
-
-    .format-buttons {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .format-buttons .btn {
-        min-width: 80px;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #28a745, #20bf6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
     }
 
     .purchase-buttons {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
-        margin: 20px 0;
+        margin: 1.5rem 0;
     }
 
     .purchase-btn {
-        padding: 12px;
+        padding: 1rem 2rem;
         font-size: 1.1rem;
         width: 100%;
+        border-radius: 8px;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .format-badges {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        justify-content: center;
+    }
+
+    .format-badge {
+        background: rgba(245, 246, 250, 0.9);
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #1a73e8;
+        border: 2px solid rgba(26, 115, 232, 0.2);
+        transition: all 0.3s ease;
+        letter-spacing: 0.5px;
+    }
+
+    .format-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.1);
+        border-color: rgba(26, 115, 232, 0.4);
+    }
+
+    .meta-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .meta-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f2f6;
+    }
+
+    .meta-label {
+        color: #a4b0be;
+        font-weight: 500;
+        width: 30%;
     }
 
     .review-card {
-        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    .available-copies {
+    .waiting-list-table {
+        width: 100%;
+        max-width: 400px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-top: 20px;
+    }
+
+    .w-l{
+        margin-top: 50px;
+    }
+
+    .waiting-list-table th {
+        background: #f5f6fa;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .waiting-list-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f2f6;
+    }
+
+    .review-section {
+        margin-top: 5%;
+        margin-left: 20px;
+    }
+
+    .review-card-light, .review-card-dark {
+        border: 1px solid rgba(26, 115, 232, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 20px;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    }
+
+    .review-card-light {
+        background: rgba(255, 255, 255, 0.95);
+        float: right;
+    }
+
+    .review-card-dark {
+        background: rgba(255, 255, 255, 0.85);
+        border-color: rgba(26, 115, 232, 0.4);
+        float: left;
+    }
+
+    .review-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .review-user-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+
+    .review-user-info {
+        flex-grow: 1;
+    }
+
+    .review-user-info h4 {
+        margin: 0;
+        color: #1a73e8;
+    }
+
+    .review-date {
+        color: #5f6368;
         font-size: 0.9rem;
-        font-weight: bold;
     }
 
-    .line-through {
-        text-decoration: line-through;
-        color: #6c757d;
+    .review-content {
+        color: #5f6368;
+        margin-top: 10px;
     }
 
-    .rating-stars {
-        color: #ffd700;
-        font-size: 1.5rem;
+    .review-form {
+        border: 1px solid rgba(26, 115, 232, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 25px;
+        backdrop-filter: blur(10px);
     }
 
-    .empty-star {
-        color: #e4e5e9;
+    .review-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(26, 115, 232, 0.2);
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        color: #2d3436;
+    }
+
+    .review-submit-btn {
+        margin: 10px 0;
+        padding: 12px 24px;
+        text-align: center;
+        background: linear-gradient(45deg, #1a73e8, #0052cc);
+        border: none;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .review-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.2);
     }
 </style>
 
-<div class="container mt-4">
+<div class="book-container">
     <div class="row">
-        <!-- Cover -->
         <div class="col-md-4">
-            <img src="@Model.CoverImageUrl" class="img-fluid rounded" alt="@Model.Title">
+            <div class="book-cover">
+                <img src="@Model.CoverImageUrl" alt="@Model.Title">
+            </div>
+            <!-- Waiting List Section -->
+            <div class="section-card mt-4 w-l">
+                <h5>Waiting List</h5>
+                @{
+                    var waitingList = ViewBag.WaitingList as List<WaitingListViewModel>;
+                }
+
+                @if (waitingList != null && waitingList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="waiting-list-table">
+                            <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Username</th>
+                                <th>Join Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var waiting in waitingList)
+                            {
+                                <tr class="@(waiting.IsCurrentUser ? "table-primary" : "")">
+                                    <td>@waiting.Position</td>
+                                    <td>
+                                        @waiting.Username
+                                        @if (waiting.IsCurrentUser)
+                                        {
+                                            <span class="badge bg-primary ms-2">You</span>
+                                        }
+                                    </td>
+                                    <td>@(waiting.RequestDate.HasValue ? waiting.RequestDate.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p>No one is currently in the waiting list</p>
+                }
+            </div>
         </div>
-
-        <!-- Details -->
+        
         <div class="col-md-8">
-            <h1 class="mb-2">@Model.Title</h1>
-            @if (ViewBag.IsAdmin)
-            {
-                <a href="@Url.Action("Edit", "Books", new { id = Model.BookId })" class="btn btn-warning mb-3">
-                    Edit book
-                </a>
-            }
-            <p class="text-muted">by @Model.Author</p>
+            <div class="section-card">
+                <h1 class="book-title">@Model.Title</h1>
+                <p class="book-author">by @Model.Author</p>
+                
+                @if (ViewBag.IsAdmin)
+                {
+                    <a href="@Url.Action("Edit", "Books", new { id = Model.BookId })" class="btn btn-warning mb-3">
+                        Edit book
+                    </a>
+                }
 
-            <!-- Rating -->
-            <div class="d-flex align-items-center mb-3">
-                <div class="rating-stars me-2">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        if (i <= ViewBag.AverageRating)
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rating-stars me-2">
+                        @for (int i = 1; i <= 5; i++)
                         {
-                            <span>★</span>
+                            if (i <= ViewBag.AverageRating)
+                            {
+                                <span>★</span>
+                            }
+                            else
+                            {
+                                <span class="empty-star">★</span>
+                            }
                         }
-                        else
-                        {
-                            <span class="empty-star">★</span>
-                        }
-                    }
+                    </div>
+                    <span class="text-muted">(@ViewBag.AverageRating/5)</span>
                 </div>
-                <span class="text-muted">(@ViewBag.AverageRating/5)</span>
             </div>
 
-            <!-- Price -->
-            <div class="mb-4">
+            <div class="section-card">
                 <h4>Purchase Price:</h4>
                 @if (Model.PreviousPrice.HasValue)
                 {
                     <span class="original-price">₪@Model.PreviousPrice</span>
                 }
-                <span class="current-price">₪@Model.BuyPrice</span>
+                <span class="price-tag">₪@Model.BuyPrice</span>
 
                 @if (Model.IsBorrowable == true)
                 {
-                    <div class="mt-3">
+                    <div class="mt-4">
                         <h4>Borrow Price:</h4>
                         @if (Model.AvailableCopies > 0)
                         {
                             <span class="borrow-price">₪@Model.BorrowPrice</span>
                             <div class="mt-2">
-                <span class="available-copies text-success">
-                    Available copies: @Model.AvailableCopies
-                </span>
+                                <span class="text-success fw-bold">
+                                    Available copies: @Model.AvailableCopies
+                                </span>
                             </div>
                         }
                         else
                         {
-                            <span class="borrow-price line-through">₪@Model.BorrowPrice</span>
+                            <span class="borrow-price text-decoration-line-through">₪@Model.BorrowPrice</span>
                             <div class="mt-2">
-                <span class="available-copies text-danger">
-                    Out of stock for borrowing
-                </span>
-                                @if (Session["UserId"] != null && !ViewBag.HasPurchased)
-                                {
-                                    <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-warning mt-2">
-                                        הצטרף לרשימת המתנה
+                                <span class="text-danger fw-bold">Out of stock for borrowing</span>
+                                <div class="mt-3">
+                                    <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-outline-secondary">
+                                        Join Waiting List
                                     </button>
-                                }
-                                else if (Session["UserId"] == null)
-                                {
-                                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary mt-2">
-                                        התחבר כדי להצטרף לרשימת המתנה
-                                    </a>
-                                }
+                                </div>
                             </div>
                         }
                     </div>
                 }
-            </div>
 
-            <!-- Buttons -->
-            <!-- Buttons -->
-            <div class="purchase-buttons">
-                @if (Session["UserId"] != null)
-                {
-                    if (ViewBag.HasPurchased)
+                <div class="purchase-buttons">
+                    @if (Session["UserId"] != null)
                     {
-                        <div class="alert alert-info">
-                            @if (ViewBag.IsBorrowed)
-                            {
-                                <p><i class="fas fa-info-circle"></i> You are currently borrowing this book (since @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
-                            }
-                            else
-                            {
-                                <p><i class="fas fa-info-circle"></i> You already own this book (purchased on @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
-                            }
-                        </div>
+                        if (ViewBag.HasPurchased)
+                        {
+                            <div class="alert alert-info">
+                                @if (ViewBag.IsBorrowed)
+                                {
+                                    <p><i class="fas fa-info-circle"></i> You are currently borrowing this book (since @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
+                                }
+                                else
+                                {
+                                    <p><i class="fas fa-info-circle"></i> You already own this book (purchased on @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
+                                Add to cart
+                            </button>
+                            <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
+                                Buy now!
+                            </button>
+                        }
                     }
                     else
                     {
-                        <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
-                            Add to cart
-                        </button>
-                        <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
-                            Buy now!
-                        </button>
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary purchase-btn">
+                            Login to purchase or borrow
+                        </a>
                     }
-                }
-                else
-                {
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary purchase-btn">
-                        Login to purchase or borrow
-                    </a>
-                }
-            </div>
-
-            <!-- Modal -->
-            <div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Add to Cart</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Would you like to buy or borrow this book?</p>
-                            <div class="d-grid gap-2">
-                                <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">Buy</button>
-                                @if (Model.IsBorrowable == true && Model.AvailableCopies > 0)
-                                {
-                                    <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
-                                }
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <div class="modal fade" id="waitingListModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">הצטרפות לרשימת המתנה</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>האם ברצונך להצטרף לרשימת ההמתנה לספר זה?</p>
-                            <p class="text-muted small">
-                                תקבל התראה במייל כאשר הספר יהיה זמין להשאלה.
-                                תהיה לך עדיפות להשאלה במשך 24 שעות מרגע קבלת ההתראה.
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
-                            <button onclick="joinWaitingList(@Model.BookId)" class="btn btn-primary">הצטרף לרשימת המתנה</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Formats -->
-            <div class="mb-4 mt-4">
-                <h5>Available Formats:</h5>
-                <div class="format-buttons">
+            <div class="section-card">
+                <h5 class="mb-3">Available Formats:</h5>
+                <div class="format-badges">
                     @if (Model.FormatEpub == true)
                     {
-                        <button class="btn btn-outline-secondary me-2">EPUB</button>
+                        <span class="format-badge">EPUB</span>
                     }
                     @if (Model.FormatPDF == true)
                     {
-                        <button class="btn btn-outline-secondary me-2">PDF</button>
+                        <span class="format-badge">PDF</span>
                     }
                     @if (Model.FormatMobi == true)
                     {
-                        <button class="btn btn-outline-secondary me-2">MOBI</button>
+                        <span class="format-badge">MOBI</span>
                     }
                     @if (Model.FormatF2b == true)
                     {
-                        <button class="btn btn-outline-secondary me-2">F2B</button>
+                        <span class="format-badge">F2B</span>
                     }
                 </div>
             </div>
 
-            <!-- Info Table -->
-            <table class="table table-borderless mt-4">
-                <tr>
-                    <td><strong>Publisher:</strong></td>
-                    <td>@Model.Publisher</td>
-                </tr>
-                <tr>
-                    <td><strong>Year of publication:</strong></td>
-                    <td>@Model.PublishYear</td>
-                </tr>
-                <tr>
-                    <td><strong>Genre:</strong></td>
-                    <td>@Model.Genre</td>
-                </tr>
-                @if (Model.AgeLimit.HasValue)
-                {
+            <div class="section-card">
+                <table class="meta-table">
                     <tr>
-                        <td><strong>Age limit:</strong></td>
-                        <td>@Model.AgeLimit+ years</td>
+                        <td class="meta-label">Publisher:</td>
+                        <td>@Model.Publisher</td>
                     </tr>
-                }
-            </table>
+                    <tr>
+                        <td class="meta-label">Publication Year:</td>
+                        <td>@Model.PublishYear</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-label">Genre:</td>
+                        <td>@Model.Genre</td>
+                    </tr>
+                    @if (Model.AgeLimit.HasValue)
+                    {
+                        <tr>
+                            <td class="meta-label">Age Limit:</td>
+                            <td>@Model.AgeLimit+ years</td>
+                        </tr>
+                    }
+                </table>
+            </div>
 
-            <!-- Description -->
-            <div class="mt-4">
+            <div class="section-card">
                 <h5>Description:</h5>
                 <p>@Model.Description</p>
             </div>
         </div>
     </div>
 
-    <!-- Waiting List Section -->
-    <div class="mt-4">
-        <h5>רשימת המתנה</h5>
-        @{
-            var waitingList = ViewBag.WaitingList as List<WaitingListViewModel>;
+    <!-- Reviews Section -->
+    <div class="section-card mt-4">
+        <h3>Reviews</h3>
+
+        @if (Session["UserId"] != null)
+        {
+            if (ViewBag.HasPurchased)
+            {
+                <form id="ratingForm" class="review-form mb-4">
+                    <h4>Leave a Review</h4>
+                    <div class="mb-3">
+                        <label for="rating">Rating</label>
+                        <select class="review-input" name="rating" id="rating" required>
+                            <option value="">Select Rating</option>
+                            <option value="1">1 - Poor</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="3">3 - Good</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="5">5 - Excellent</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comment">Your Review (Optional)</label>
+                        <textarea class="review-input" id="comment" name="comment" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="review-submit-btn">Post Review</button>
+                </form>
+            }
+            else
+            {
+                <div class="review-form mb-4">
+                    <h4>Want to Review?</h4>
+                    <p class="text-muted">To review this book, you need to purchase it first.</p>
+                    <div class="mt-3">
+                        <button onclick="showAddToCartOptions(@Model.BookId)" class="review-submit-btn me-2">
+                            Add to Cart
+                        </button>
+                        <button onclick="directBuy(@Model.BookId)" class="review-submit-btn">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            }
         }
 
-        @if (waitingList != null && waitingList.Any())
+        @if (Model.Ratings != null && Model.Ratings.Any())
         {
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>מיקום בתור</th>
-                        <th>שם משתמש</th>
-                        <th>תאריך הצטרפות</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var waiting in waitingList)
-                    {
-                        <tr class="@(waiting.IsCurrentUser ? "table-primary" : "")">
-                            <td>@waiting.Position</td>
-                            <td>
-                                @waiting.Username
-                                @if (waiting.IsCurrentUser)
-                                {
-                                    <span class="badge bg-primary ms-2">את/ה</span>
-                                }
-                            </td>
-                            <td>@(waiting.RequestDate.HasValue ? waiting.RequestDate.Value.ToString("dd/MM/yyyy") : "-")</td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-
-            if (ViewBag.IsInWaitingList)
+            foreach (var review in Model.Ratings.OrderByDescending(r => r.CreatedAt))
             {
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    המיקום שלך בתור: @ViewBag.UserWaitingPosition
-                    @if (ViewBag.UserWaitingPosition == 1)
+                <div class="review-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="rating-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.RatingValue)
+                                    {
+                                        <span>★</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="empty-star">★</span>
+                                    }
+                                }
+                            </div>
+                            <div class="mt-1">
+                                <strong class="text-primary">@review.User.Username</strong>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            @String.Format("{0:dd/MM/yyyy}", review.CreatedAt)
+                        </small>
+                    </div>
+                    @if (!string.IsNullOrEmpty(review.Comment))
                     {
-                        <br/>
-                        <small>כשהספר יהיה זמין, תקבל/י התראה במייל ותהיה לך עדיפות להשאלה במשך 24 שעות.</small>
+                        <div class="mt-2">
+                            <p class="mb-0">@review.Comment</p>
+                        </div>
                     }
                 </div>
             }
         }
         else
         {
-            <p>אין כרגע אנשים ברשימת ההמתנה</p>
+            <p>No reviews yet</p>
         }
     </div>
+</div>
 
-    <!-- Reviews Section -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3>Reviews</h3>
+<!-- Modals -->
+<div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add to Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to buy or borrow this book?</p>
+                <div class="d-grid gap-2">
+                    <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">Buy</button>
+                    @if (Model.IsBorrowable == true && Model.AvailableCopies > 0)
+                    {
+                        <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            @if (Session["UserId"] != null)
-            {
-                if (ViewBag.HasPurchased)
-                {
-                    <div class="add-review-section mb-4">
-                        <form id="ratingForm" class="p-3 bg-light rounded mb-4">
-                            <div class="mb-3">
-                                <label class="form-label">Your Rating:</label>
-                                <select class="form-select" name="rating" id="rating" required>
-                                    <option value="">Select Rating</option>
-                                    <option value="1">1 - Poor</option>
-                                    <option value="2">2 - Fair</option>
-                                    <option value="3">3 - Good</option>
-                                    <option value="4">4 - Very Good</option>
-                                    <option value="5">5 - Excellent</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="comment" class="form-label">Your Review (Optional):</label>
-                                <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Review</button>
-                        </form>
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-info mb-4" role="alert">
-                        <i class="fas fa-info-circle me-2"></i>
-                        To rate and review this book, you need to purchase it first.
-                        <div class="mt-2">
-                            <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-sm btn-primary">
-                                Add to Cart
-                            </button>
-                            <button onclick="directBuy(@Model.BookId)" class="btn btn-sm btn-success ms-2">
-                                Buy Now
-                            </button>
-                        </div>
-                    </div>
-                }
-            }
-
-            <!-- Existing Reviews -->
-            @if (Model.Ratings != null && Model.Ratings.Any())
-            {
-                foreach (var review in Model.Ratings.OrderByDescending(r => r.CreatedAt))
-                {
-                    <div class="review-card mb-3 p-3 border rounded">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="rating-stars">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        if (i <= review.RatingValue)
-                                        {
-                                            <span>★</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="empty-star">★</span>
-                                        }
-                                    }
-                                </div>
-                                <div class="mt-1">
-                                    <strong class="text-primary">@review.User.Username</strong>
-                                </div>
-                            </div>
-                            <small class="text-muted">
-                                @String.Format("{0:dd/MM/yyyy}", review.CreatedAt)
-                            </small>
-                        </div>
-                        @if (!string.IsNullOrEmpty(review.Comment))
-                        {
-                            <div class="review-content mt-2">
-                                <p>@review.Comment</p>
-                            </div>
-                        }
-                    </div>
-                }
-            }
-            else
-            {
-                <p>No reviews yet</p>
-            }
+<div class="modal fade" id="waitingListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Join Waiting List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to join the waiting list for this book?</p>
+                <p class="text-muted small">
+                    You'll receive an email notification when the book becomes available.
+                    You'll have priority for borrowing within 24 hours of notification.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button onclick="joinWaitingList(@Model.BookId)" class="btn btn-primary">Join Waiting List</button>
+            </div>
         </div>
     </div>
 </div>
@@ -456,7 +639,6 @@
                 .done(function(response) {
                     $('#waitingListModal').modal('hide');
                     if (response.success) {
-                        // נרענן את העמוד כדי להציג את המידע המעודכן
                         window.location.reload();
                     } else {
                         alert(response.message);
@@ -464,7 +646,7 @@
                 })
                 .fail(function() {
                     $('#waitingListModal').modal('hide');
-                    alert("אירעה שגיאה בהצטרפות לרשימת ההמתנה");
+                    alert("Error joining waiting list");
                 });
         }
 
@@ -504,7 +686,6 @@
             });
         }
 
-        // Rating Form Handling
         $(document).ready(function() {
             $('#ratingForm').on('submit', function(e) {
                 e.preventDefault();

@@ -156,6 +156,8 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MyLibraryController.cs" />
     <Compile Include="Controllers\ProfileController.cs" />
+    <Compile Include="Controllers\SiteReviewController.cs" />
+    <Compile Include="Controllers\UserManagementController.cs" />
     <Compile Include="Filters\CartCountAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -199,6 +201,7 @@
     </Compile>
     <Compile Include="Models\RegisterViewModel.cs" />
     <Compile Include="Models\ResetPasswordViewModel.cs" />
+    <Compile Include="Models\SiteReviewViewModel.cs" />
     <Compile Include="Models\User.cs">
       <DependentUpon>DBLib.tt</DependentUpon>
     </Compile>
@@ -279,6 +282,10 @@
     <Content Include="Views\Profile\Profile.cshtml" />
     <Content Include="Views\Shared\_CartPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\SiteReview\Create.cshtml" />
+    <Content Include="Views\SiteReview\Index.cshtml" />
+    <Content Include="Views\UserManagement\edit.cshtml" />
+    <Content Include="Views\UserManagement\index.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
