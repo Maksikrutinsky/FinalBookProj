@@ -20,429 +20,711 @@
     </div>
 }
 
-<!-- Logo and Main Title -->
-<div class="container d-flex justify-content-center mt-50">
-    <div class="text-center">
-        <img src="~/content/images/Reader.png" alt="Reader Logo" class="logo-img" style="width: 400px; height: auto;" />
-    </div>
-</div>
-
 <!-- Styles -->
+
 <style>
-    /* אנימציות בסיסיות */
-    @@keyframes fadeInUp {  
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Categories Section */
-    .categories-section {
-        padding: 15px 0;
-        margin-top: 20px;
-        margin-bottom: 50px;
-    }
-
-    .categories-title {
-        position: relative;
-        text-align: center;
-        font-size: 3rem;
-        padding-bottom: 15px;
-        margin-bottom: 40px;
-        color: #333;
-        font-weight: bold;
-    }
-
-    .categories-title:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(to right, #164e12, #6610f2);
-        border-radius: 2px;
-    }
-
-    .categories-container {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        flex-wrap: wrap;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .category-item {
-        text-decoration: none;
-        color: #333;
+    /* גלובלי ורספונסיבי */
+    .row { display: flex; flex-wrap: wrap; margin: -15px; }
+    .col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 15px; }
+    
+    .category-circle i {
+        font-size: 2rem;
+        color: #1a5f7a;
         transition: all 0.3s ease;
-        text-align: center;
-        width: 200px;
-    }
-
-    .category-item:hover {
-        transform: translateY(-10px);
-    }
-
-    .category-circle {
-        width: 120px;
-        height: 120px;
-        border: 2px solid rgba(228, 244, 242, 0.9);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px;
-        background-color: transparent;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .category-item:hover .category-circle {
-        background-color: #195732;
-        transform: scale(1.05);
     }
 
     .category-item:hover .category-circle i {
+        transform: scale(1.2);
+        color: #2e86ab;
+    }
+
+    /* אזור ספרים מובילים */
+    .hero-section {
+        background: transparent;
+        padding: 3rem 2rem;
+        padding-left: 0;
+        margin-top: 0;
+        min-height: 600px;
+        width: 90%;
+        max-width: 1600px;
+        display: flex;
+        align-items: center;
+        position: relative; /* נוסף */
+        overflow: hidden; /* נוסף */
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .hero-content {
+        display: flex;
+        padding-left: 5%;
+        margin-left: 2rem;  /* מרווח קטן מהקצה */
+        flex-direction: column;
+        gap: 2rem;
+        max-width: 600px;
+        position: relative; /* נוסף */
+        z-index: 2; /* נוסף */
+    }
+
+    .row {
+        margin: 0;
+        padding: 0;
+    }
+
+    .col-md-6 {
+        padding: 0;
+    }
+
+    .book-container {
+        position: absolute;
+        right: -120rem;
+        top: 30%;
+        transform: translateY(-75%);
+        height: 500px;
+        width: 800px;
+    }
+
+    .col-md-6:first-child {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: bold;
+        color: #003366;
+        text-align: left;
+        line-height: 1.2;
+        margin-left: 0;  /* הסרת מרווח משמאל */
+    }
+
+    .hero-subtitle {
+        font-size: 1.8rem;
+        color: #004d99;
+        text-align: left;
+        opacity: 0.9;
+    }
+
+    .browse-button {
+        display: inline-block;
+        background: #dc3545;
         color: white;
+        padding: 1.2rem 2.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+        margin-top: 1rem;
     }
 
-    .category-circle i {
-        font-size: 40px;
-        color: #090909;
-        transition: color 0.3s ease;
+    .browse-button:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+    
+    .book-display {
+        position: relative;
+        width: 100%;
+        height: 100%;
     }
 
-    .category-name {
-        font-size: 1.3rem;
-        font-weight: 500;
+    .book-cover {
+        position: absolute;
+        width: 240px;
+        height: 360px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
-    /* Products Section */
+    .book-cover:hover {
+        transform: translateY(-20px) rotate(0deg) !important;
+        z-index: 4 !important;
+    }
+
+    .book-cover:nth-child(1) {
+        right: 280px;
+        top: 60px;
+        transform: rotate(-15deg);
+        z-index: 1;
+    }
+
+    .book-cover:nth-child(2) {
+        right: 160px;
+        top: 20px;
+        transform: rotate(0deg);
+        z-index: 3;
+    }
+
+    .book-cover:nth-child(3) {
+        right: 40px;
+        top: 60px;
+        transform: rotate(15deg);
+        z-index: 1;
+    }
+
+    .book-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    @@media (max-width: 992px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+    }
+
+    .book-cover {
+        width: 200px;
+        height: 300px;
+    }
+    }
+
+    @@media (max-width: 768px) {
+    .hero-section {
+        padding: 4rem 2rem;
+        min-height: auto;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .book-container {
+        height: 400px;
+        margin-top: 3rem;
+    }
+
+    .book-cover {
+        width: 160px;
+        height: 240px;
+    }
+
+    .book-cover:nth-child(1) { right: 200px; }
+    .book-cover:nth-child(2) { right: 120px; }
+    .book-cover:nth-child(3) { right: 40px; }
+    }
+
+    .top-rated-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 3rem;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* כרטיסי ספרים */
     .product-wrapper {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 0.6s ease forwards;
+        position: relative;
+        background: white;
+        border-radius: 8px;
+        overflow: visible;
+        transform: perspective(1000px) rotateY(0deg);
+        transform-style: preserve-3d;
+        transition: all 0.4s ease;
+        margin-bottom: 30px;
+        box-shadow:
+            -15px 15px 10px rgba(0,0,0,0.2),
+            0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-wrapper:hover {
+        transform: perspective(1000px) rotateY(10deg) translateY(-10px);
+        box-shadow:
+            -25px 25px 15px rgba(0,0,0,0.3),
+            0 8px 12px rgba(0,0,0,0.15);
     }
 
     .product-img {
         position: relative;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding-top: 140%;
     }
 
-    .product-img:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    .ranking-number {
+    .product-img::before {
+        content: '';
         position: absolute;
-        top: 10px;
-        left: 10px;
-        background-color: rgba(220, 20, 20, 0.85);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        z-index: 2;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 100%;
+        background: linear-gradient(to right,
+        rgba(0,0,0,0.1),
+        rgba(0,0,0,0.05) 10%,
+        transparent 50%);
+        transform: translateX(-100%) rotateY(-90deg);
+        transform-origin: right;
     }
 
-    .product-wrapper:hover .ranking-number {
-        transform: scale(1.1);
+    .product-img img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
-
-    .book-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2d3436;
-        margin: 12px 0 8px;
-        line-height: 1.4;
-        height: 2.8em;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    .book-rating {
-        font-size: 0.95rem;
-        color: #636e72;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-    }
+    
 
     .book-rating i.fa-star {
-        color: #f1c40f;
+        color: #f6ae2d;
     }
 
-    /* תיקון זליגת פרטי הספר */
-    .product-img span {
-        display: block;
-        position: relative;
-        z-index: 1;
-        padding: 10px;
-        background: white;
-    }
+    /* כפתורי פעולה */
 
-    /* תיקון כפתורי הפעולה */
-    .product-action-style {
-        position: absolute;
-        bottom: -20px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 5px;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .product-img:hover .product-action-style {
+    .product-wrapper:hover .product-action-style {
         opacity: 1;
         visibility: visible;
-        bottom: 10px;
+        transform: translateX(-50%) translateZ(20px) translateY(-5px);
     }
 
-    /* עיצוב כפתורי הפעולה */
-    .action-plus, .action-heart, .action-cart {
-        width: 35px;
-        height: 35px;
-        background: white;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .action-plus:hover { background-color: #74b9ff; color: white; }
-    .action-heart:hover { background-color: #ff7675; color: white; }
-    .action-cart:hover { background-color: #55efc4; color: white; }
-
-    /* Top Rated Title */
-    .top-rated-title {
-        font-size: 3rem;
-        font-weight: bold;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        background: linear-gradient(to right, #249720, #6610f2);
-        -webkit-background-clip: text;
-        color: transparent;
-        margin-bottom: 30px;
-    }
-
-    .highlight {
-        color: #ff6347;
-        font-style: italic;
-    }
-
-    /* Features Section */
-    .feature-box {
-        padding: 25px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease;
-        margin-bottom: 20px;
-    }
-
-    .feature-box:hover {
-        transform: translateY(-5px);
-    }
-
-    .feature-box i {
-        color: #144313;
-        margin-bottom: 15px;
-    }
-
-    .feature-box h3 {
-        color: #2d3436;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-
-    .feature-box p {
-        color: #636e72;
-        line-height: 1.6;
-    }
-
-    /* Gradient Button */
-    .gradient-button {
-        background: linear-gradient(45deg, #249720, #6610f2);
-        border: none;
-        border-radius: 25px;
-        padding: 12px 30px;
+    .action-button:hover {
+        transform: scale(1.1);
+        background: #1a5f7a;
         color: white;
-        font-weight: 600;
-        letter-spacing: 1px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .gradient-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 16, 242, 0.3);
+    @@media (max-width: 768px) {
+    .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+        
     }
 
-    .gradient-button-text {
-        color: white;
-        text-decoration: none;
+    @@media (max-width: 480px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .category-item {
+        flex: 0 0 100%;
+    }
     }
 </style>
 
-<div class="categories-section">
-    <img src="~/content/images/captureimag.png" alt="captureimg" class="logo-img2" style="width: auto; height: auto;" />
-    <div class="categories-container">
-        <a href="@Url.Action("Gallery", "Books", new { genre = "Finance" })" class="category-item">
-            <div class="category-circle">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="category-name">Finance</div>
-        </a>
-
-        <a href="@Url.Action("Gallery", "Books", new { genre = "Mystery" })" class="category-item">
-            <div class="category-circle">
-                <i class="fas fa-search"></i>
-            </div>
-            <div class="category-name">Mystery</div>
-        </a>
-
-        <a href="@Url.Action("Gallery", "Books", new { genre = "Romance" })" class="category-item">
-            <div class="category-circle">
-                <i class="fas fa-heart"></i>
-            </div>
-            <div class="category-name">Romance</div>
-        </a>
-
-        <a href="@Url.Action("Gallery", "Books", new { genre = "Fantasy" })" class="category-item">
-            <div class="category-circle">
-                <i class="fas fa-dragon"></i>
-            </div>
-            <div class="category-name">Fantasy</div>
-        </a>
-    </div>
-</div>
-
 <!-- Top Rated Section -->
-<div class="container mt-50">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h2 class="top-rated-title">Top-rated picks, <span class="highlight">just for you!</span></h2>
+<div class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">Explore & read millions of books online for free</h1>
+                    <p class="hero-subtitle">Find your next favorite book in our collection</p>
+                    <a href="@Url.Action("Gallery", "Books")" class="browse-button">Browse our collection</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="book-container">
+                    <div class="book-display">
+                        @foreach (var book in Model.Take(3))
+                        {
+                            <div class="book-cover">
+                                <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
+                                    <img src="@book.CoverImageUrl" alt="@book.Title">
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="container mt-30">
-    <div class="row">
-        @{ var bookCounter = 1; }
-        @foreach (var book in Model)
-        {
-            var averageRating = book.Ratings.Any() ? book.Ratings.Average(r => r.RatingValue) : 0;
-            var ratingsCount = book.Ratings.Count;
+<!-- Reviews Section -->
+<section class="reviews-section">
+    <div class="section-header">
+        <h2 class="reviews-title">What Our Readers Say</h2>
+        <div class="reviews-subtitle">Join thousands of satisfied readers</div>
+    </div>
 
-            <div class="col-md-3">
-                <div class="product-wrapper mb-30 text-center">
-                    <div class="product-img">
-                        <div class="ranking-number">#@(bookCounter)</div>
-                        <a href="@Url.Action("Details", "Books", new { id = book.BookId })" data-abc="true">
-                            <img src="@book.CoverImageUrl" alt="@book.Title">
-                        </a>
-                        <span>
-                            <div class="book-title">@book.Title</div>
-                            <div class="book-rating">
-                                <i class="fa fa-star"></i> @averageRating.ToString("F1") (@ratingsCount)
-                            </div>
-                        </span>
-                    </div>
-                    <div class="product-action">
-                        <div class="product-action-style">
-                            <a class="action-plus" title="Quick View"
-                               href="@Url.Action("Details", "Books", new { id = book.BookId })"
-                               data-abc="true">
-                                <i class="fa fa-eye"></i>
-                            </a>
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <a class="action-heart" title="Add to Wishlist"
-                                   href="@Url.Action("AddToWishList", "Books", new { id = book.BookId })"
-                                   data-abc="true">
-                                    <i class="fa fa-heart"></i>
-                                </a>
-                                if (book.IsBuyable == true)
+    <div class="reviews-container">
+        <div class="reviews-wrapper">
+            @foreach (var review in ViewBag.TopReviews ?? new List<BookProject.Models.SiteReviewViewModel>())
+            {
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-info">
+                            <h4>@review.Username</h4>
+                            <div class="review-rating">
+                                @for (int i = 1; i <= 5; i++)
                                 {
-                                    <a class="action-cart" title="Add To Cart"
-                                       href="@Url.Action("AddToCart", "Books", new { id = book.BookId })"
-                                       data-abc="true">
-                                        <i class="fa fa-shopping-cart"></i>
-                                    </a>
+                                    <i class="fas fa-star @(i <= review.RatingValue ? "active" : "")"></i>
                                 }
-                            }
+                            </div>
                         </div>
                     </div>
+                    <div class="review-content">
+                        <p>@review.Comment</p>
+                    </div>
+                    <div class="review-footer">
+                        <span class="review-date">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="view-all-reviews">
+        <a href="@Url.Action("Index", "SiteReview")" class="review-button">View All Reviews</a>
+    </div>
+</section>
+
+<style>
+    .reviews-section {
+        padding: 1rem 0;
+        background: transparent;
+        margin-top: 0;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .reviews-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .reviews-subtitle {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+
+    .reviews-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .reviews-wrapper {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);  
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+    }
+
+    .review-card::before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: 20px;
+        font-size: 8rem;
+        color: rgba(30, 95, 122, 0.1);
+        font-family: serif;
+    }
+
+    .review-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .review-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-avatar i {
+        font-size: 3rem;
+        color: #1a5f7a;
+    }
+
+    .user-info h4 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+
+    .review-rating {
+        display: flex;
+        gap: 4px;
+        margin-top: 0.5rem;
+    }
+
+    .review-rating i {
+        color: #ddd;
+        font-size: 1rem;
+    }
+
+    .review-rating i.active {
+        color: #ffd700;
+    }
+
+    .review-content {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #4a5568;
+        margin-bottom: 1.5rem;
+    }
+
+    .review-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .review-date {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .view-all-reviews {
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .review-button {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        background: #1a5f7a;
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .review-button:hover {
+        background: #2e86ab;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    @@media (max-width: 768px) {
+        .reviews-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .reviews-title {
+            font-size: 2rem;
+        }
+
+        .review-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="welcome-section">
+    <div class="features">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-books fa-3x"></i>
+                    <div class="feature-counter">10K+</div>
+                    <h3>Rich Library</h3>
+                    <p>Thousands of digital books across genres from world's best authors</p>
                 </div>
             </div>
-            bookCounter++;
-        }
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-mobile-alt fa-3x"></i>
+                    <div class="feature-counter">24/7</div>
+                    <h3>Read Anywhere</h3>
+                    <p>Access your books from any device, anytime, anywhere</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-heart fa-3x"></i>
+                    <div class="feature-counter">98%</div>
+                    <h3>Perfect Reading Experience</h3>
+                    <p>User-friendly interface, bookmarks, and personalized optimal reading experience</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container text-center">
+        <button class="gradient-button">
+            <a href="#" class="gradient-button-text">Start Reading Now!</a>
+        </button>
     </div>
 </div>
 
 <style>
-    .top-rated-title {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #333;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        background: linear-gradient(to right, #249720, #6610f2);
-        -webkit-background-clip: text;
-        color: transparent;
+    .welcome-section {
+        padding: 6rem 0;
+        background: transparent;
+        position: relative;
+        overflow: hidden;
     }
 
-    .highlight {
-        color: #ff6347;
-        font-style: italic;
+    .welcome-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.1;
+    }
+
+    .features {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .feature-box {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #1a5f7a, #2e86ab);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-box:hover::before {
+        transform: scaleX(1);
+    }
+
+    .feature-box i {
+        font-size: 3.5rem;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover i {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .feature-box h3 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .feature-box p {
+        font-size: 1.1rem;
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .feature-counter {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .gradient-button {
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        border: none;
+        padding: 1rem 3rem;
+        margin: 4rem auto 0;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .gradient-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent);
+        transition: all 0.5s ease;
+    }
+
+    .gradient-button:hover::before {
+        left: 100%;
+    }
+
+    .gradient-button-text {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-decoration: none;
+        position: relative;
+        z-index: 1;
+    }
+
+    @@media (max-width: 768px) {
+    .feature-box {
+        margin-bottom: 2rem;
+    }
+
+    .feature-box h3 {
+        font-size: 1.5rem;
+    }
+
+    .feature-box p {
+        font-size: 1rem;
+    }
     }
 </style>
-
-
-<div class="welcome-section mt-100">
-    <div class="welcome-content">
-        <div class="features">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fas fa-book fa-3x"></i>
-                        <h3>Rich library</h3>
-                        <p>Thousands of digital books in a variety of genres, from the world's best authors</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fas fa-mobile-alt fa-3x"></i>
-                        <h3>Reading anywhere</h3>
-                        <p>Access your books from any device, anytime, anywhere</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fas fa-heart fa-3x"></i>
-                        <h3>Perfect reading experience</h3>
-                        <p>Friendly interface, bookmarks, personalized optimal reading experience</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container text-center mt-50">
-    <button class="gradient-button">
-        <a href="@Url.Action("Gallery", "Books")" class="gradient-button-text">Start Read Right now!</a>
-    </button>
-</div>

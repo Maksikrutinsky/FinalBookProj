@@ -23,6 +23,36 @@ public class MyLibraryController : Controller
             ConfigurationManager.AppSettings["SmtpPassword"]
         );
     }
+    
+    [HttpPost] 
+    public ActionResult DeleteBook(int bookId)
+    {
+        try
+        {
+            int userId = Convert.ToInt32(Session["UserId"]);
+        
+            // מצא את ההזמנה הרלוונטית
+            var orderItem = _context.OrderItems
+                .FirstOrDefault(oi => oi.BookId == bookId && 
+                                      oi.Order.UserId == userId && 
+                                      oi.Order.Status == "Completed");
+
+            if (orderItem == null)
+            {
+                return Json(new { success = false, message = "הספר לא נמצא בספרייה שלך" }, JsonRequestBehavior.AllowGet);
+            }
+
+            // מחיקת הספר מהספרייה
+            orderItem.Order.Status = "Cancelled";
+            _context.SaveChanges();
+
+            return Json(new { success = true }, JsonRequestBehavior.AllowGet);
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = "אירעה שגיאה במחיקת הספר" }, JsonRequestBehavior.AllowGet);
+        }
+    }
 
 public async Task<ActionResult> Index()
 {

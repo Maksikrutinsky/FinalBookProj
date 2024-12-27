@@ -283,6 +283,197 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(26, 115, 232, 0.2);
     }
+    .custom-modal .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .custom-modal .modal-header {
+        border-bottom: 2px solid rgba(26, 115, 232, 0.1);
+        padding: 2rem;
+        background: linear-gradient(45deg, rgba(26, 115, 232, 0.03), rgba(0, 82, 204, 0.03));
+        border-radius: 25px 25px 0 0;
+    }
+
+    .custom-modal .modal-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, #1a73e8, #0052cc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+
+    .custom-modal .modal-body {
+        padding: 3rem;
+    }
+
+    .custom-modal .modal-body p {
+        color: #5f6368;
+        font-size: 1.4rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .custom-modal .modal-body .small {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-top: 1.5rem;
+    }
+
+    .custom-modal .modal-footer {
+        border-top: 2px solid rgba(26, 115, 232, 0.1);
+        padding: 2rem;
+        background: linear-gradient(45deg, rgba(26, 115, 232, 0.03), rgba(0, 82, 204, 0.03));
+        border-radius: 0 0 25px 25px;
+    }
+
+    .custom-modal .btn {
+        padding: 1rem 2.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .custom-modal .btn-secondary {
+        background: #f1f3f4;
+        color: #5f6368;
+        border: none;
+    }
+
+    .custom-modal .btn-primary {
+        background: linear-gradient(45deg, #1a73e8, #0052cc);
+        border: none;
+        box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+    }
+
+    .custom-modal .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #b02a37);
+        border: none;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+    }
+
+    .custom-modal .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    }
+
+    .custom-modal .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .d-grid.gap-2 {
+        display: grid;
+        gap: 1.5rem !important;
+    }
+
+    .modal {
+        text-align: center;
+        padding: 0!important;
+    }
+
+    .modal:before {
+        content: '';
+        display: inline-block;
+        height: 100vh;
+        vertical-align: middle;
+        margin-right: -4px;
+    }
+
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+        width: 90%;
+        max-width: 500px;
+        margin: 1.75rem auto;
+    }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid rgba(0,0,0,.2);
+        position: relative;
+        margin: auto;
+        top: 0;
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #dee2e6;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        padding: 1rem;
+    }
+
+    /* Animation */
+    .modal.fade .modal-dialog {
+        transform: scale(0.8);
+        transition: transform 0.3s ease-out;
+    }
+
+    .modal.show .modal-dialog {
+        transform: scale(1);
+    }
+
+    .modal-backdrop.show {
+        opacity: 0.5;
+    }
+
+    /* Buttons */
+    .modal .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .modal .btn i {
+        margin-right: 0.5rem;
+    }
+
+    .modal .btn-primary {
+        background: #1a73e8;
+        border: none;
+    }
+
+    .modal .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
+
+    .modal .btn-success {
+        background: #28a745;
+        border: none;
+    }
+
+    .modal .d-grid {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .modal .d-grid .btn {
+        width: 100%;
+        text-align: center;
+    }
 </style>
 
 <div class="book-container">
@@ -392,9 +583,21 @@
                             <div class="mt-2">
                                 <span class="text-danger fw-bold">Out of stock for borrowing</span>
                                 <div class="mt-3">
-                                    <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-outline-secondary">
-                                        Join Waiting List
-                                    </button>
+                                    @if (ViewBag.IsInWaitingList)
+                                    {
+                                        <button onclick="showLeaveWaitingList(@Model.BookId)" class="btn btn-outline-danger">
+                                            Leave Waiting List
+                                        </button>
+                                        <small class="d-block mt-2 text-muted">
+                                            Your position: @ViewBag.UserWaitingPosition
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-outline-secondary">
+                                            Join Waiting List
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         }
@@ -579,8 +782,9 @@
 </div>
 
 <!-- Modals -->
-<div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Add to Cart Modal -->
+<div class="modal fade" id="addToCartModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add to Cart</h5>
@@ -589,10 +793,14 @@
             <div class="modal-body">
                 <p>Would you like to buy or borrow this book?</p>
                 <div class="d-grid gap-2">
-                    <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">Buy</button>
+                    <button onclick="addToCart(@Model.BookId, false)" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i> Buy
+                    </button>
                     @if (Model.IsBorrowable == true && Model.AvailableCopies > 0)
                     {
-                        <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">Borrow</button>
+                        <button onclick="addToCart(@Model.BookId, true)" class="btn btn-success">
+                            <i class="fas fa-book-reader"></i> Borrow
+                        </button>
                     }
                 </div>
             </div>
@@ -600,8 +808,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="waitingListModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Join Waiting List Modal -->
+<div class="modal fade" id="waitingListModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Join Waiting List</h5>
@@ -610,13 +819,46 @@
             <div class="modal-body">
                 <p>Would you like to join the waiting list for this book?</p>
                 <p class="text-muted small">
+                    <i class="fas fa-info-circle"></i>
                     You'll receive an email notification when the book becomes available.
                     You'll have priority for borrowing within 24 hours of notification.
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button onclick="joinWaitingList(@Model.BookId)" class="btn btn-primary">Join Waiting List</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button onclick="joinWaitingList(@Model.BookId)" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Join Waiting List
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Waiting List Modal -->
+<div class="modal fade" id="leaveWaitingListModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Leave Waiting List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to leave the waiting list for this book?</p>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    You will lose your current position in the list.
+                    If you wish to join again later, you'll need to start at the end of the list.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button onclick="leaveWaitingList(@Model.BookId)" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Leave Waiting List
+                </button>
             </div>
         </div>
     </div>
@@ -632,22 +874,44 @@
             $('#waitingListModal').modal('show');
         }
 
+        function showLeaveWaitingList(bookId) {
+            $('#leaveWaitingListModal').modal('show');
+        }
+
         function joinWaitingList(bookId) {
             $.post('@Url.Action("JoinWaitingList", "Books")', {
                 bookId: bookId
             })
-                .done(function(response) {
-                    $('#waitingListModal').modal('hide');
-                    if (response.success) {
-                        window.location.reload();
-                    } else {
-                        alert(response.message);
-                    }
-                })
-                .fail(function() {
-                    $('#waitingListModal').modal('hide');
-                    alert("Error joining waiting list");
-                });
+            .done(function(response) {
+                $('#waitingListModal').modal('hide');
+                if (response.success) {
+                    window.location.reload();
+                } else {
+                    alert(response.message);
+                }
+            })
+            .fail(function() {
+                $('#waitingListModal').modal('hide');
+                alert("Error joining waiting list");
+            });
+        }
+
+        function leaveWaitingList(bookId) {
+            $.post('@Url.Action("LeaveWaitingList", "Books")', {
+                bookId: bookId
+            })
+            .done(function(response) {
+                $('#leaveWaitingListModal').modal('hide');
+                if (response.success) {
+                    window.location.reload();
+                } else {
+                    alert(response.message);
+                }
+            })
+            .fail(function() {
+                $('#leaveWaitingListModal').modal('hide');
+                alert("Error leaving waiting list");
+            });
         }
 
         function directBuy(bookId) {

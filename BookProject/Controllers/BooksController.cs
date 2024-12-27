@@ -291,6 +291,51 @@ namespace BookProject.Controllers
             return View("EditBook", book);
         }
 
+        [HttpPost]
+        public ActionResult LeaveWaitingList(int bookId)
+        {
+            try
+            {
+                var userId = Session["UserId"];
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "יש להתחבר כדי לבצע פעולה זו" });
+                }
+
+                int currentUserId = Convert.ToInt32(userId);
+        
+                // מצא את הרשומה של המשתמש ברשימת ההמתנה
+                var waitingEntry = _context.WaitingLists
+                    .FirstOrDefault(w => w.BookId == bookId && w.UserId == currentUserId);
+            
+                if (waitingEntry == null)
+                {
+                    return Json(new { success = false, message = "לא נמצאת ברשימת ההמתנה לספר זה" });
+                }
+
+                // מחק את הרשומה
+                _context.WaitingLists.Remove(waitingEntry);
+        
+                // עדכן את המיקומים של כל המשתמשים שאחריו ברשימה
+                var laterEntries = _context.WaitingLists
+                    .Where(w => w.BookId == bookId && w.Position > waitingEntry.Position)
+                    .ToList();
+            
+                foreach (var entry in laterEntries)
+                {
+                    entry.Position--;
+                }
+
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "הוסרת בהצלחה מרשימת ההמתנה" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "אירעה שגיאה: " + ex.Message });
+            }
+        }
+        
 [HttpPost]
 public async Task<ActionResult> Edit(Book book)
 {

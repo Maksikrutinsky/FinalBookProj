@@ -192,9 +192,11 @@
     <Compile Include="Models\Order.cs">
       <DependentUpon>DBLib.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\OrderConfirmationViewModel.cs" />
     <Compile Include="Models\OrderItem.cs">
       <DependentUpon>DBLib.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\OrderWaitingViewModel.cs" />
     <Compile Include="Models\PaymentViewModel.cs" />
     <Compile Include="Models\Rating.cs">
       <DependentUpon>DBLib.tt</DependentUpon>
@@ -275,6 +277,8 @@
     <Content Include="Views\Books\_BooksGrid.cshtml" />
     <Content Include="Views\Cart\Checkout.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
+    <Content Include="Views\Cart\OrderConfirmation.cshtml" />
+    <Content Include="Views\Cart\OrderWaiting.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
