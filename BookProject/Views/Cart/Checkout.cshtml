@@ -223,6 +223,39 @@
             font-size: 2rem;
         }
     }
+
+    .paypal-button-container {
+        width: 70%;
+        margin: 1rem auto;
+        min-height: 45px;
+    }
+
+    .payment-divider {
+        text-align: center;
+        margin: 1rem 0;
+        position: relative;
+    }
+
+    .payment-divider:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .payment-divider span {
+        background-color: white;
+        padding: 0 10px;
+        color: #718096;
+        position: relative;
+    }
+
+    .payment-options {
+        margin-top: 2rem;
+    }
+    
 </style>
 
 <div class="checkout-container">
@@ -258,28 +291,39 @@
 
                 <h2 class="payment-header">Payment Details</h2>
 
-                <div class="form-group">
-                    <label>Card Number</label>
-                    @Html.TextBoxFor(m => m.Payment.CardNumber, new { @class = "inputbox", placeholder = "1234 5678 9012 3456" })
-                    @Html.ValidationMessageFor(m => m.Payment.CardNumber, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="card-details">
+                <div class="payment-options">
+                    <!-- כרטיס אשראי -->
                     <div class="form-group">
-                        <label>Expiry Date</label>
-                        @Html.TextBoxFor(m => m.Payment.ExpiryDate, new { @class = "inputbox", placeholder = "MM/YY" })
-                        @Html.ValidationMessageFor(m => m.Payment.ExpiryDate, "", new { @class = "text-danger" })
+                        <label>Card Number</label>
+                        @Html.TextBoxFor(m => m.Payment.CardNumber, new { @class = "inputbox", placeholder = "1234 5678 9012 3456" })
+                        @Html.ValidationMessageFor(m => m.Payment.CardNumber, "", new { @class = "text-danger" })
                     </div>
 
-                    <div class="form-group">
-                        <label>CVV</label>
-                        @Html.TextBoxFor(m => m.Payment.CVV, new { @class = "inputbox", placeholder = "123" })
-                        @Html.ValidationMessageFor(m => m.Payment.CVV, "", new { @class = "text-danger" })
+                    <div class="card-details">
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            @Html.TextBoxFor(m => m.Payment.ExpiryDate, new { @class = "inputbox", placeholder = "MM/YY" })
+                            @Html.ValidationMessageFor(m => m.Payment.ExpiryDate, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            <label>CVV</label>
+                            @Html.TextBoxFor(m => m.Payment.CVV, new { @class = "inputbox", placeholder = "123" })
+                            @Html.ValidationMessageFor(m => m.Payment.CVV, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    @Html.HiddenFor(m => m.TotalAmount)
+                    <button type="submit" class="button">Pay with Credit Card</button>
+
+                    <!-- PayPal -->
+                    <div class="payment-divider">
+                        <span>Or pay with</span>
+                    </div>
+                    <div class="paypal-button-container">
+                        <div id="paypal-button"></div>
                     </div>
                 </div>
-
-                @Html.HiddenFor(m => m.TotalAmount)
-                <button type="submit" class="button">Complete Payment</button>
             }
         </div>
     </div>
@@ -287,6 +331,9 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=ARPZ5NF5rFX-nbPhK79vEt7B3TYo7GF36Kbe5VUPtqZoQp6wWfZMMmrzr4AOr8K2zL7Zpr2Dk4rwSSrS&currency=ILS"></script>
+    
     <script>
         $(document).ready(function() {
             // Card number formatting
@@ -322,5 +369,45 @@
                 $(this).val($(this).val().replace(/\D/g, ''));
             });
         });
+
+        // PayPal Integration
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '@Model.TotalAmount.ToString("0.00")',
+                            currency_code: 'ILS'
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    return fetch('@Url.Action("ProcessPayPalPayment", "Cart")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderID: data.orderID,
+                            paymentDetails: details
+                        })
+                    }).then(function(response) {
+                        return response.json();
+                    }).then(function(responseData) {
+                        if(responseData.success) {
+                            window.location.href = '@Url.Action("PaymentSuccess", "Cart")';
+                        } else {
+                            alert('Payment failed: ' + responseData.message);
+                        }
+                    });
+                });
+            },
+            onError: function (err) {
+                console.error('PayPal Error:', err);
+                alert('An error occurred with PayPal. Please try again later.');
+            }
+        }).render('#paypal-button');
     </script>
 }

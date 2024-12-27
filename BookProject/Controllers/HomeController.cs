@@ -18,19 +18,28 @@ namespace BookProject.Controllers
 
             var topRatedBooks = db.Books
                 .Where(b => b.IsActive == true)
-                .Select(b => new
-                {
-                    Book = b,
-                    AverageRating = b.Ratings.Any() ? b.Ratings.Average(r => r.RatingValue) : 0,
-                    RatingsCount = b.Ratings.Count
-                })
+                .Select(b => new { Book = b, AverageRating = b.Ratings.Any() ? b.Ratings.Average(r => r.RatingValue) : 0, RatingsCount = b.Ratings.Count })
                 .OrderByDescending(b => b.AverageRating)
                 .ThenByDescending(b => b.RatingsCount)
                 .Take(4)
                 .Select(b => b.Book)
                 .ToList();
 
-            return View(topRatedBooks);  // חשוב שזה יהיה כאן
+            ViewBag.TopReviews = db.Ratings
+                .Where(r => r.Type == "Site" && r.Comment != null)
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(3)
+                .Select(r => new SiteReviewViewModel
+                {
+                    RatingId = r.RatingId,
+                    Username = r.User.Username,
+                    RatingValue = r.RatingValue,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt
+                })
+                .ToList();
+
+            return View(topRatedBooks);
         }
 
         public ActionResult Contact()

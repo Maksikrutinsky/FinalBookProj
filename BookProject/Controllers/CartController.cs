@@ -270,13 +270,11 @@ private void UpdateWaitingListPositions(int bookId)
     _context.SaveChanges();
 }
 
-// עדכון מתודת ProcessPayment
 [HttpPost]
 public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 {
     try
     {
-        // מנקה רווחים ממספר הכרטיס
         if (model.Payment != null && model.Payment.CardNumber != null)
         {
             model.Payment.CardNumber = model.Payment.CardNumber.Replace(" ", "");
@@ -311,43 +309,92 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
             return RedirectToAction("Index", "Home");
         }
 
-        bool paymentSuccessful = true; // סימולציית תשלום
+        // בדיקת זמינות ספרים להשאלה
+        var unavailableItems = new List<OrderWaitingViewModel.WaitingItemInfo>();
+        var itemsToRemove = new List<OrderItem>();
+
+        foreach (var orderItem in currentCart.OrderItems)
+        {
+            if (orderItem.TypeBook) // אם זו השאלה
+            {
+                var book = orderItem.Book;
+                
+                if (book.AvailableCopies <= 0)
+                {
+                    // הוספה לרשימת המתנה
+                    var position = _context.WaitingLists
+                        .Where(w => w.BookId == book.BookId)
+                        .Select(w => w.Position)
+                        .DefaultIfEmpty(0)
+                        .Max() + 1;
+
+                    var waitingList = new WaitingList
+                    {
+                        BookId = book.BookId,
+                        UserId = userId,
+                        Position = position,
+                        RequestDate = DateTime.Now,
+                        NotificationSent = false
+                    };
+                    
+                    _context.WaitingLists.Add(waitingList);
+                    
+                    // הוספה לרשימת הספרים הלא זמינים
+                    unavailableItems.Add(new OrderWaitingViewModel.WaitingItemInfo 
+                    { 
+                        Book = book, 
+                        Position = position 
+                    });
+                    
+                    // הוספה לרשימת הפריטים להסרה מהעגלה
+                    itemsToRemove.Add(orderItem);
+                }
+            }
+        }
+
+        // אם יש פריטים לא זמינים
+        if (unavailableItems.Any())
+        {
+            // הסרת הפריטים הלא זמינים מהעגלה
+            foreach (var item in itemsToRemove)
+            {
+                currentCart.TotalAmount -= item.Price;
+                _context.OrderItems.Remove(item);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // עדכון העגלה הנוכחית
+            currentCart = _context.Orders
+                .Include(o => o.OrderItems.Select(oi => oi.Book))
+                .FirstOrDefault(o => o.UserId == userId && o.Status == "InCart");
+
+            var waitingModel = new OrderWaitingViewModel
+            {
+                WaitingItems = unavailableItems,
+                RemainingItems = currentCart?.OrderItems.ToList() ?? new List<OrderItem>()
+            };
+
+            return View("OrderWaiting", waitingModel);
+        }
+
+        // אם כל הפריטים זמינים, המשך בתהליך התשלום
+        bool paymentSuccessful = true;
 
         if (paymentSuccessful)
         {
             foreach (var orderItem in currentCart.OrderItems)
             {
-                if (orderItem.TypeBook) // אם זו השאלה
+                if (orderItem.TypeBook)
                 {
                     var book = orderItem.Book;
-                    
-                    var firstWaitingUser = _context.WaitingLists
-                        .Where(w => w.BookId == book.BookId)
-                        .OrderBy(w => w.Position)
-                        .FirstOrDefault();
-
-                    if (firstWaitingUser != null && firstWaitingUser.UserId != userId)
-                    {
-                        TempData["ErrorMessage"] = "הספר כבר שמור למשתמש אחר";
-                        return RedirectToAction("Checkout");
-                    }
-
-                    if (book.AvailableCopies <= 0)
-                    {
-                        TempData["ErrorMessage"] = "אחד הספרים אינו זמין יותר להשאלה";
-                        return RedirectToAction("Checkout");
-                    }
-
-                    // הפחתת מספר עותקים
                     book.AvailableCopies--;
 
-                    // הסרה מרשימת ההמתנה אם קיים
                     var waitingEntry = _context.WaitingLists
                         .FirstOrDefault(w => w.BookId == book.BookId && w.UserId == userId);
                     if (waitingEntry != null)
                     {
                         _context.WaitingLists.Remove(waitingEntry);
-                        // קריאה למתודה שמעדכנת את המיקומים
                         UpdateWaitingListPositions(book.BookId);
                     }
                 }
@@ -355,19 +402,25 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 
             currentCart.Status = "Completed";
             currentCart.OrderDate = DateTime.Now;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             var user = _context.Users.Find(userId);
             await SendPurchaseConfirmationEmailAsync(user.Email, currentCart);
 
-            TempData["SuccessMessage"] = "התשלום בוצע בהצלחה! תודה על הקנייה.";
+            var confirmationModel = new OrderConfirmationViewModel
+            {
+                OrderId = currentCart.OrderId,
+                OrderItems = currentCart.OrderItems,
+                TotalAmount = currentCart.TotalAmount
+            };
+
+            return View("OrderConfirmation", confirmationModel);
         }
         else
         {
             TempData["ErrorMessage"] = "התשלום נכשל. אנא נסה שנית.";
+            return RedirectToAction("Checkout");
         }
-
-        return RedirectToAction("Index", "Home");
     }
     catch (Exception ex)
     {

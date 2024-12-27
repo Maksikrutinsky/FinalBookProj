@@ -17,9 +17,8 @@
         gap: 20px;
         padding: 20px 0;
         width: 100%;
-        justify-content: flex-start;  /* יתחיל מהשמאל */
+        justify-content: flex-start;
     }
-    
 
     .col-md-4 {
         flex: 0 0 calc(50% - 20px);
@@ -54,18 +53,24 @@
 
     .black {
         background: #f6ad87;
+        margin-bottom: 10px;
+    }
+
+    .delete-btn {
+        background: #dc3545;
+    }
+
+    .btn-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 </style>
 
-<!-- שאר הקוד HTML נשאר זהה -->
-
-
-
 <div class="container">
     <h2 class="text-center mb-4">My Library</h2>
-    
 
-    <!-- ספרים שנקנו -->
+    <!-- Purchased Books -->
     <div>
         <h3 class="mb-3">Books purchased</h3>
         @if (!Model.PurchasedBooks.Any())
@@ -91,9 +96,14 @@
                                     Year of publication: @item.Book.PublishYear <br />
                                     Genre: @item.Book.Genre
                                 </p>
-                                <button class="black" id="test1"  type="button" onclick="showBookFormats(@item.BookId)">
-                                    Download a book
-                                </button>
+                                <div class="btn-container">
+                                    <button class="black" type="button" onclick="showBookFormats(@item.BookId)">
+                                        Download book
+                                    </button>
+                                    <button class="black delete-btn" type="button" onclick="confirmDeleteBook(@item.BookId)">
+                                        Remove book
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -102,8 +112,7 @@
         }
     </div>
 
-
-    <!-- ספרים מושאלים -->
+    <!-- Borrowed Books -->
     <div>
         <h3 class="mb-3">Borrowed books</h3>
         @if (!Model.BorrowedBooks.Any())
@@ -129,11 +138,16 @@
                                     Expenditure: @item.Book.Publisher <br />
                                     Year of publication: @item.Book.PublishYear <br />
                                     Genre: @item.Book.Genre <br/>
-                                    @daysLeft Day left
+                                    @daysLeft Days left
                                 </p>
-                                <button class="black" id="test1"  type="button" onclick="showBookFormats(@item.BookId)">
-                                    Download a book
-                                </button>
+                                <div class="btn-container">
+                                    <button class="black" type="button" onclick="showBookFormats(@item.BookId)">
+                                        Download book
+                                    </button>
+                                    <button class="black delete-btn" type="button" onclick="confirmDeleteBook(@item.BookId)">
+                                        Remove book
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -141,75 +155,119 @@
             </div>
         }
     </div>
-    
-    
 
-    <!-- מודאל בחירת פורמט -->
+    <!-- Download Format Modal -->
     <div class="modal fade" id="bookDownloadModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">בחר פורמט הורדה</h5>
+                    <h5 class="modal-title">Select Download Format</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <select id="formatSelect" class="form-select mb-3">
-                        <!-- פורמטים יתווספו דינמית -->
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
-                    <button type="button" class="btn btn-primary" onclick="downloadBook()">הורד</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadBook()">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to remove this book from your library?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteBook()">Remove</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    function showBookFormats(bookId) {
+        $.ajax({
+            url: '@Url.Action("GetBookFormats", "MyLibrary")',
+            type: 'GET',
+            data: { bookId: bookId },
+            success: function(response) {
+                if (response.success) {
+                    var formatSelect = $('#formatSelect');
+                    formatSelect.empty();
 
-    <script>
-        function showBookFormats(bookId) {
-            $.ajax({
-                url: '@Url.Action("GetBookFormats", "MyLibrary")',
-                type: 'GET',
-                data: { bookId: bookId },
-                success: function(response) {
-                    if (response.success) {
-                        var formatSelect = $('#formatSelect');
-                        formatSelect.empty();
-                        
-                        response.formats.forEach(function(formatInfo) {
-                            formatSelect.append(
-                                $('<option>', {
-                                    value: formatInfo.url,
-                                    text: formatInfo.format
-                                })
-                            );
-                        });
+                    response.formats.forEach(function(formatInfo) {
+                        formatSelect.append(
+                            $('<option>', {
+                                value: formatInfo.url,
+                                text: formatInfo.format
+                            })
+                        );
+                    });
 
-                        $('#bookDownloadModal').attr('data-book-id', bookId);
-                        $('#bookDownloadModal').modal('show');
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('אירעה שגיאה בטעינת הפורמטים');
+                    $('#bookDownloadModal').attr('data-book-id', bookId);
+                    $('#bookDownloadModal').modal('show');
+                } else {
+                    alert(response.message);
                 }
-            });
-        }
-
-        function downloadBook() {
-            var downloadUrl = $('#formatSelect').val();
-            
-            if (!downloadUrl) {
-                alert('אנא בחר פורמט');
-                return;
+            },
+            error: function() {
+                alert('Error loading formats');
             }
+        });
+    }
 
-            // הפניה ישירה לקישור ההורדה
-            window.open(downloadUrl, '_blank');
-            
-            $('#bookDownloadModal').modal('hide');
+    function downloadBook() {
+        var downloadUrl = $('#formatSelect').val();
+
+        if (!downloadUrl) {
+            alert('Please select a format');
+            return;
         }
-    </script>
+
+        window.open(downloadUrl, '_blank');
+        $('#bookDownloadModal').modal('hide');
+    }
+
+    let bookIdToDelete = null;
+
+    function confirmDeleteBook(bookId) {
+        bookIdToDelete = bookId;
+        $('#deleteConfirmModal').modal('show');
+    }
+
+    function deleteBook() {
+        if (!bookIdToDelete) return;
+
+        $.ajax({
+            url: '@Url.Action("DeleteBook", "MyLibrary")',
+            type: 'POST',
+            data: { bookId: bookIdToDelete },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || 'Error removing book');
+                }
+            },
+            error: function() {
+                alert('Error removing book from library');
+            },
+            complete: function() {
+                $('#deleteConfirmModal').modal('hide');
+                bookIdToDelete = null;
+            }
+        });
+    }
+</script>

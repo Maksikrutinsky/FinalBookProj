@@ -1,0 +1,317 @@
+@model BookProject.Models.OrderWaitingViewModel
+
+<style>
+    .waiting-container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 2rem;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .waiting-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transform: translateY(0);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .waiting-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .waiting-header {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        padding: 3rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .waiting-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%237c3aed' fill-opacity='0.1' fill-rule='evenodd'/%3E</Csvg>");
+        opacity: 0.1;
+    }
+
+    .status-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .status-icon svg {
+        width: 45px;
+        height: 45px;
+        color: white;
+    }
+
+    .waiting-title {
+        font-size: 2.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .waiting-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .waiting-content {
+        padding: 3rem;
+    }
+
+    .waiting-info {
+        background: linear-gradient(to right, #EEF2FF, #E0E7FF);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .waiting-info::before {
+        content: '!';
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        width: 30px;
+        height: 30px;
+        background: #4F46E5;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .waiting-info h3 {
+        color: #4338CA;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .waiting-info p {
+        color: #4B5563;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .waiting-book {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        margin: 1rem 0;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .waiting-book:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+        border-color: #4F46E5;
+    }
+
+    .book-cover {
+        width: 70px;
+        height: 105px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-right: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .waiting-book:hover .book-cover {
+        transform: rotateY(10deg);
+    }
+
+    .book-info {
+        flex-grow: 1;
+    }
+
+    .book-title {
+        font-weight: 600;
+        color: #1F2937;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .book-position {
+        color: #4F46E5;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .book-position::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #4F46E5;
+        border-radius: 50%;
+    }
+
+    .remaining-items {
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 2px solid #E5E7EB;
+    }
+
+    .remaining-items h3 {
+        color: #1F2937;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 1.25rem;
+        border-radius: 40px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: #4F46E5;
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-primary:hover {
+        background: #4338CA;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #4F46E5;
+        border: 2px solid #4F46E5;
+    }
+
+    .btn-secondary:hover {
+        background: #EEF2FF;
+        transform: translateY(-2px);
+    }
+
+    @@media (max-width: 768px) {
+    .waiting-container {
+        padding: 1rem;
+    }
+
+    .waiting-header {
+        padding: 2rem;
+    }
+
+    .waiting-title {
+        font-size: 2rem;
+    }
+
+    .waiting-content {
+        padding: 1.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+    }
+</style>
+
+<div class="waiting-container">
+    <div class="waiting-card">
+        <div class="waiting-header">
+            <div class="status-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 class="waiting-title">Added to Waiting List</h1>
+            <p class="waiting-subtitle">Some books are currently unavailable</p>
+        </div>
+
+        <div class="waiting-content">
+            <div class="waiting-info">
+                <h3>Important Notice</h3>
+                <p>The following books are currently unavailable for borrowing. We've automatically added you to the waiting list and will notify you when they become available.</p>
+            </div>
+
+            @foreach (var item in Model.WaitingItems)
+            {
+                <div class="waiting-book">
+                    <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+                    <div class="book-info">
+                        <div class="book-title">@item.Book.Title</div>
+                        <div class="book-position">Queue Position: @item.Position</div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.RemainingItems.Any())
+            {
+                <div class="remaining-items">
+                    <h3>Items Remaining in Your Cart</h3>
+                    @foreach (var item in Model.RemainingItems)
+                    {
+                        <div class="waiting-book">
+                            <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+                            <div class="book-info">
+                                <div class="book-title">@item.Book.Title</div>
+                                <div class="book-type">@(item.TypeBook ? "Borrow" : "Purchase")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="action-buttons">
+                @if (Model.RemainingItems.Any())
+                {
+                    <a href="@Url.Action("Checkout", "Cart")" class="btn btn-primary">Proceed to Checkout</a>
+                }
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Return to Store</a>
+            </div>
+        </div>
+    </div>
+</div>

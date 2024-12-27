@@ -1,0 +1,298 @@
+@model BookProject.Models.OrderConfirmationViewModel
+
+<style>
+    .confirmation-container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 2rem;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .confirmation-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transform: translateY(0);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .confirmation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .confirmation-header {
+        background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+        padding: 3rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirmation-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z' fill='white' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        opacity: 0.1;
+    }
+
+    .status-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        animation: scaleIn 0.5s ease;
+    }
+
+    keyframes scaleIn {
+        from { transform: scale(0); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .status-icon svg {
+        width: 45px;
+        height: 45px;
+        color: white;
+        animation: checkmark 0.5s ease forwards 0.5s;
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    keyframes checkmark {
+        from { transform: scale(0) rotate(-45deg); opacity: 0; }
+        to { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .confirmation-title {
+        font-size: 2.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        animation: slideDown 0.5s ease forwards;
+    }
+
+    .confirmation-subtitle {
+        font-size: 1.25rem;
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards 0.3s;
+    }
+
+    keyframes slideDown {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .confirmation-content {
+        padding: 3rem;
+    }
+
+    .order-details {
+        margin-top: 2rem;
+    }
+
+    .order-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .order-item:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+        border-color: #3B82F6;
+    }
+
+    .book-cover {
+        width: 70px;
+        height: 105px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .order-item:hover .book-cover {
+        transform: rotateY(10deg);
+    }
+
+    .book-info {
+        flex-grow: 1;
+    }
+
+    .book-title {
+        font-weight: 600;
+        color: #1F2937;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .book-type {
+        color: #6B7280;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .book-type::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #3B82F6;
+        border-radius: 50%;
+    }
+
+    .book-price {
+        font-weight: 600;
+        color: #3B82F6;
+        font-size: 1.3rem;
+        padding-left: 1rem;
+    }
+
+    .total-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #E5E7EB;
+        text-align: right;
+    }
+
+    .total-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1E40AF;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 1.25rem;
+        border-radius: 40px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: #3B82F6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-primary:hover {
+        background: #1E40AF;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #3B82F6;
+        border: 2px solid #3B82F6;
+    }
+
+    .btn-secondary:hover {
+        background: #EFF6FF;
+        transform: translateY(-2px);
+    }
+
+    @@media (max-width: 768px) {
+    .confirmation-container {
+        padding: 1rem;
+    }
+
+    .confirmation-header {
+        padding: 2rem;
+    }
+
+    .confirmation-title {
+        font-size: 2rem;
+    }
+
+    .confirmation-content {
+        padding: 1.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+    }
+</style>
+
+<div class="confirmation-container">
+    <div class="confirmation-card">
+        <div class="confirmation-header">
+            <div class="status-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h1 class="confirmation-title">Thank You for Your Order!</h1>
+            <p class="confirmation-subtitle">Order #@Model.OrderId.ToString().PadLeft(8, '0')</p>
+        </div>
+
+        <div class="confirmation-content">
+            <h2>Order Details</h2>
+            <div class="order-details">
+                @foreach (var item in Model.OrderItems)
+                {
+                    <div class="order-item">
+                        <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title" class="book-cover" />
+                        <div class="book-info">
+                            <div class="book-title">@item.Book.Title</div>
+                            <div class="book-type">
+                                @(item.TypeBook ? "Borrow" : "Purchase")
+                            </div>
+                        </div>
+                        <div class="book-price">$@item.Price.ToString("F2")</div>
+                    </div>
+                }
+            </div>
+
+            <div class="total-section">
+                <div class="total-amount">Total: $@Model.TotalAmount.ToString("F2")</div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Continue Shopping</a>
+                <a href="@Url.Action("Index", "MyLibrary")" class="btn btn-secondary">View My Orders</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -228,13 +228,6 @@ nav ul li a:hover {
 }
 
 /* Container Settings */
-.container {
-    width: 100%;
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
 
 .container.body-content {
     margin-top: 80px;  /* מרווח מהנאבבר הקבוע */
