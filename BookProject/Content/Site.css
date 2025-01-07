@@ -49,7 +49,7 @@ body {
     font-family: var(--main-font);
     margin: 0;
     padding: 0;
-    background: url("../Content/images_/header.png") no-repeat center top fixed;
+    background: url("../Content/images_/header10.png") no-repeat center top fixed;
     background-size: 100% 100%;
     background-color: var(--main-bg-color);
     display: flex;
@@ -93,7 +93,7 @@ nav.scrolled {
     }
     
 nav .logo img {
-    height: 40px;
+    height: 50px;
     width: auto;
     margin-right: 10px;
     transition: all 0.3s ease;
@@ -231,7 +231,7 @@ nav ul li a:hover {
 
 .container.body-content {
     margin-top: 80px;  /* מרווח מהנאבבר הקבוע */
-    background-color: rgba(228, 244, 242, 0.9);
+    background-color: transparent;
     border-radius: var(--border-radius-lg);
     box-shadow: 0 0 15px var(--shadow-sm);
     padding: 20px;

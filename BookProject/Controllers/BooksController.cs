@@ -57,10 +57,11 @@ namespace BookProject.Controllers
             {
                 searchTerm = searchTerm.ToLower();
                 books = books.Where(b => b.Title.ToLower().Contains(searchTerm) || 
-                                       b.Author.ToLower().Contains(searchTerm));
+                                         b.Author.ToLower().Contains(searchTerm) ||
+                                         b.Publisher.ToLower().Contains(searchTerm));
                 ViewBag.CurrentSearch = searchTerm;
             }
-
+            
             if (!string.IsNullOrEmpty(genre))
             {
                 books = books.Where(b => b.Genre == genre);
@@ -88,6 +89,16 @@ namespace BookProject.Controllers
                     break;
             }
 
+            foreach (var book in books)
+            {
+                if (book.DiscountEndDate.HasValue && book.DiscountEndDate < DateTime.Now)
+                {
+                    book.BuyPrice = book.PreviousPrice ?? book.BuyPrice;
+                    book.PreviousPrice = null;
+                    book.DiscountEndDate = null;
+                }
+            }
+            
             var booksWithRatings = books.ToList().Select(b => new
             {
                 Book = b,
@@ -123,7 +134,6 @@ namespace BookProject.Controllers
             ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
             ViewBag.CurrentUserId = currentUserId;
 
-            // מצא את הפריט האחרון שנרכש/הושאל (אם קיים)
             var lastOrderItem = _context.Orders
                 .Where(o => o.OrderItems.Any(oi => 
                     oi.BookId == id && 
@@ -172,13 +182,48 @@ namespace BookProject.Controllers
 
         return View(book);
     }
+    
+    [HttpPost]
+    public async Task<ActionResult> DeleteBook(int id)
+    {
+        var userId = Session["UserId"];
+        if (userId == null)
+        {
+            return Json(new { success = false, message = "יש להתחבר כדי לבצע פעולה זו" });
+        }
+
+        int currentUserId = Convert.ToInt32(userId);
+        var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
+        if (!isAdmin)
+        {
+            return Json(new { success = false, message = "אין לך הרשאה לבצע פעולה זו" });
+        }
+
+        try
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return Json(new { success = false, message = "הספר לא נמצא" });
+            }
+
+            book.IsActive = false;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "הספר נמחק בהצלחה" });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = "אירעה שגיאה במחיקת הספר: " + ex.Message });
+        }
+    }
 
         public async Task NotifyWaitingUsers(int bookId)
         {
             var book = _context.Books.Find(bookId);
             if (book == null) return;  // רק בדיקת null
 
-            var waitingUsers = _context.WaitingLists  // שים לב: WaitingList ולא WaitingLists
+            var waitingUsers = _context.WaitingLists 
                 .Where(w => w.BookId == bookId && w.NotificationSent == false)
                 .OrderBy(w => w.Position)
                 .Take(3)
@@ -234,35 +279,49 @@ namespace BookProject.Controllers
             var userId = Session["UserId"];
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, message = "You must be logged in!" });
             }
 
             int currentUserId = Convert.ToInt32(userId);
             var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
             if (!isAdmin)
             {
-                return RedirectToAction("Gallery");
+                return Json(new { success = false, message = "You don't have admin permissions" });
             }
 
-            if (ModelState.IsValid)
+            // בדיקת מחיר קנייה
+            if (book.BuyPrice <= 0)
             {
-                try
-                {
-                    book.IsActive = true;
-                    _context.Books.Add(book);
-                    _context.SaveChanges();
-
-                    TempData["SuccessMessage"] = "הספר נוסף בהצלחה!";
-                    return RedirectToAction("Gallery");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "אירעה שגיאה בהוספת הספר: " + ex.Message);
-                }
+                return Json(new { success = false, message = "Must enter purchase price for the book" });
             }
 
-            ViewBag.Genres = GetGenresFromDb();
-            return View(book);
+            // בדיקה רק אם הספר זמין להשאלה
+            if (book.IsBorrowable == true && book.BorrowPrice <= 0)
+            {
+                return Json(new { success = false, message = "Must enter borrowing price when book is available for borrowing" });
+            }
+
+            try
+            {
+                book.IsActive = true;
+                book.Type = "Physical";
+                book.IsBuyable = true;
+
+                // אם הספר לא להשאלה, נאפס את מחיר ההשאלה
+                if (!book.IsBorrowable.GetValueOrDefault())
+                {
+                    book.BorrowPrice = 0;
+                }
+
+                _context.Books.Add(book);
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Book added successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
         }
 
         [HttpGet]
@@ -303,8 +362,7 @@ namespace BookProject.Controllers
                 }
 
                 int currentUserId = Convert.ToInt32(userId);
-        
-                // מצא את הרשומה של המשתמש ברשימת ההמתנה
+                
                 var waitingEntry = _context.WaitingLists
                     .FirstOrDefault(w => w.BookId == bookId && w.UserId == currentUserId);
             
@@ -342,90 +400,121 @@ public async Task<ActionResult> Edit(Book book)
     var userId = Session["UserId"];
     if (userId == null)
     {
-        return RedirectToAction("Login", "Account");
+        return Json(new { success = false, message = "You must be logged in!" });
     }
 
     int currentUserId = Convert.ToInt32(userId);
     var isAdmin = _context.Users.FirstOrDefault(u => u.UserId == currentUserId)?.IsAdmin ?? false;
     if (!isAdmin)
     {
-        return RedirectToAction("Gallery");
+        return Json(new { success = false, message = "You don't have admin permissions" });
     }
 
-    if (ModelState.IsValid)
+    if (book.BuyPrice <= 0)
     {
-        try
-        {
-            var existingBook = _context.Books.Find(book.BookId);
-            if (existingBook == null)
-            {
-                return HttpNotFound();
-            }
-
-            // עדכון כל שדות הספר
-            existingBook.Title = book.Title;
-            existingBook.Author = book.Author;
-            existingBook.Description = book.Description;
-            existingBook.Genre = book.Genre;
-            existingBook.PublishYear = book.PublishYear;
-            existingBook.Publisher = book.Publisher;
-            existingBook.CoverImageUrl = book.CoverImageUrl;
-            existingBook.BuyPrice = book.BuyPrice;
-            existingBook.BorrowPrice = book.BorrowPrice;
-            existingBook.IsBorrowable = book.IsBorrowable;
-            existingBook.AvailableCopies = book.AvailableCopies;
-            existingBook.PDFUrl = book.PDFUrl;
-            existingBook.EPUBUrl = book.EPUBUrl;
-            existingBook.MOBIUrl = book.MOBIUrl;
-            existingBook.F2BUrl = book.F2BUrl;
-            existingBook.IsActive = true;
-
-            _context.SaveChanges();
-
-            // אם יש עותקים זמינים, נודיע למשתמשים בהמתנה
-            if (book.AvailableCopies > 0)
-            {
-                await NotifyWaitingUsers(book.BookId);
-            }
-
-            TempData["SuccessMessage"] = "הספר עודכן בהצלחה!";
-            return RedirectToAction("Details", new { id = book.BookId });
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("", "אירעה שגיאה בעדכון הספר: " + ex.Message);
-        }
+        return Json(new { success = false, message = "Must enter purchase price for the book" });
     }
 
-    ViewBag.Genres = GetGenresFromDb();
-    return View("EditBook", book);
+    if (book.IsBorrowable == true && book.BorrowPrice <= 0)
+    {
+        return Json(new { success = false, message = "Must enter borrowing price when book is available for borrowing" });
+    }
+
+    try
+    {
+        var existingBook = _context.Books.Find(book.BookId);
+        if (existingBook == null)
+        {
+            return Json(new { success = false, message = "Book not found" });
+        }
+
+        // Handle discount logic
+        if (book.PreviousPrice.HasValue)
+        {
+            if (book.PreviousPrice <= book.BuyPrice)
+            {
+                return Json(new { success = false, message = "Original price must be higher than the discounted price" });
+            }
+
+            if (!book.DiscountEndDate.HasValue)
+            {
+                return Json(new { success = false, message = "Discount end date is required" });
+            }
+
+            if (book.DiscountEndDate <= DateTime.Now)
+            {
+                return Json(new { success = false, message = "Discount end date must be in the future" });
+            }
+        }
+        else
+        {
+            // If removing discount, current price becomes previous price
+            if (existingBook.PreviousPrice.HasValue)
+            {
+                book.BuyPrice = existingBook.PreviousPrice.Value;
+            }
+        }
+        
+        existingBook.Title = book.Title;
+        existingBook.Author = book.Author;
+        existingBook.Description = book.Description;
+        existingBook.Genre = book.Genre;
+        existingBook.PublishYear = book.PublishYear;
+        existingBook.Publisher = book.Publisher;
+        existingBook.CoverImageUrl = book.CoverImageUrl;
+        existingBook.BuyPrice = book.BuyPrice;
+        existingBook.PreviousPrice = book.PreviousPrice;
+        existingBook.DiscountEndDate = book.DiscountEndDate;
+        existingBook.BorrowPrice = book.BorrowPrice;
+        existingBook.IsBorrowable = book.IsBorrowable;
+        existingBook.AvailableCopies = book.AvailableCopies;
+        existingBook.PDFUrl = book.PDFUrl;
+        existingBook.EPUBUrl = book.EPUBUrl;
+        existingBook.MOBIUrl = book.MOBIUrl;
+        existingBook.F2BUrl = book.F2BUrl;
+        existingBook.IsActive = true;
+
+        _context.SaveChanges();
+
+        if (book.AvailableCopies > 0)
+        {
+            await NotifyWaitingUsers(book.BookId);
+        }
+
+        return Json(new { success = true, message = "Book updated successfully!" });
+    }
+    catch (Exception ex)
+    {
+        return Json(new { success = false, message = "Error updating book: " + ex.Message });
+    }
 }
 
-        [HttpGet]
-        public JsonResult Search(string query)
+[HttpGet]
+public JsonResult Search(string query)
+{
+    if (string.IsNullOrEmpty(query))
+    {
+        return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+    }
+
+    var results = _context.Books
+        .Where(b => b.IsActive == true &&
+                    (b.Title.Contains(query) || 
+                     b.Author.Contains(query) || 
+                     b.Publisher.Contains(query)))  
+        .Select(b => new
         {
-            if (string.IsNullOrEmpty(query))
-            {
-                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
-            }
+            b.BookId,
+            b.Title,
+            b.Author,
+            b.CoverImageUrl,
+            b.BuyPrice
+        })
+        .Take(5)
+        .ToList();
 
-            var results = _context.Books
-                .Where(b => b.IsActive == true &&
-                           (b.Title.Contains(query) || 
-                            b.Author.Contains(query)))
-                .Select(b => new
-                {
-                    b.BookId,
-                    b.Title,
-                    b.Author,
-                    b.CoverImageUrl,
-                    b.BuyPrice
-                })
-                .Take(5)
-                .ToList();
-
-            return Json(results, JsonRequestBehavior.AllowGet);
-        }
+    return Json(results, JsonRequestBehavior.AllowGet);
+}
 
         [HttpPost]
         public ActionResult AddRating(int bookId, int rating, string comment)

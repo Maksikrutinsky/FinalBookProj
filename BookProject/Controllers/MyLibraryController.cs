@@ -25,13 +25,13 @@ public class MyLibraryController : Controller
     }
     
     [HttpPost] 
-    public ActionResult DeleteBook(int bookId)
+    public async Task<ActionResult> DeleteBook(int bookId)
     {
         try
         {
             int userId = Convert.ToInt32(Session["UserId"]);
-        
-            // מצא את ההזמנה הרלוונטית
+    
+            // מצא את פריט ההזמנה הרלוונטי
             var orderItem = _context.OrderItems
                 .FirstOrDefault(oi => oi.BookId == bookId && 
                                       oi.Order.UserId == userId && 
@@ -42,8 +42,23 @@ public class MyLibraryController : Controller
                 return Json(new { success = false, message = "הספר לא נמצא בספרייה שלך" }, JsonRequestBehavior.AllowGet);
             }
 
-            // מחיקת הספר מהספרייה
-            orderItem.Order.Status = "Cancelled";
+            // אם זה ספר מושאל, החזר את העותק למלאי
+            if (orderItem.TypeBook)
+            {
+                var book = _context.Books.Find(bookId);
+                if (book != null)
+                {
+                    book.AvailableCopies++;
+                    
+                    // שליחת התראות למשתמשים ברשימת ההמתנה
+                    var booksController = new BooksController();
+                    await booksController.NotifyWaitingUsers(bookId);
+                    
+                }
+            }
+
+            // מחיקת הספר מפריטי ההזמנה
+            _context.OrderItems.Remove(orderItem);
             _context.SaveChanges();
 
             return Json(new { success = true }, JsonRequestBehavior.AllowGet);
