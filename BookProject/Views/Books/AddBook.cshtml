@@ -1,30 +1,51 @@
 @model BookProject.Models.Book
 
 <div class="container">
-    <h2>Add a new book</h2>
+    <h2>Add New Book</h2>
 
-    @using (Html.BeginForm("AddBook", "Books", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("AddBook", "Books", FormMethod.Post, new { enctype = "multipart/form-data", id = "addBookForm" }))
     {
         @Html.AntiForgeryToken()
-        
+
         <div class="form-group">
             <label>Title</label>
-            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", required = "required" })
+            @Html.TextBoxFor(m => m.Title, new { 
+                @class = "form-control", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the book title')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
             <label>Author</label>
-            @Html.TextBoxFor(m => m.Author, new { @class = "form-control", required = "required" })
+            @Html.TextBoxFor(m => m.Author, new { 
+                @class = "form-control", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the author name')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
             <label>Publisher</label>
-            @Html.TextBoxFor(m => m.Publisher, new { @class = "form-control" })
+            @Html.TextBoxFor(m => m.Publisher, new { 
+                @class = "form-control", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Publisher is required')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
-            <label>Publish Year</label>
-            @Html.TextBoxFor(m => m.PublishYear, new { @class = "form-control", type = "number" })
+            <label>Publication Year</label>
+            @Html.TextBoxFor(m => m.PublishYear, new { 
+                @class = "form-control", 
+                type = "number",
+                required = "required", 
+                oninvalid = "this.setCustomValidity('Publication year is required')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
@@ -32,10 +53,10 @@
             @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4" })
         </div>
 
-            <div class="form-group">
-                <label>Cover Image Url</label>
-                @Html.TextBoxFor(m => m.CoverImageUrl, new { @class = "form-control", type = "url", placeholder = "הכנס כתובת URL של תמונה" })
-            </div>
+        <div class="form-group">
+            <label>Cover Image URL</label>
+            @Html.TextBoxFor(m => m.CoverImageUrl, new { @class = "form-control", type = "url", placeholder = "Enter image URL" })
+        </div>
 
         <div class="form-group">
             <label>Age Limit</label>
@@ -47,32 +68,34 @@
             @Html.DropDownListFor(m => m.Genre, new SelectList(ViewBag.Genres, "Text", "Text"), new { @class = "form-control" })
         </div>
 
-        <div class="form-group">
-            <label>Borrower price</label>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="IsBorrowable" id="IsBorrowable" value="true" />
+            <label class="form-check-label">Available for Borrowing</label>
+        </div>
+
+        <div class="form-group borrowing-price">
+            <label>Borrowing Price</label>
             @Html.TextBoxFor(m => m.BorrowPrice, new { @class = "form-control", type = "number", step = "0.01" })
         </div>
 
         <div class="form-group">
-            <label>Purchase price</label>
-            @Html.TextBoxFor(m => m.BuyPrice, new { @class = "form-control", type = "number", step = "0.01" })
+            <label>Purchase Price</label>
+            @Html.TextBoxFor(m => m.BuyPrice, new { 
+                @class = "form-control", 
+                type = "number", 
+                step = "0.01", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the purchase price')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
-            <label>Number of copies available</label>
+            <label>Available Copies</label>
             @Html.TextBoxFor(m => m.AvailableCopies, new { @class = "form-control", type = "number" })
         </div>
 
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="IsBorrowable" value="true" />
-            <label class="form-check-label">Can be borrowed</label>
-        </div>
-
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="IsBuyable" value="true" />
-            <label class="form-check-label">Can be purchased</label>
-        </div>
-
-        <h5>Available formats</h5>
+        <h5>Available Formats</h5>
         <div class="form-check">
             <input type="checkbox" class="form-check-input" name="FormatEpub" value="true" />
             <label class="form-check-label">EPUB</label>
@@ -89,7 +112,7 @@
             <input type="checkbox" class="form-check-input" name="FormatPDF" value="true" />
             <label class="form-check-label">PDF</label>
         </div>
-        
+
         <div class="form-group">
             <label>PDF Download URL</label>
             @Html.TextBoxFor(m => m.PDFUrl, new { @class = "form-control", type = "url" })
@@ -110,6 +133,115 @@
             @Html.TextBoxFor(m => m.F2BUrl, new { @class = "form-control", type = "url" })
         </div>
 
-        <button type="submit" class="btn btn-primary">Save a book</button>
+        <div id="errorMessages" class="alert alert-danger" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary">Save Book</button>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var isBorrowableCheckbox = $('#IsBorrowable');
+            var borrowPriceInput = $('input[name="BorrowPrice"]');
+
+            function updateBorrowPriceValidation() {
+                if (isBorrowableCheckbox.is(':checked')) {
+                    borrowPriceInput.prop('required', true);
+                    borrowPriceInput[0].setCustomValidity('Please enter the borrowing price');
+                } else {
+                    borrowPriceInput.prop('required', false);
+                    borrowPriceInput.val('');
+                    borrowPriceInput[0].setCustomValidity('');
+                }
+            }
+
+            updateBorrowPriceValidation();
+            isBorrowableCheckbox.on('change', updateBorrowPriceValidation);
+
+            borrowPriceInput.on('input', function() {
+                if (isBorrowableCheckbox.is(':checked') && (!this.value || parseFloat(this.value) <= 0)) {
+                    this.setCustomValidity('Please enter a valid borrowing price greater than 0');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            $('#addBookForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var isBorrowable = isBorrowableCheckbox.is(':checked');
+                var borrowPrice = borrowPriceInput.val();
+                var buyPrice = $('input[name="BuyPrice"]').val();
+
+                if (isBorrowable && (!borrowPrice || parseFloat(borrowPrice) <= 0)) {
+                    alert('Please enter a borrowing price when the book is available for borrowing');
+                    return false;
+                }
+
+                if (!buyPrice || parseFloat(buyPrice) <= 0) {
+                    alert('Please enter a valid purchase price');
+                    return false;
+                }
+
+                var form = $(this);
+                var formData = new FormData(this);
+
+                formData.append('IsBorrowable', isBorrowable);
+                formData.append('FormatEpub', $('input[name="FormatEpub"]').is(':checked'));
+                formData.append('FormatF2b', $('input[name="FormatF2b"]').is(':checked'));
+                formData.append('FormatMobi', $('input[name="FormatMobi"]').is(':checked'));
+                formData.append('FormatPDF', $('input[name="FormatPDF"]').is(':checked'));
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Book added successfully!');
+                            window.location.href = '/Books/Gallery';
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error occurred while saving the book: ' + error);
+                    }
+                });
+            });
+
+            $('input[type="url"]').on('input', function() {
+                if (this.value && !isValidUrl(this.value)) {
+                    alert('Please enter a valid URL');
+                }
+            });
+
+            function isValidUrl(url) {
+                try {
+                    new URL(url);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+
+            $('#addBookForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var publisher = $('input[name="Publisher"]').val();
+                if (!publisher || publisher.trim() === '') {
+                    alert('Publisher name is required');
+                    return false;
+                }
+            });
+                $('input[type="number"]').on('input', function() {
+                var value = parseFloat(this.value);
+                if (this.value && (isNaN(value) || value < 0)) {
+                    alert('Please enter a valid positive number');
+                }
+            });
+        });
+    </script>
+}

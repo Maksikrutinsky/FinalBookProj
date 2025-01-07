@@ -50,40 +50,47 @@ namespace BookProject.Controllers
             return View(currentCart.OrderItems.Where(oi => oi.Book.IsActive.GetValueOrDefault()));
         }
 
-[HttpPost]
-public JsonResult AddToCart(int bookId, bool isBorrow)
-{
-    if (Session["UserId"] == null)
-    {
-        return Json(new { success = false, message = "אנא התחבר כדי להוסיף פריטים לעגלה" });
-    }
-
-    try
-    {
-        int userId = Convert.ToInt32(Session["UserId"]);
-        var bookToAdd = _context.Books.Find(bookId);
-        
-        if (bookToAdd == null)
+        [HttpPost]
+        public JsonResult AddToCart(int bookId, bool isBorrow)
         {
-            return Json(new { success = false, message = "הספר לא נמצא" });
-        }
-
-        if (isBorrow)
-        {
-            // בדיקת מגבלת השאלות
-            var currentBorrowedBooksCount = _context.Orders
-                .Where(order => order.UserId == userId && 
-                            (order.Status == "InCart" || order.Status == "Completed"))
-                .SelectMany(order => order.OrderItems)
-                .Count(orderItem => orderItem.TypeBook);
-
-            if (currentBorrowedBooksCount >= 3)
+            if (Session["UserId"] == null)
             {
-                return Json(new { 
-                    success = false, 
-                    message = "לא ניתן להשאיל יותר משלושה ספרים בו-זמנית" 
-                });
+                return Json(new { success = false, message = "אנא התחבר כדי להוסיף פריטים לעגלה" });
             }
+
+            try
+            {
+                int userId = Convert.ToInt32(Session["UserId"]);
+                var bookToAdd = _context.Books.Find(bookId);
+        
+                if (bookToAdd == null)
+                {
+                    return Json(new { success = false, message = "הספר לא נמצא" });
+                }
+
+                if (isBorrow)
+                {
+                    // ספירת ספרים מושאלים קיימים (בעגלה ובהשאלה פעילה)
+                    var currentBorrowedBooksCount = _context.Orders
+                        .Where(order => order.UserId == userId && 
+                                        (order.Status == "InCart" || order.Status == "Completed"))
+                        .SelectMany(order => order.OrderItems)
+                        .Count(orderItem => orderItem.TypeBook);
+
+                    // ספירת ספרים מושאלים בעגלה הנוכחית
+                    var currentCartBorrowedCount = _context.Orders
+                        .Where(order => order.UserId == userId && order.Status == "InCart")
+                        .SelectMany(order => order.OrderItems)
+                        .Count(orderItem => orderItem.TypeBook);
+
+                    // בדיקה אם הוספת הספר תעביר את הסך הכל מעבר ל-3
+                    if (currentBorrowedBooksCount + currentCartBorrowedCount > 3)
+                    {
+                        return Json(new { 
+                            success = false, 
+                            message = "לא ניתן להשאיל יותר משלושה ספרים בו-זמנית" 
+                        });
+                    }
 
             // בדיקת זמינות הספר
             var firstWaitingUser = _context.WaitingLists
@@ -270,6 +277,7 @@ private void UpdateWaitingListPositions(int bookId)
     _context.SaveChanges();
 }
 
+// מתודות עדכון ProcessPayment ו-ProcessPayPalPayment 
 [HttpPost]
 public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 {
@@ -394,8 +402,21 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
                         .FirstOrDefault(w => w.BookId == book.BookId && w.UserId == userId);
                     if (waitingEntry != null)
                     {
+                        // הסרת הרשומה
                         _context.WaitingLists.Remove(waitingEntry);
-                        UpdateWaitingListPositions(book.BookId);
+                        
+                        // מציאת כל הרשומות שאחרי הרשומה שנמחקה
+                        var laterEntries = _context.WaitingLists
+                            .Where(w => w.BookId == book.BookId && w.Position > waitingEntry.Position)
+                            .ToList();
+                    
+                        // עדכון המיקומים
+                        foreach (var entry in laterEntries)
+                        {
+                            entry.Position--;
+                        }
+
+                        _context.SaveChanges();
                     }
                 }
             }
@@ -444,7 +465,6 @@ public async Task<JsonResult> ProcessPayPalPayment(string orderID, dynamic payme
             .Include(o => o.OrderItems.Select(oi => oi.Book))
             .FirstOrDefault(o => o.UserId == userId && o.Status == "InCart");
         
-
         if (currentCart == null || !currentCart.OrderItems.Any())
         {
             return Json(new { success = false, message = "Cart is empty" });
@@ -467,8 +487,21 @@ public async Task<JsonResult> ProcessPayPalPayment(string orderID, dynamic payme
                     .FirstOrDefault(w => w.BookId == book.BookId && w.UserId == userId);
                 if (waitingEntry != null)
                 {
+                    // הסרת הרשומה
                     _context.WaitingLists.Remove(waitingEntry);
-                    UpdateWaitingListPositions(book.BookId);
+                    
+                    // מציאת כל הרשומות שאחרי הרשומה שנמחקה
+                    var laterEntries = _context.WaitingLists
+                        .Where(w => w.BookId == book.BookId && w.Position > waitingEntry.Position)
+                        .ToList();
+                
+                    // עדכון המיקומים
+                    foreach (var entry in laterEntries)
+                    {
+                        entry.Position--;
+                    }
+
+                    _context.SaveChanges();
                 }
             }
         }

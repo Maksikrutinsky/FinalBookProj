@@ -3,7 +3,7 @@
 <div class="container">
     <h2>Edit Book</h2>
 
-    @using (Html.BeginForm("Edit", "Books", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("Edit", "Books", FormMethod.Post, new { enctype = "multipart/form-data", id = "editBookForm" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.BookId)
@@ -11,22 +11,43 @@
         
         <div class="form-group">
             <label>Title</label>
-            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", required = "required" })
+            @Html.TextBoxFor(m => m.Title, new { 
+                @class = "form-control", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the book title')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
             <label>Author</label>
-            @Html.TextBoxFor(m => m.Author, new { @class = "form-control", required = "required" })
+            @Html.TextBoxFor(m => m.Author, new { 
+                @class = "form-control", 
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the author name')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
             <label>Publisher</label>
-            @Html.TextBoxFor(m => m.Publisher, new { @class = "form-control" })
+            @Html.TextBoxFor(m => m.Publisher, new { 
+                @class = "form-control",
+                required = "required",
+                oninvalid = "this.setCustomValidity('Publisher is required')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
-            <label>Publish Year</label>
-            @Html.TextBoxFor(m => m.PublishYear, new { @class = "form-control", type = "number" })
+            <label>Publication Year</label>
+            @Html.TextBoxFor(m => m.PublishYear, new { 
+                @class = "form-control", 
+                type = "number",
+                required = "required",
+                oninvalid = "this.setCustomValidity('Publication year is required')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
@@ -34,10 +55,10 @@
             @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4" })
         </div>
 
-            <div class="form-group">
-                <label>Cover Image Url</label>
-                @Html.TextBoxFor(m => m.CoverImageUrl, new { @class = "form-control", type = "url", placeholder = "הכנס כתובת URL של תמונה" })
-            </div>
+        <div class="form-group">
+            <label>Cover Image URL</label>
+            @Html.TextBoxFor(m => m.CoverImageUrl, new { @class = "form-control", type = "url" })
+        </div>
 
         <div class="form-group">
             <label>Age Limit</label>
@@ -49,50 +70,88 @@
             @Html.DropDownListFor(m => m.Genre, new SelectList(ViewBag.Genres, "Text", "Text"), new { @class = "form-control" })
         </div>
 
-        <div class="form-group">
-            <label>Borrower price</label>
+        <div class="form-check">
+            @Html.CheckBox("IsBorrowable", Model.IsBorrowable ?? false, new { @class = "form-check-input" })
+            <label class="form-check-label">Available for Borrowing</label>
+        </div>
+
+        <div class="form-group borrowing-price">
+            <label>Borrowing Price</label>
             @Html.TextBoxFor(m => m.BorrowPrice, new { @class = "form-control", type = "number", step = "0.01" })
         </div>
 
         <div class="form-group">
-            <label>Purchase price</label>
-            @Html.TextBoxFor(m => m.BuyPrice, new { @class = "form-control", type = "number", step = "0.01" })
+            <label>Purchase Price</label>
+            @Html.TextBoxFor(m => m.BuyPrice, new { 
+                @class = "form-control", 
+                type = "number", 
+                step = "0.01",
+                required = "required",
+                oninvalid = "this.setCustomValidity('Please enter the purchase price')",
+                oninput = "this.setCustomValidity('')"
+            })
         </div>
 
         <div class="form-group">
-            <label>Number of copies available</label>
+            <label>Available Copies</label>
             @Html.TextBoxFor(m => m.AvailableCopies, new { @class = "form-control", type = "number" })
         </div>
-
         
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="IsBorrowable" value="true" />
-            <label class="form-check-label">Can be borrowed</label>
+        <div class="form-group">
+            <h5>Discount Settings</h5>
+            <div class="form-check">
+                @Html.CheckBox("HasDiscount", Model.PreviousPrice.HasValue, new { @class = "form-check-input", id = "hasDiscount" })
+                <label class="form-check-label">Apply Discount</label>
+            </div>
+            
+            <div id="discountFields" style="display: none;">
+                <div class="form-group">
+                    <label>Original Price</label>
+                    @Html.TextBoxFor(m => m.PreviousPrice, new { 
+                        @class = "form-control", 
+                        type = "number",
+                        step = "0.01",
+                        min = "0"
+                    })
+                </div>
+                
+                <div class="form-group">
+                    <label>Discount End Date</label>
+                    @Html.TextBoxFor(m => m.DiscountEndDate, new { 
+                        @class = "form-control", 
+                        type = "datetime-local"
+                    })
+                </div>
+
+                <div class="form-group">
+                    <label>Discount Percentage (Calculated)</label>
+                    <input type="text" id="discountPercentage" class="form-control" readonly />
+                </div>
+            </div>
         </div>
 
+        <h5>Available Formats</h5>
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="IsBuyable" value="true" />
-            <label class="form-check-label">Can be purchased</label>
-        </div>
-
-        <h5>Available formats</h5>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="FormatEpub" value="true" />
+            <input type="checkbox" class="form-check-input" name="FormatEpub" 
+                   @(Model.FormatEpub == true ? "checked" : "") value="true" />
             <label class="form-check-label">EPUB</label>
         </div>
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="FormatF2b" value="true" />
+            <input type="checkbox" class="form-check-input" name="FormatF2b" 
+                   @(Model.FormatF2b == true ? "checked" : "") value="true" />
             <label class="form-check-label">F2B</label>
         </div>
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="FormatMobi" value="true" />
+            <input type="checkbox" class="form-check-input" name="FormatMobi" 
+                   @(Model.FormatMobi == true ? "checked" : "") value="true" />
             <label class="form-check-label">MOBI</label>
         </div>
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="FormatPDF" value="true" />
+            <input type="checkbox" class="form-check-input" name="FormatPDF" 
+                   @(Model.FormatPDF == true ? "checked" : "") value="true" />
             <label class="form-check-label">PDF</label>
         </div>
-        
+
         <div class="form-group">
             <label>PDF Download URL</label>
             @Html.TextBoxFor(m => m.PDFUrl, new { @class = "form-control", type = "url" })
@@ -113,6 +172,160 @@
             @Html.TextBoxFor(m => m.F2BUrl, new { @class = "form-control", type = "url" })
         </div>
 
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <div id="errorMessages" class="alert alert-danger" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Original borrowing validation
+            var isBorrowableCheckbox = $('#IsBorrowable');
+            var borrowPriceInput = $('input[name="BorrowPrice"]');
+            
+
+            function updateBorrowPriceValidation() {
+                if (isBorrowableCheckbox.is(':checked')) {
+                    borrowPriceInput.prop('required', true);
+                    if (!borrowPriceInput.val()) {
+                        borrowPriceInput[0].setCustomValidity('Please enter the borrowing price');
+                    }
+                } else {
+                    borrowPriceInput.prop('required', false);
+                    borrowPriceInput.val('');
+                    borrowPriceInput[0].setCustomValidity('');
+                }
+            }
+
+            updateBorrowPriceValidation();
+            isBorrowableCheckbox.on('change', updateBorrowPriceValidation);
+
+            // Discount functionality
+            var hasDiscountCheckbox = $('#hasDiscount');
+            var discountFields = $('#discountFields');
+            var previousPriceInput = $('input[name="PreviousPrice"]');
+            var buyPriceInput = $('input[name="BuyPrice"]');
+            var discountPercentageDisplay = $('#discountPercentage');
+            
+            function toggleDiscountFields() {
+                if (hasDiscountCheckbox.is(':checked')) {
+                    discountFields.show();
+                    if (!previousPriceInput.val()) {
+                        previousPriceInput.val(buyPriceInput.val());
+                    }
+                    calculateDiscountPercentage();
+                } else {
+                    discountFields.hide();
+                    previousPriceInput.val('');
+                    discountPercentageDisplay.val('');
+                }
+            }
+            
+            function calculateDiscountPercentage() {
+                var previousPrice = parseFloat(previousPriceInput.val());
+                var currentPrice = parseFloat(buyPriceInput.val());
+                
+                if (previousPrice && currentPrice && previousPrice > 0) {
+                    var discount = ((previousPrice - currentPrice) / previousPrice) * 100;
+                    discountPercentageDisplay.val(discount.toFixed(1) + '%');
+                } else {
+                    discountPercentageDisplay.val('');
+                }
+            }
+            
+            toggleDiscountFields();
+            hasDiscountCheckbox.on('change', toggleDiscountFields);
+            
+            previousPriceInput.on('input', calculateDiscountPercentage);
+            buyPriceInput.on('input', calculateDiscountPercentage);
+            
+            // Form submission
+            $('#editBookForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var isBorrowable = isBorrowableCheckbox.is(':checked');
+                var borrowPrice = borrowPriceInput.val();
+                var buyPrice = buyPriceInput.val();
+                var hasDiscount = hasDiscountCheckbox.is(':checked');
+                var previousPrice = previousPriceInput.val();
+
+                if (isBorrowable && (!borrowPrice || parseFloat(borrowPrice) <= 0)) {
+                    alert('Please enter a borrowing price when book is available for borrowing');
+                    return false;
+                }
+
+                if (!buyPrice || parseFloat(buyPrice) <= 0) {
+                    alert('Please enter a valid purchase price');
+                    return false;
+                }
+
+                if (hasDiscount) {
+                    if (!previousPrice || parseFloat(previousPrice) <= parseFloat(buyPrice)) {
+                        alert('Original price must be higher than the current price');
+                        return false;
+                    }
+                    
+                    if (!$('input[name="DiscountEndDate"]').val()) {
+                        alert('Please set a discount end date');
+                        return false;
+                    }
+                }
+
+                var form = $(this);
+                var formData = new FormData(this);
+                formData.append('IsBorrowable', isBorrowable);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Book updated successfully!');
+                            window.location.href = '/Books/Details/' + @Model.BookId;
+                        } else {
+                            alert(response.message || 'Error updating book');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error occurred while updating the book: ' + error);
+                    }
+                });
+            });
+
+            // URL validation
+            function isValidUrl(url) {
+                try {
+                    new URL(url);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+            
+            $('input[type="url"]').on('input', function() {
+                if (this.value && !isValidUrl(this.value)) {
+                    alert('Please enter a valid URL');
+                }
+            });
+            
+            $('input[type="number"]').on('input', function() {
+                var value = parseFloat(this.value);
+                if (this.value && (isNaN(value) || value < 0)) {
+                    alert('Please enter a valid positive number');
+                }
+            });
+
+            if (hasDiscountCheckbox.is(':checked')) {
+                var currentDiscountDate = @Html.Raw(Json.Encode(Model.DiscountEndDate));
+                if (currentDiscountDate) {
+                    $('input[name="DiscountEndDate"]').val(new Date(currentDiscountDate).toISOString().slice(0,16));
+                }
+            }
+            
+        });
+    </script>
+}

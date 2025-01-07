@@ -185,7 +185,7 @@
         padding: 1rem;
         font-weight: 600;
     }
-
+    
     .waiting-list-table td {
         padding: 1rem;
         border-bottom: 1px solid #f1f2f6;
@@ -283,162 +283,6 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(26, 115, 232, 0.2);
     }
-    .custom-modal .modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: none;
-        border-radius: 25px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    }
-
-    .custom-modal .modal-header {
-        border-bottom: 2px solid rgba(26, 115, 232, 0.1);
-        padding: 2rem;
-        background: linear-gradient(45deg, rgba(26, 115, 232, 0.03), rgba(0, 82, 204, 0.03));
-        border-radius: 25px 25px 0 0;
-    }
-
-    .custom-modal .modal-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        background: linear-gradient(45deg, #1a73e8, #0052cc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0;
-    }
-
-    .custom-modal .modal-body {
-        padding: 3rem;
-    }
-
-    .custom-modal .modal-body p {
-        color: #5f6368;
-        font-size: 1.4rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
-
-    .custom-modal .modal-body .small {
-        font-size: 1.1rem;
-        opacity: 0.8;
-        margin-top: 1.5rem;
-    }
-
-    .custom-modal .modal-footer {
-        border-top: 2px solid rgba(26, 115, 232, 0.1);
-        padding: 2rem;
-        background: linear-gradient(45deg, rgba(26, 115, 232, 0.03), rgba(0, 82, 204, 0.03));
-        border-radius: 0 0 25px 25px;
-    }
-
-    .custom-modal .btn {
-        padding: 1rem 2.5rem;
-        font-size: 1.2rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        border-radius: 12px;
-    }
-
-    .custom-modal .btn-secondary {
-        background: #f1f3f4;
-        color: #5f6368;
-        border: none;
-    }
-
-    .custom-modal .btn-primary {
-        background: linear-gradient(45deg, #1a73e8, #0052cc);
-        border: none;
-        box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
-    }
-
-    .custom-modal .btn-danger {
-        background: linear-gradient(45deg, #dc3545, #b02a37);
-        border: none;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
-    }
-
-    .custom-modal .btn-success {
-        background: linear-gradient(45deg, #28a745, #20c997);
-        border: none;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
-    }
-
-    .custom-modal .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .d-grid.gap-2 {
-        display: grid;
-        gap: 1.5rem !important;
-    }
-
-    .modal {
-        text-align: center;
-        padding: 0!important;
-    }
-
-    .modal:before {
-        content: '';
-        display: inline-block;
-        height: 100vh;
-        vertical-align: middle;
-        margin-right: -4px;
-    }
-
-    .modal-dialog {
-        display: inline-block;
-        text-align: left;
-        vertical-align: middle;
-        width: 90%;
-        max-width: 500px;
-        margin: 1.75rem auto;
-    }
-
-    .modal-content {
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid rgba(0,0,0,.2);
-        position: relative;
-        margin: auto;
-        top: 0;
-        transform: translateY(0);
-    }
-
-    .modal-header {
-        border-bottom: 1px solid #dee2e6;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        padding: 1rem;
-    }
-
-    .modal-body {
-        padding: 1rem;
-    }
-
-    .modal-footer {
-        border-top: 1px solid #dee2e6;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-        padding: 1rem;
-    }
-
-    /* Animation */
-    .modal.fade .modal-dialog {
-        transform: scale(0.8);
-        transition: transform 0.3s ease-out;
-    }
-
-    .modal.show .modal-dialog {
-        transform: scale(1);
-    }
-
-    .modal-backdrop.show {
-        opacity: 0.5;
-    }
-
     /* Buttons */
     .modal .btn {
         padding: 0.5rem 1rem;
@@ -560,9 +404,9 @@
                 <h4>Purchase Price:</h4>
                 @if (Model.PreviousPrice.HasValue)
                 {
-                    <span class="original-price">₪@Model.PreviousPrice</span>
+                    <span class="original-price">$@Model.PreviousPrice</span>
                 }
-                <span class="price-tag">₪@Model.BuyPrice</span>
+                <span class="price-tag">$@Model.BuyPrice</span>
 
                 @if (Model.IsBorrowable == true)
                 {
@@ -570,7 +414,7 @@
                         <h4>Borrow Price:</h4>
                         @if (Model.AvailableCopies > 0)
                         {
-                            <span class="borrow-price">₪@Model.BorrowPrice</span>
+                            <span class="borrow-price">$@Model.BorrowPrice</span>
                             <div class="mt-2">
                                 <span class="text-success fw-bold">
                                     Available copies: @Model.AvailableCopies

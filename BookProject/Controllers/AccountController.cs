@@ -130,35 +130,39 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<ActionResult> ForgotPassword(string Email)
     {
-        if (!string.IsNullOrEmpty(Email))
+        if (string.IsNullOrEmpty(Email))
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == Email);
-            if (user != null)
-            {
-                string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-                Session[$"ResetToken_{Email}"] = token;
-                Session[$"ResetTokenExpiry_{Email}"] = DateTime.Now.AddHours(1);
+            ModelState.AddModelError("", "Please enter an email address");
+            return View();
+        }
 
-                var resetLink = Url.Action("ResetPassword", "Account",
-                    new { email = Email, token = token },
-                    protocol: Request.Url.Scheme);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == Email);
+        if (user == null)
+        {
+            ModelState.AddModelError("", "Email address is not registered in our system");
+            return View();
+        }
 
-                try
-                {
-                    await _emailService.SendPasswordResetEmailAsync(Email, resetLink);
-                }
-                catch
-                {
-                    ModelState.AddModelError("", "Error sending email. Please try again later.");
-                    return View();
-                }
-            }
-            // תמיד מחזירים את אותה תגובה מסיבות אבטחה
+        string token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        Session[$"ResetToken_{Email}"] = token;
+        Session[$"ResetTokenExpiry_{Email}"] = DateTime.Now.AddHours(1);
+
+        var resetLink = Url.Action("ResetPassword", "Account",
+            new { email = Email, token = token },
+            protocol: Request.Url.Scheme);
+
+        try
+        {
+            await _emailService.SendPasswordResetEmailAsync(Email, resetLink);
             return RedirectToAction("ForgotPasswordConfirmation");
         }
-        return View();
+        catch
+        {
+            ModelState.AddModelError("", "Error sending email. Please try again later.");
+            return View();
+        }
     }
-
+    
     [HttpGet]
     public ActionResult ResetPassword(string email, string token)
     {

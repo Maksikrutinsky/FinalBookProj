@@ -86,8 +86,30 @@ public class UserManagementController : Controller
         var user = await _context.Users.FindAsync(id);
         if (user == null) return HttpNotFound();
 
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
-        return RedirectToAction("Index");
+        try
+        {
+            
+            var ratings = _context.Ratings.Where(r => r.UserId == id);
+            _context.Ratings.RemoveRange(ratings);
+
+            var orders = await _context.Orders.Where(o => o.UserId == id).ToListAsync();
+            foreach(var order in orders)
+            {
+                var orderItems = _context.OrderItems.Where(oi => oi.OrderId == order.OrderId);
+                _context.OrderItems.RemoveRange(orderItems);
+            }
+            
+            _context.Orders.RemoveRange(orders);
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Could not delete user. Please try again.";
+            return RedirectToAction("Index");
+        }
     }
 }

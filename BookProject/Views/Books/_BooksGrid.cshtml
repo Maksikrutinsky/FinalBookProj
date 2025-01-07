@@ -1,10 +1,10 @@
 @model IEnumerable<BookProject.Models.Book>
 
 <style>
-
     .card {
         height: 100%;
         transition: transform 0.2s;
+        position: relative;
     }
 
     .card:hover {
@@ -50,6 +50,38 @@
         color: #6c757d;
         margin-right: 10px;
     }
+
+    .delete-book {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        z-index: 1000;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .delete-book:hover {
+        transform: scale(1.1);
+        background-color: #c82333;
+    }
+
+    .delete-book i {
+        font-size: 16px;
+    }
+
+    .book-card {
+        margin-bottom: 20px;
+    }
 </style>
 
 <div class="books-grid">
@@ -57,6 +89,13 @@
     {
         <div class="book-card">
             <div class="card">
+                @if (ViewBag.IsAdmin)
+                {
+                    <button class="delete-book" data-book-id="@book.BookId">
+                        <i class="fas fa-times"></i>
+                    </button>
+                }
+                
                 <a href="@Url.Action("Details", "Books", new { id = book.BookId })">
                     <img src="@book.CoverImageUrl" class="card-img-top" alt="@book.Title">
                 </a>
@@ -78,21 +117,21 @@
                         @if (book.PreviousPrice.HasValue)
                         {
                             <div class="mb-1">
-                                <span class="original-price">₪@book.PreviousPrice</span>
+                                <span class="original-price">$@book.PreviousPrice</span>
                             </div>
                         }
 
                         @if (book.IsBuyable == true)
                         {
                             <div class="mb-1">
-                                <strong>Buy:</strong> <span class="current-price">₪@book.BuyPrice</span>
+                                <strong>Buy:</strong> <span class="current-price">$@book.BuyPrice</span>
                             </div>
                         }
 
                         @if (book.IsBorrowable == true)
                         {
                             <div class="mb-1">
-                                <strong>Borrow:</strong> <span class="borrow-price">₪@book.BorrowPrice</span>
+                                <strong>Borrow:</strong> <span class="borrow-price">$@book.BorrowPrice</span>
                             </div>
                         }
                         else

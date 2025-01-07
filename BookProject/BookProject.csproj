@@ -18,9 +18,8 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>
-    </IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication />
+    <IISExpressSSLPort>    </IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
@@ -223,6 +222,11 @@
     <Content Include="Content\images\Reader.png" />
     <Content Include="Content\images\readerlogin.png" />
     <Content Include="Content\images\top rated.png" />
+    <Content Include="Content\images_\header10.png" />
+    <Content Include="Content\images_\header2.jpeg" />
+    <Content Include="Content\images_\header3.jpg" />
+    <Content Include="Content\images_\header4.jpeg" />
+    <Content Include="Content\images_\header5.jpeg" />
     <Content Include="Content\images_\logo.png" />
     <Content Include="Content\images_\header.png" />
     <Content Include="favicon.ico" />
@@ -338,7 +342,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59119</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:59119/</IISUrl>
+          <IISUrl>https://localhost:59119/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

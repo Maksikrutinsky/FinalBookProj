@@ -91,7 +91,7 @@
                 <input type="text"
                        id="searchInput"
                        class="form-control"
-                       placeholder="Search by book title or author..."
+                       placeholder="Search by book title or author name..."
                        value="@ViewBag.CurrentSearch">
             </div>
 
@@ -129,16 +129,25 @@
                 var searchTerm = $('#searchInput').val();
                 var genre = $('#genreSelect').val();
                 var sortOrder = $('#sortOrder').val();
+                var publisher = $('#publisherSelect').val(); 
 
-                $.get('@Url.Action("Gallery", "Books")', {
-                    searchTerm: searchTerm,
-                    genre: genre,
-                    sortOrder: sortOrder
-                }, function(data) {
-                    $('#booksContainer').html(data);
+                $.ajax({
+                    url: '@Url.Action("Gallery", "Books")',
+                    type: 'GET',
+                    data: {
+                        searchTerm: searchTerm,
+                        genre: genre,
+                        sortOrder: sortOrder
+                    },
+                    success: function(data) {
+                        $('#booksContainer').html(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
                 });
             }
-
+            
             $('#searchInput').on('input', function() {
                 clearTimeout(timer);
                 timer = setTimeout(updateResults, 300);
@@ -147,6 +156,69 @@
             $('#genreSelect, #sortOrder').change(function() {
                 updateResults();
             });
+
+            if ($('#searchInput').val()) {
+                updateResults();
+            }
+
+            // טיפול במחיקת ספר
+            $(document).on('click', '.delete-book', function(e) {
+                e.preventDefault();
+                
+                var bookId = $(this).data('book-id');
+                var $card = $(this).closest('.col-md-4');
+                
+                if (confirm('האם אתה בטוח שברצונך למחוק ספר זה?')) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteBook", "Books")',
+                        type: 'POST',
+                        data: { id: bookId },
+                        success: function(response) {
+                            if (response.success) {
+                                $card.fadeOut(300, function() {
+                                    $(this).remove();
+                                });
+                                
+                                var alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                    response.message +
+                                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                    '<span aria-hidden="true">&times;</span></button></div>');
+                                $('.container').prepend(alert);
+
+                                // עדכון התצוגה לאחר מחיקה
+                                setTimeout(updateResults, 300);
+                            } else {
+                                var alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                                    response.message +
+                                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                    '<span aria-hidden="true">&times;</span></button></div>');
+                                $('.container').prepend(alert);
+                            }
+                        },
+                        error: function() {
+                            var alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                                'אירעה שגיאה במחיקת הספר' +
+                                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                                '<span aria-hidden="true">&times;</span></button></div>');
+                            $('.container').prepend(alert);
+                        }
+                    });
+                }
+            });
+
+            // סגירת הודעות אוטומטית
+            $(document).on('click', '.alert .close', function() {
+                $(this).closest('.alert').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            });
+
+            // הסרה אוטומטית של הודעות אחרי 5 שניות
+            setTimeout(function() {
+                $('.alert').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 5000);
         });
     </script>
 }
