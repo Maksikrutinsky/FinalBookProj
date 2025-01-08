@@ -35,85 +35,100 @@ namespace BookProject.Controllers
                 .ToList();
         }
 
-        [HttpGet]
-        public ActionResult Gallery(string searchTerm, string genre, string sortOrder)
+[HttpGet]
+public ActionResult Gallery(string searchTerm, string genre, string sortOrder, decimal? maxPrice)
+{
+    var userId = Session["UserId"];
+    if (userId != null)
+    {
+        int id = Convert.ToInt32(userId);
+        ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == id)?.IsAdmin ?? false;
+    }
+    else
+    {
+        ViewBag.IsAdmin = false;
+    }
+
+    var books = _context.Books.Where(b => b.IsActive == true);
+
+    ViewBag.Genres = GetGenresFromDb();
+
+    // חיפוש לפי טקסט
+    if (!string.IsNullOrEmpty(searchTerm))
+    {
+        searchTerm = searchTerm.ToLower();
+        books = books.Where(b => b.Title.ToLower().Contains(searchTerm) || 
+                                b.Author.ToLower().Contains(searchTerm) ||
+                                b.Publisher.ToLower().Contains(searchTerm));
+        ViewBag.CurrentSearch = searchTerm;
+    }
+    
+    // סינון לפי ז'אנר
+    if (!string.IsNullOrEmpty(genre))
+    {
+        books = books.Where(b => b.Genre == genre);
+    }
+
+    // פילטר מחירים
+    if (maxPrice.HasValue && maxPrice.Value > 0)
+    {
+        books = books.Where(b => 
+            (b.PreviousPrice.HasValue ? b.PreviousPrice.Value : b.BuyPrice) <= maxPrice.Value);
+    }
+
+    switch (sortOrder)
+    {
+        case "price_asc":
+            books = books.OrderBy(b => b.BuyPrice);
+            break;
+        case "price_desc":
+            books = books.OrderByDescending(b => b.BuyPrice);
+            break;
+        case "year_desc":
+            books = books.OrderByDescending(b => b.PublishYear);
+            break;
+        case "year_asc":
+            books = books.OrderBy(b => b.PublishYear);
+            break;
+        case "rating":
+            books = books.OrderByDescending(b => b.Ratings.Average(r => r.RatingValue));
+            break;
+        case "buy_only":
+            books = books.Where(b => !(b.IsBorrowable ?? false));
+            break;
+        case "on_sale":
+            books = books.Where(b => b.PreviousPrice.HasValue && b.DiscountEndDate.HasValue && b.DiscountEndDate > DateTime.Now);
+            break;
+        default:
+            books = books.OrderByDescending(b => b.PublishYear);
+            break;
+    }
+
+    foreach (var book in books)
+    {
+        if (book.DiscountEndDate.HasValue && book.DiscountEndDate < DateTime.Now)
         {
-            var userId = Session["UserId"];
-            if (userId != null)
-            {
-                int id = Convert.ToInt32(userId);
-                ViewBag.IsAdmin = _context.Users.FirstOrDefault(u => u.UserId == id)?.IsAdmin ?? false;
-            }
-            else
-            {
-                ViewBag.IsAdmin = false;
-            }
-
-            var books = _context.Books.Where(b => b.IsActive == true);
-
-            ViewBag.Genres = GetGenresFromDb();
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                searchTerm = searchTerm.ToLower();
-                books = books.Where(b => b.Title.ToLower().Contains(searchTerm) || 
-                                         b.Author.ToLower().Contains(searchTerm) ||
-                                         b.Publisher.ToLower().Contains(searchTerm));
-                ViewBag.CurrentSearch = searchTerm;
-            }
-            
-            if (!string.IsNullOrEmpty(genre))
-            {
-                books = books.Where(b => b.Genre == genre);
-            }
-
-            switch (sortOrder)
-            {
-                case "price_asc":
-                    books = books.OrderBy(b => b.BuyPrice);
-                    break;
-                case "price_desc":
-                    books = books.OrderByDescending(b => b.BuyPrice);
-                    break;
-                case "year_desc":
-                    books = books.OrderByDescending(b => b.PublishYear);
-                    break;
-                case "year_asc":
-                    books = books.OrderBy(b => b.PublishYear);
-                    break;
-                case "rating":
-                    books = books.OrderByDescending(b => b.Ratings.Average(r => r.RatingValue));
-                    break;
-                default:
-                    books = books.OrderByDescending(b => b.PublishYear);
-                    break;
-            }
-
-            foreach (var book in books)
-            {
-                if (book.DiscountEndDate.HasValue && book.DiscountEndDate < DateTime.Now)
-                {
-                    book.BuyPrice = book.PreviousPrice ?? book.BuyPrice;
-                    book.PreviousPrice = null;
-                    book.DiscountEndDate = null;
-                }
-            }
-            
-            var booksWithRatings = books.ToList().Select(b => new
-            {
-                Book = b,
-                AverageRating = GetAverageRating(b.BookId)
-            });
-
-            ViewBag.BooksRatings = booksWithRatings.ToDictionary(b => b.Book.BookId, b => b.AverageRating);
-
-            if (Request.IsAjaxRequest())
-            {
-                return PartialView("_BooksGrid", books.ToList());
-            }
-
-            return View(books.ToList());
+            book.BuyPrice = book.PreviousPrice ?? book.BuyPrice;
+            book.PreviousPrice = null;
+            book.DiscountEndDate = null;
         }
+    }
+    
+    var booksWithRatings = books.ToList().Select(b => new
+    {
+        Book = b,
+        AverageRating = GetAverageRating(b.BookId)
+    });
+
+    ViewBag.BooksRatings = booksWithRatings.ToDictionary(b => b.Book.BookId, b => b.AverageRating);
+
+    if (Request.IsAjaxRequest())
+    {
+        return PartialView("_BooksGrid", books.ToList());
+    }
+
+    return View(books.ToList());
+}
 
     public ActionResult Details(int id)
     {
@@ -218,40 +233,71 @@ namespace BookProject.Controllers
         }
     }
 
-        public async Task NotifyWaitingUsers(int bookId)
+    public async Task NotifyWaitingUsers(int bookId)
+    {
+        var book = _context.Books.Find(bookId);
+        if (book == null) return;
+
+        var waitingUsers = _context.WaitingLists 
+            .Where(w => w.BookId == bookId && w.NotificationSent == false)
+            .OrderBy(w => w.Position)
+            .Take(3)
+            .Include(w => w.User)
+            .ToList();
+
+        foreach (var waitEntry in waitingUsers)
         {
-            var book = _context.Books.Find(bookId);
-            if (book == null) return;  // רק בדיקת null
-
-            var waitingUsers = _context.WaitingLists 
-                .Where(w => w.BookId == bookId && w.NotificationSent == false)
-                .OrderBy(w => w.Position)
-                .Take(3)
-                .Include(w => w.User)
-                .ToList();
-
-            System.Diagnostics.Debug.WriteLine($"Found {waitingUsers.Count} waiting users for book {bookId}");
-
-            foreach (var waitEntry in waitingUsers)
+            if (waitEntry.User?.Email != null)
             {
-                if (waitEntry.User?.Email != null)
+                try
                 {
-                    try
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Trying to send email to {waitEntry.User.Email}");
-                        await _emailService.SendBookAvailableEmailAsync(waitEntry.User.Email, book.Title);
-                        waitEntry.NotificationSent = true;
-                        System.Diagnostics.Debug.WriteLine($"Successfully sent email to {waitEntry.User.Email}");
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to send email: {ex.Message}");
-                    }
+                    await _emailService.SendBookAvailableEmailAsync(waitEntry.User.Email, book.Title);
+                    waitEntry.NotificationSent = true;
+                    waitEntry.RequestDate = DateTime.Now; // נשתמש ב-RequestDate כזמן התחלת 24 השעות
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to send email: {ex.Message}");
                 }
             }
-    
-            _context.SaveChanges();
         }
+
+        _context.SaveChanges();
+    }
+    
+    public async Task CheckExpiredWaitingEntries()
+    {
+        var expiredEntries = _context.WaitingLists
+            .Where(w => w.NotificationSent == true &&
+                        w.RequestDate.HasValue &&
+                        DbFunctions.AddHours(w.RequestDate.Value, 24) < DateTime.Now)
+            .ToList();
+
+        foreach (var entry in expiredEntries)
+        {
+            // מחיקת הרשומה מרשימת ההמתנה
+            _context.WaitingLists.Remove(entry);
+        
+            // עדכון מיקומים של משתמשים אחרים ברשימה
+            var laterEntries = _context.WaitingLists
+                .Where(w => w.BookId == entry.BookId && w.Position > entry.Position)
+                .ToList();
+        
+            foreach (var laterEntry in laterEntries)
+            {
+                laterEntry.Position--;
+            }
+
+            // בדיקה אם יש עותקים זמינים ושליחת התראה למשתמש הבא בתור
+            var book = await _context.Books.FindAsync(entry.BookId);
+            if (book != null && book.AvailableCopies > 0)
+            {
+                await NotifyWaitingUsers(book.BookId);
+            }
+        }
+        
+        await _context.SaveChangesAsync();
+    }
 
         [HttpGet]
         public ActionResult AddBook()
@@ -289,6 +335,15 @@ namespace BookProject.Controllers
                 return Json(new { success = false, message = "You don't have admin permissions" });
             }
 
+            // בדיקה אם קיים ספר עם אותו שם
+            var existingBook = _context.Books
+                .FirstOrDefault(b => b.Title.ToLower() == book.Title.ToLower() && b.IsActive == true);
+    
+            if (existingBook != null)
+            {
+                return Json(new { success = false, message = "A book with this title already exists in the system" });
+            }
+
             // בדיקת מחיר קנייה
             if (book.BuyPrice <= 0)
             {
@@ -324,6 +379,16 @@ namespace BookProject.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult CheckDuplicateTitle(string title)
+        {
+            bool isDuplicate = _context.Books
+                .Any(b => b.Title.ToLower() == title.ToLower() && 
+                          b.IsActive == true);
+                  
+            return Json(new { isDuplicate = isDuplicate });
+        }
+        
         [HttpGet]
         public ActionResult Edit(int id)
         {
@@ -347,6 +412,8 @@ namespace BookProject.Controllers
             }
 
             ViewBag.Genres = GetGenresFromDb();
+            ViewBag.MinYear = 1997;
+            ViewBag.MaxYear = DateTime.Now.Year;
             return View("EditBook", book);
         }
 

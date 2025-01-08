@@ -310,10 +310,18 @@
                         <div class="book-info">
                             <h3 class="book-title">@item.Book.Title</h3>
                             <div class="book-author">By: @item.Book.Author</div>
-                            <div class="book-price">₪@item.Price</div>
+                            <div class="book-price">$@item.Price</div>
 
-                            <div class="book-type @(item.Book.Type == "Physical" ? "type-rental" : "type-purchase")">
-                                @item.Book.Type
+                            <div class="purchase-type">
+                                <label>
+                                    <input type="radio" name="purchase-type-@item.OrderItemId" value="buy" @(item.TypeBook ? "" : "checked") onchange="changePurchaseType(@item.OrderItemId, @item.Book.BookId)"> Buy
+                                </label>
+                                @if (item.Book.IsBorrowable == true)
+                                {
+                                    <label>
+                                        <input type="radio" name="purchase-type-@item.OrderItemId" value="borrow" @(item.TypeBook ? "checked" : "") onchange="changePurchaseType(@item.OrderItemId, @item.Book.BookId)"> Borrow
+                                    </label>
+                                }
                             </div>
 
                             <div class="formats-container">
@@ -338,7 +346,7 @@
                     @Model.Count() items in your cart
                 </div>
                 <div class="total-price">
-                    Total to pay: ₪@Model.Sum(item => item.Price)
+                    Total to pay: $@Model.Sum(item => item.Price)
                 </div>
                 <a href="@Url.Action("Checkout", "Cart")" class="btn-checkout">
                     Proceed to Checkout
@@ -349,6 +357,27 @@
 </div>
 
 <script>
+    function changePurchaseType(orderItemId, bookId) {
+        var purchaseType = $('input[name="purchase-type-' + orderItemId + '"]:checked').val();
+        var isBorrow = purchaseType === 'borrow';
+
+        $.ajax({
+            url: '@Url.Action("ChangePurchaseType", "Cart")',
+            type: 'POST',
+            data: { orderItemId: orderItemId, isBorrow: isBorrow },
+            success: function (result) {
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error changing purchase type');
+                }
+            },
+            error: function () {
+                alert('Error changing purchase type');
+            }
+        });
+    }
+    
     function updateTotalPrice() {
         var total = 0;
         $('.cart-item').each(function() {

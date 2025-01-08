@@ -25,13 +25,12 @@ public class MyLibraryController : Controller
     }
     
     [HttpPost] 
-    public async Task<ActionResult> DeleteBook(int bookId)
+    public ActionResult DeleteBook(int bookId)
     {
         try
         {
             int userId = Convert.ToInt32(Session["UserId"]);
     
-            // מצא את פריט ההזמנה הרלוונטי
             var orderItem = _context.OrderItems
                 .FirstOrDefault(oi => oi.BookId == bookId && 
                                       oi.Order.UserId == userId && 
@@ -41,23 +40,12 @@ public class MyLibraryController : Controller
             {
                 return Json(new { success = false, message = "הספר לא נמצא בספרייה שלך" }, JsonRequestBehavior.AllowGet);
             }
-
-            // אם זה ספר מושאל, החזר את העותק למלאי
+            
             if (orderItem.TypeBook)
             {
-                var book = _context.Books.Find(bookId);
-                if (book != null)
-                {
-                    book.AvailableCopies++;
-                    
-                    // שליחת התראות למשתמשים ברשימת ההמתנה
-                    var booksController = new BooksController();
-                    await booksController.NotifyWaitingUsers(bookId);
-                    
-                }
+                orderItem.Book.AvailableCopies++;
             }
 
-            // מחיקת הספר מפריטי ההזמנה
             _context.OrderItems.Remove(orderItem);
             _context.SaveChanges();
 
@@ -80,7 +68,6 @@ public async Task<ActionResult> Index()
     DateTime currentDate = DateTime.Now;
     DateTime expiryDate = currentDate.AddDays(-30);
 
-    // בדיקת ספרים שזמן ההשאלה שלהם פג והחזרת העותקים למלאי
     var expiredBorrows = _context.OrderItems
         .Include(oi => oi.Book)
         .Include(oi => oi.Order)
@@ -92,7 +79,6 @@ public async Task<ActionResult> Index()
 
     foreach (var expiredBorrow in expiredBorrows)
     {
-        // החזרת העותק למלאי
         expiredBorrow.Book.AvailableCopies++;
         
         // שינוי הסטטוס ל-Cancelled במקום Returned

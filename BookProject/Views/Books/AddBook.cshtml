@@ -9,8 +9,8 @@
 
         <div class="form-group">
             <label>Title</label>
-            @Html.TextBoxFor(m => m.Title, new { 
-                @class = "form-control", 
+            @Html.TextBoxFor(m => m.Title, new {
+                @class = "form-control",
                 required = "required",
                 oninvalid = "this.setCustomValidity('Please enter the book title')",
                 oninput = "this.setCustomValidity('')"
@@ -19,8 +19,8 @@
 
         <div class="form-group">
             <label>Author</label>
-            @Html.TextBoxFor(m => m.Author, new { 
-                @class = "form-control", 
+            @Html.TextBoxFor(m => m.Author, new {
+                @class = "form-control",
                 required = "required",
                 oninvalid = "this.setCustomValidity('Please enter the author name')",
                 oninput = "this.setCustomValidity('')"
@@ -29,8 +29,8 @@
 
         <div class="form-group">
             <label>Publisher</label>
-            @Html.TextBoxFor(m => m.Publisher, new { 
-                @class = "form-control", 
+            @Html.TextBoxFor(m => m.Publisher, new {
+                @class = "form-control",
                 required = "required",
                 oninvalid = "this.setCustomValidity('Publisher is required')",
                 oninput = "this.setCustomValidity('')"
@@ -42,8 +42,10 @@
             @Html.TextBoxFor(m => m.PublishYear, new { 
                 @class = "form-control", 
                 type = "number",
-                required = "required", 
-                oninvalid = "this.setCustomValidity('Publication year is required')",
+                required = "required",
+                min = "1997",
+                max = DateTime.Now.Year,
+                oninvalid = "this.setCustomValidity('Value must be between ' + this.min + ' and ' + this.max)",
                 oninput = "this.setCustomValidity('')"
             })
         </div>
@@ -80,10 +82,10 @@
 
         <div class="form-group">
             <label>Purchase Price</label>
-            @Html.TextBoxFor(m => m.BuyPrice, new { 
-                @class = "form-control", 
-                type = "number", 
-                step = "0.01", 
+            @Html.TextBoxFor(m => m.BuyPrice, new {
+                @class = "form-control",
+                type = "number",
+                step = "0.01",
                 required = "required",
                 oninvalid = "this.setCustomValidity('Please enter the purchase price')",
                 oninput = "this.setCustomValidity('')"
@@ -143,6 +145,7 @@
         $(document).ready(function() {
             var isBorrowableCheckbox = $('#IsBorrowable');
             var borrowPriceInput = $('input[name="BorrowPrice"]');
+            var currentYear = new Date().getFullYear();
 
             function updateBorrowPriceValidation() {
                 if (isBorrowableCheckbox.is(':checked')) {
@@ -172,6 +175,18 @@
                 var isBorrowable = isBorrowableCheckbox.is(':checked');
                 var borrowPrice = borrowPriceInput.val();
                 var buyPrice = $('input[name="BuyPrice"]').val();
+                var publishYear = parseInt($('input[name="PublishYear"]').val());
+                var publisher = $('input[name="Publisher"]').val();
+
+                if (!publisher || publisher.trim() === '') {
+                    alert('Publisher name is required');
+                    return false;
+                }
+
+                if (publishYear < 1997 || publishYear > currentYear) {
+                    alert('Publication year must be between 1997 and ' + currentYear);
+                    return false;
+                }
 
                 if (isBorrowable && (!borrowPrice || parseFloat(borrowPrice) <= 0)) {
                     alert('Please enter a borrowing price when the book is available for borrowing');
@@ -227,16 +242,7 @@
                 }
             }
 
-            $('#addBookForm').on('submit', function(e) {
-                e.preventDefault();
-
-                var publisher = $('input[name="Publisher"]').val();
-                if (!publisher || publisher.trim() === '') {
-                    alert('Publisher name is required');
-                    return false;
-                }
-            });
-                $('input[type="number"]').on('input', function() {
+            $('input[type="number"]').on('input', function() {
                 var value = parseFloat(this.value);
                 if (this.value && (isNaN(value) || value < 0)) {
                     alert('Please enter a valid positive number');

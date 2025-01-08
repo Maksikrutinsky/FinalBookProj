@@ -45,7 +45,9 @@
                 @class = "form-control", 
                 type = "number",
                 required = "required",
-                oninvalid = "this.setCustomValidity('Publication year is required')",
+                min = "1997",
+                max = DateTime.Now.Year,
+                oninvalid = "this.setCustomValidity('Value must be between ' + this.min + ' and ' + this.max)",
                 oninput = "this.setCustomValidity('')"
             })
         </div>
@@ -180,10 +182,10 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Original borrowing validation
             var isBorrowableCheckbox = $('#IsBorrowable');
             var borrowPriceInput = $('input[name="BorrowPrice"]');
-            
+            var currentYear = new Date().getFullYear();
+            var originalTitle = $('#Title').val();
 
             function updateBorrowPriceValidation() {
                 if (isBorrowableCheckbox.is(':checked')) {
@@ -249,6 +251,14 @@
                 var buyPrice = buyPriceInput.val();
                 var hasDiscount = hasDiscountCheckbox.is(':checked');
                 var previousPrice = previousPriceInput.val();
+                var publishYear = parseInt($('input[name="PublishYear"]').val());
+                var currentTitle = $('#Title').val();
+
+                // בדיקת שנת פרסום
+                if (publishYear < 1997 || publishYear > currentYear) {
+                    alert('Publication year must be between 1997 and ' + currentYear);
+                    return false;
+                }
 
                 if (isBorrowable && (!borrowPrice || parseFloat(borrowPrice) <= 0)) {
                     alert('Please enter a borrowing price when book is available for borrowing');
@@ -276,6 +286,31 @@
                 var formData = new FormData(this);
                 formData.append('IsBorrowable', isBorrowable);
 
+                // בדיקה אם השם שונה מהמקורי
+                if (currentTitle.toLowerCase() !== originalTitle.toLowerCase()) {
+                    // בדיקת שם כפול בשרת
+                    $.ajax({
+                        url: '/Books/CheckDuplicateTitle',
+                        type: 'POST',
+                        data: JSON.stringify({ title: currentTitle }),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            if (response.isDuplicate) {
+                                alert('A book with this title already exists in the system');
+                            } else {
+                                submitForm(form, formData);
+                            }
+                        },
+                        error: function() {
+                            alert('Error checking book title');
+                        }
+                    });
+                } else {
+                    submitForm(form, formData);
+                }
+            });
+
+            function submitForm(form, formData) {
                 $.ajax({
                     url: form.attr('action'),
                     type: 'POST',
@@ -294,7 +329,7 @@
                         alert('Error occurred while updating the book: ' + error);
                     }
                 });
-            });
+            }
 
             // URL validation
             function isValidUrl(url) {
@@ -325,7 +360,6 @@
                     $('input[name="DiscountEndDate"]').val(new Date(currentDiscountDate).toISOString().slice(0,16));
                 }
             }
-            
         });
     </script>
 }

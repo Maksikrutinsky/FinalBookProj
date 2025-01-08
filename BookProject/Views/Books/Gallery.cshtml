@@ -1,8 +1,6 @@
 @model IEnumerable<BookProject.Models.Book>
 
 <style>
-
-
     .card-img-top {
         height: 300px;
         object-fit: contain;
@@ -50,6 +48,39 @@
     .filters-container {
         margin-bottom: 30px;
     }
+
+    .price-range-container {
+        padding: 10px;
+    }
+
+    input[type="range"] {
+        height: 25px;
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #007bff;
+        margin-top: -5px;
+        cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        background: #ddd;
+        border-radius: 3px;
+    }
+
+    #priceRangeDisplay {
+        font-weight: bold;
+        color: #007bff;
+    }
 </style>
 
 <div class="container">
@@ -84,10 +115,9 @@
         }
     </div>
 
-
     <div class="filters-container">
         <div class="row">
-            <div class="col-md-4 mb-3">
+            <div class="col-12 mb-3">
                 <input type="text"
                        id="searchInput"
                        class="form-control"
@@ -95,14 +125,14 @@
                        value="@ViewBag.CurrentSearch">
             </div>
 
-            <div class="col-md-4 mb-3">
+            <div class="col-12 mb-3">
                 @Html.DropDownList("genre",
                     new SelectList(ViewBag.Genres, "Value", "Text"),
                     "All Genres",
                     new { @class = "form-control", @id = "genreSelect" })
             </div>
 
-            <div class="col-md-4 mb-3">
+            <div class="col-12 mb-3">
                 <select id="sortOrder" class="form-control">
                     <option value="">Sort By...</option>
                     <option value="price_asc">Price: Low to High</option>
@@ -110,7 +140,25 @@
                     <option value="year_desc">Year: Newest First</option>
                     <option value="year_asc">Year: Oldest First</option>
                     <option value="rating">Popularity (Rating)</option>
+                    <option value="buy_only">For Purchase Only</option>
+                    <option value="on_sale">On Sale Only</option>
                 </select>
+            </div>
+
+            <div class="col-12 mb-3">
+                <div class="price-range-container">
+                    <div class="text-center mb-2">
+                        <span>Price Range: </span>
+                        <span id="priceRangeDisplay">$0 - $1000</span>
+                    </div>
+                    <input type="range"
+                           id="priceRange"
+                           class="form-control-range w-100"
+                           min="0"
+                           max="1000"
+                           step="10"
+                           value="1000">
+                </div>
             </div>
         </div>
     </div>
@@ -129,7 +177,7 @@
                 var searchTerm = $('#searchInput').val();
                 var genre = $('#genreSelect').val();
                 var sortOrder = $('#sortOrder').val();
-                var publisher = $('#publisherSelect').val(); 
+                var maxPrice = $('#priceRange').val();
 
                 $.ajax({
                     url: '@Url.Action("Gallery", "Books")',
@@ -137,7 +185,8 @@
                     data: {
                         searchTerm: searchTerm,
                         genre: genre,
-                        sortOrder: sortOrder
+                        sortOrder: sortOrder,
+                        maxPrice: maxPrice
                     },
                     success: function(data) {
                         $('#booksContainer').html(data);
@@ -147,7 +196,14 @@
                     }
                 });
             }
-            
+
+            $('#priceRange').on('input', function() {
+                var price = $(this).val();
+                $('#priceRangeDisplay').text('$0 - $' + price);
+                clearTimeout(timer);
+                timer = setTimeout(updateResults, 300);
+            });
+
             $('#searchInput').on('input', function() {
                 clearTimeout(timer);
                 timer = setTimeout(updateResults, 300);
@@ -164,10 +220,10 @@
             // טיפול במחיקת ספר
             $(document).on('click', '.delete-book', function(e) {
                 e.preventDefault();
-                
+
                 var bookId = $(this).data('book-id');
                 var $card = $(this).closest('.col-md-4');
-                
+
                 if (confirm('האם אתה בטוח שברצונך למחוק ספר זה?')) {
                     $.ajax({
                         url: '@Url.Action("DeleteBook", "Books")',
@@ -178,14 +234,13 @@
                                 $card.fadeOut(300, function() {
                                     $(this).remove();
                                 });
-                                
+
                                 var alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
                                     response.message +
                                     '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
                                     '<span aria-hidden="true">&times;</span></button></div>');
                                 $('.container').prepend(alert);
 
-                                // עדכון התצוגה לאחר מחיקה
                                 setTimeout(updateResults, 300);
                             } else {
                                 var alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +

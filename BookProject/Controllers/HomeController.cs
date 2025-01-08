@@ -13,8 +13,13 @@ namespace BookProject.Controllers
     
         public async Task<ActionResult> Index()
         {
+            // בדיקת ספרים שפג תוקפם
             var bookReturn = new BookReturnJob();
             await bookReturn.CheckExpiredBooks();
+
+            // בדיקת משתמשים בהמתנה שפג תוקפג
+            var booksController = new BooksController();
+            await booksController.CheckExpiredWaitingEntries();
 
             var topRatedBooks = db.Books
                 .Where(b => b.IsActive == true)
