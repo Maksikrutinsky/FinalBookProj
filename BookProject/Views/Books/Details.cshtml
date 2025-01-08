@@ -412,67 +412,41 @@
                 {
                     <div class="mt-4">
                         <h4>Borrow Price:</h4>
-                        @if (Model.AvailableCopies > 0)
-                        {
-                            <span class="borrow-price">$@Model.BorrowPrice</span>
-                            <div class="mt-2">
-                                <span class="text-success fw-bold">
-                                    Available copies: @Model.AvailableCopies
-                                </span>
+                        <span class="borrow-price">$@Model.BorrowPrice</span>
+                        <div class="mt-2">
+                            @if (ViewBag.IsInWaitingList)
+                            {
+                                <button onclick="showLeaveWaitingList(@Model.BookId)" class="btn btn-outline-danger">
+                                    Leave Waiting List
+                                </button>
+                                <small class="d-block mt-2 text-muted">
+                                    Your position: @ViewBag.UserWaitingPosition
+                                </small>
+                            }
+                            @if (Model.AvailableCopies == 0 && !ViewBag.IsInWaitingList)
+                            {
+                                <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-outline-secondary">
+                                    Join Waiting List
+                                </button>
+                            }
+                            <div>
+                <span class="@(Model.AvailableCopies > 0 ? "text-success" : "text-danger") fw-bold">
+                    @(Model.AvailableCopies > 0 ? $"Available copies: {Model.AvailableCopies}" : "Out of stock for borrowing")
+                </span>
                             </div>
-                        }
-                        else
-                        {
-                            <span class="borrow-price text-decoration-line-through">₪@Model.BorrowPrice</span>
-                            <div class="mt-2">
-                                <span class="text-danger fw-bold">Out of stock for borrowing</span>
-                                <div class="mt-3">
-                                    @if (ViewBag.IsInWaitingList)
-                                    {
-                                        <button onclick="showLeaveWaitingList(@Model.BookId)" class="btn btn-outline-danger">
-                                            Leave Waiting List
-                                        </button>
-                                        <small class="d-block mt-2 text-muted">
-                                            Your position: @ViewBag.UserWaitingPosition
-                                        </small>
-                                    }
-                                    else
-                                    {
-                                        <button onclick="showJoinWaitingList(@Model.BookId)" class="btn btn-outline-secondary">
-                                            Join Waiting List
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        }
+                        </div>
                     </div>
                 }
 
                 <div class="purchase-buttons">
                     @if (Session["UserId"] != null)
                     {
-                        if (ViewBag.HasPurchased)
-                        {
-                            <div class="alert alert-info">
-                                @if (ViewBag.IsBorrowed)
-                                {
-                                    <p><i class="fas fa-info-circle"></i> You are currently borrowing this book (since @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
-                                }
-                                else
-                                {
-                                    <p><i class="fas fa-info-circle"></i> You already own this book (purchased on @ViewBag.PurchaseDate.ToString("dd/MM/yyyy"))</p>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
-                                Add to cart
-                            </button>
-                            <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
-                                Buy now!
-                            </button>
-                        }
+                        <button onclick="showAddToCartOptions(@Model.BookId)" class="btn btn-outline-primary purchase-btn">
+                            Add to cart
+                        </button>
+                        <button onclick="directBuy(@Model.BookId)" class="btn btn-primary purchase-btn">
+                            Buy now!
+                        </button>
                     }
                     else
                     {

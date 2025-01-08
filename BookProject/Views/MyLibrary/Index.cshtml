@@ -1,109 +1,227 @@
 @model BookProject.Models.MyLibraryViewModel
 
 <style>
-    .library-card {
-        background: rgba(206, 226, 224, 0.61);
-        border: 1px solid #f6ad87;
-        color: rgba(0, 0, 0, 0.8);
+    .library-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    }
+
+    .library-title {
+        font-size: 3.4rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 3rem;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1a5f7a;
         margin-bottom: 2rem;
-        width: 350px;
-        padding: 15px;
-        border-radius: 10px;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid rgba(26, 95, 122, 0.1);
     }
 
-    .row {
+    .library-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* שינוי ל-2 עמודות קבועות */
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .book-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        padding: 20px 0;
+        height: 240px;
+        width: 100%; /* וידוא שהכרטיס תופס את כל הרוחב */
+    }
+
+    @@media (min-width: 1200px) {
+    .library-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 ספרים בשורה במסכים גדולים */
+    }
+    }
+
+    @@media (max-width: 768px) {
+    .library-grid {
+        grid-template-columns: 1fr; /* ספר אחד בשורה במסכים קטנים */
+    }
+    }
+
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .book-image {
+        width: 70px;
+        min-width: 140px;
+        overflow: hidden;
+    }
+
+    .book-image img {
         width: 100%;
-        justify-content: flex-start;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
     }
 
-    .col-md-4 {
-        flex: 0 0 calc(50% - 20px);
-        max-width: 350px;
+    .book-card:hover .book-image img {
+        transform: scale(1.05);
     }
 
-    .library-card img.card-img-top {
-        width: 100%;
-        height: 300px;
-        object-fit: contain;
-        padding: 10px;
+    .book-info {
+        padding: 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
 
-    button {
-        margin: 0 auto 0 auto;
-        width: 10em;
-        height: 3em;
-        font-size: 0.8em;
-        color: #fff;
-        font-weight: bold;
-        cursor: pointer;
+    .book-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .book-meta {
+        font-size: 1.2rem;
+        color: #6c757d;
+        flex-grow: 1;
+    }
+
+    .book-meta p {
+        margin: 0.2rem 0;
+    }
+
+    .book-meta strong {
+        color: #1a5f7a;
+    }
+
+    .days-left {
+        display: inline-block;
+        padding: 0.2rem 0.8rem;
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        color: white;
+        border-radius: 20px;
+        font-size: 1.2rem;
+        margin-top: 0.3rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: auto;
+    }
+
+    .action-button {
+        padding: 0.5rem 1rem;
         border: none;
-        border-radius: 0.35em;
-        transition: all cubic-bezier(0, 0, 0.2, 1) 0.3s;
-        box-shadow: 0 1px 3px 0px rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
     }
 
-    .push {
-        margin-bottom: 26px;
-        box-shadow: 0 26px 15px 0px rgba(0, 0, 0, 0.15);
-    }
-
-    .black {
-        background: #f6ad87;
-        margin-bottom: 10px;
+    .download-btn {
+        background: linear-gradient(45deg, #1a5f7a, #2e86ab);
+        color: white;
     }
 
     .delete-btn {
-        background: #dc3545;
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
     }
 
-    .btn-container {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 2rem;
+        background: rgba(26, 95, 122, 0.1);
+        border-radius: 10px;
+        color: #1a5f7a;
+        font-size: 1.2rem;
+    }
+
+    @@media (max-width: 768px) {
+        .library-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .book-card {
+            height: 180px;
+        }
+
+        .book-image {
+            width: 120px;
+            min-width: 120px;
+        }
+
+        .library-title {
+            font-size: 2.2rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
     }
 </style>
 
-<div class="container">
-    <h2 class="text-center mb-4">My Library</h2>
+<div class="library-container">
+    <h1 class="library-title">My Library</h1>
 
-    <!-- Purchased Books -->
-    <div>
-        <h3 class="mb-3">Books purchased</h3>
+    <!-- Purchased Books Section -->
+    <div class="library-section">
+        <h2 class="section-title">Books purchased</h2>
         @if (!Model.PurchasedBooks.Any())
         {
-            <div class="alert alert-info">No books purchased.</div>
+            <div class="empty-message">No books purchased yet.</div>
         }
         else
         {
-            <div class="row">
+            <div class="library-grid">
                 @foreach (var item in Model.PurchasedBooks)
                 {
-                    <div class="col-md-4 mb-4">
-                        <div class="library-card">
+                    <div class="book-card">
+                        <div class="book-image">
                             @if (!string.IsNullOrEmpty(item.Book.CoverImageUrl))
                             {
-                                <img src="@item.Book.CoverImageUrl" class="card-img-top" alt="@item.Book.Title">
+                                <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title">
                             }
-                            <div class="card-body">
-                                <h5 class="card-title">@item.Book.Title</h5>
-                                <p class="card-text">
-                                    From: @item.Book.Author <br />
-                                    Expenditure: @item.Book.Publisher <br />
-                                    Year of publication: @item.Book.PublishYear <br />
-                                    Genre: @item.Book.Genre
-                                </p>
-                                <div class="btn-container">
-                                    <button class="black" type="button" onclick="showBookFormats(@item.BookId)">
-                                        Download book
-                                    </button>
-                                    <button class="black delete-btn" type="button" onclick="confirmDeleteBook(@item.BookId)">
-                                        Remove book
-                                    </button>
-                                </div>
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">@item.Book.Title</h3>
+                            <div class="book-meta">
+                                <p><strong>Author:</strong> @item.Book.Author</p>
+                                <p><strong>Publisher:</strong> @item.Book.Publisher</p>
+                                <p><strong>Year:</strong> @item.Book.PublishYear</p>
+                                <p><strong>Genre:</strong> @item.Book.Genre</p>
+                            </div>
+                            <div class="action-buttons">
+                                <button onclick="showBookFormats(@item.BookId)" class="action-button download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button onclick="confirmDeleteBook(@item.BookId)" class="action-button delete-btn">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -112,42 +230,42 @@
         }
     </div>
 
-    <!-- Borrowed Books -->
-    <div>
-        <h3 class="mb-3">Borrowed books</h3>
+    <!-- Borrowed Books Section -->
+    <div class="library-section mt-5">
+        <h2 class="section-title">Borrowed books</h2>
         @if (!Model.BorrowedBooks.Any())
         {
-            <div class="alert alert-info">There are no borrowed books.</div>
+            <div class="empty-message">No borrowed books at the moment.</div>
         }
         else
         {
-            <div class="row">
+            <div class="library-grid">
                 @foreach (var item in Model.BorrowedBooks)
                 {
                     var daysLeft = (item.Order.OrderDate.AddDays(30) - DateTime.Now).Days;
-                    <div class="col-md-4 mb-4">
-                        <div class="library-card">
+                    <div class="book-card">
+                        <div class="book-image">
                             @if (!string.IsNullOrEmpty(item.Book.CoverImageUrl))
                             {
-                                <img src="@item.Book.CoverImageUrl" class="card-img-top" alt="@item.Book.Title">
+                                <img src="@item.Book.CoverImageUrl" alt="@item.Book.Title">
                             }
-                            <div class="card-body">
-                                <h5 class="card-title">@item.Book.Title</h5>
-                                <p class="card-text">
-                                    From: @item.Book.Author <br />
-                                    Expenditure: @item.Book.Publisher <br />
-                                    Year of publication: @item.Book.PublishYear <br />
-                                    Genre: @item.Book.Genre <br/>
-                                    @daysLeft Days left
-                                </p>
-                                <div class="btn-container">
-                                    <button class="black" type="button" onclick="showBookFormats(@item.BookId)">
-                                        Download book
-                                    </button>
-                                    <button class="black delete-btn" type="button" onclick="confirmDeleteBook(@item.BookId)">
-                                        Remove book
-                                    </button>
-                                </div>
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">@item.Book.Title</h3>
+                            <div class="book-meta">
+                                <p><strong>Author:</strong> @item.Book.Author</p>
+                                <p><strong>Publisher:</strong> @item.Book.Publisher</p>
+                                <p><strong>Year:</strong> @item.Book.PublishYear</p>
+                                <p><strong>Genre:</strong> @item.Book.Genre</p>
+                                <span class="days-left">@daysLeft Days left</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button onclick="showBookFormats(@item.BookId)" class="action-button download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button onclick="confirmDeleteBook(@item.BookId)" class="action-button delete-btn">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -155,6 +273,7 @@
             </div>
         }
     </div>
+</div>
 
     <!-- Download Format Modal -->
     <div class="modal fade" id="bookDownloadModal" tabindex="-1" role="dialog">
@@ -194,7 +313,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script>
     function showBookFormats(bookId) {

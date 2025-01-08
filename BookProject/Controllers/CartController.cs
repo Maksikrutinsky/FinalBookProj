@@ -451,6 +451,39 @@ public async Task<ActionResult> ProcessPayment(CheckoutViewModel model)
 }
 
 [HttpPost]
+public ActionResult ChangePurchaseType(int orderItemId, bool isBorrow)
+{
+    try
+    {
+        var orderItem = _context.OrderItems.Find(orderItemId);
+        if (orderItem == null)
+        {
+            return Json(new { success = false, message = "Item not found" });
+        }
+
+        var book = _context.Books.Find(orderItem.BookId);
+        if (book == null || (isBorrow && book.IsBorrowable != true))
+        {
+            return Json(new { success = false, message = "Invalid operation" });
+        }
+
+        decimal newPrice = isBorrow ? book.BorrowPrice : book.BuyPrice;
+
+        orderItem.TypeBook = isBorrow;
+        orderItem.Price = newPrice;
+
+        _context.SaveChanges();
+
+        return Json(new { success = true });
+    }
+    catch (Exception ex)
+    {
+        return Json(new { success = false, message = ex.Message });
+    }
+}
+
+
+[HttpPost]
 public async Task<JsonResult> ProcessPayPalPayment(string orderID, dynamic paymentDetails)
 {
     try

@@ -83,13 +83,13 @@ namespace BookProject.Models
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_fromEmail),
-                Subject = "ספר זמין להשאלה!",
+                Subject = "Book Available for Borrowing!",
                 Body = $@"
-            <h2>הספר זמין להשאלה!</h2>
-            <p>שלום,</p>
-            <p>הספר {bookTitle} שביקשת להשאיל זמין כעת!</p>
-            <p>יש לך 24 שעות להיכנס לאתר ולהשאיל את הספר.</p>
-            <p>אחרי 24 שעות, האפשרות תעבור למשתמש הבא ברשימת ההמתנה.</p>",
+                <h2>Book Available for Borrowing!</h2>
+                <p>Hello,</p>
+                <p>The book {bookTitle} that you requested is now available!</p>
+                <p>You have 24 hours to log into the website and borrow the book.</p>
+                <p>After 24 hours, the option will pass to the next user on the waiting list.</p>",
                 IsBodyHtml = true
             };
 
@@ -107,18 +107,18 @@ namespace BookProject.Models
                 EnableSsl = true,
             };
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_fromEmail),
-                Subject = "אישור הזמנה",
-                Body = $@"
-<h2>אישור הזמנה</h2>
-<p>תודה על הרכישה!</p>
-<h3>פרטי ההזמנה:</h3>
+var mailMessage = new MailMessage
+{
+   From = new MailAddress(_fromEmail),
+   Subject = "Order Confirmation",
+   Body = $@"
+<h2>Order Confirmation</h2>
+<p>Thank you for your purchase!</p>
+<h3>Order Details:</h3>
 <p>{orderDetails}</p>
-<p>תודה שקנית מאיתנו!</p>",
-                IsBodyHtml = true
-            };
+<p>Thank you for shopping with us!</p>",
+   IsBodyHtml = true
+};
 
             mailMessage.To.Add(toEmail);
             await client.SendMailAsync(mailMessage);
