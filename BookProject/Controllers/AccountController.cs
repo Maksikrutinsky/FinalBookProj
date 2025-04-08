@@ -4,6 +4,8 @@ using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BookProject.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 public class AccountController : Controller
 {
@@ -19,6 +21,16 @@ public class AccountController : Controller
             ConfigurationManager.AppSettings["SmtpEmail"],
             ConfigurationManager.AppSettings["SmtpPassword"]
         );
+    }
+    
+    private string HashPasswordSHA256(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(password);
+            byte[] hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
     }
     
     public AccountController(EBookLibraryEntities context)
@@ -46,17 +58,23 @@ public class AccountController : Controller
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == model.Username);
 
-            if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+            if (user != null)
             {
-                Session["UserId"] = user.UserId;
-                Session["UserName"] = user.Username;
-                return RedirectToAction("Index", "Home");
+                // השוואת סיסמה עם גרסת SHA-256
+                var hashedInputPassword = HashPasswordSHA256(model.Password);
+                if (user.Password == hashedInputPassword)
+                {
+                    Session["UserId"] = user.UserId;
+                    Session["UserName"] = user.Username;
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             ModelState.AddModelError("", "Incorrect username or password.");
         }
         return View(model);
     }
+
 
     [HttpGet]
     public ActionResult Register()
@@ -83,8 +101,8 @@ public class AccountController : Controller
                 return View(model);
             }
 
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-        
+            var hashedPassword = HashPasswordSHA256(model.Password);
+
             var user = new User
             {
                 Username = model.Username,
@@ -104,16 +122,18 @@ public class AccountController : Controller
             }
             catch
             {
-                // לוג את השגיאה אבל להמשיך
+                // אפשר לרשום ללוג אך לא לעצור את הזרימה
             }
 
             Session["UserId"] = user.UserId;
             Session["UserName"] = user.Username;
-        
+
             return RedirectToAction("Index", "Home");
         }
+
         return View(model);
     }
+
 
     public ActionResult Logout()
     {
@@ -188,15 +208,16 @@ public class AccountController : Controller
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == Email);
             if (user != null)
             {
-                user.Password = BCrypt.Net.BCrypt.HashPassword(Password);
+                user.Password = HashPasswordSHA256(Password);
                 await _context.SaveChangesAsync();
-                
+
                 Session.Remove($"ResetToken_{Email}");
                 Session.Remove($"ResetTokenExpiry_{Email}");
-                
+
                 return RedirectToAction("Login");
             }
         }
+
         return View();
     }
 
